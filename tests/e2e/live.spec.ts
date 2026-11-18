@@ -7,6 +7,7 @@ import { parseEnv } from 'node:util';
 import { createApp } from '../../apps/api/src/app';
 import { startProvider, defaultResponse } from '../fixtures/provider';
 import { makeSample } from '../../packages/domain/src/samples';
+import { buildLocalSummary } from '../../packages/domain/src/local-summary';
 let provider: Awaited<ReturnType<typeof startProvider>>,
   backend: Awaited<ReturnType<typeof createApp>>,
   vite: any,
@@ -265,4 +266,58 @@ test('没有环境模型时显示配置提示且不能创建讨论', async ({ pa
   await page.getByRole('button', { name: '开启一场圆桌' }).click();
   await page.getByLabel('想讨论什么？').fill('未配置模型时应该如何提示？');
   await expect(page.getByRole('button', { name: '生成讨论阵容' })).toBeDisabled();
+});
+
+test('本地整理与备用模型来源明确，手机可定位原始发言', async ({ page }) => {
+  const s = makeSample(0);
+  s.discussion.insightsThrough = 3;
+  s.insights = [];
+  const summary = s.messages.find((m) => m.kind === 'summary')!;
+  summary.content = buildLocalSummary(s);
+  summary.summaryMeta = {
+    source: 'local',
+    throughMessageSeq: 5,
+    insightsThroughMessageSeq: 3,
+    model: null,
+    provider: null,
+    connectionId: null,
+    connectionVersion: null,
+    fallbackUsed: true,
+    reason: 'models_unavailable',
+  };
+  await page.route('**/api/discussions/sample-1/snapshot', (route) => route.fulfill({ json: s }));
+  for (const width of [375, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/discussions/sample-1');
+    await expect(page.locator('.summary-title')).toHaveText('本地整理摘要');
+    await expect(page.locator('.local-summary-message .message-meta strong')).toHaveText(
+      '本地整理',
+    );
+    await expect(page.locator('.summary-provenance')).toContainText(
+      '根据已保存发言与已核验洞察整理',
+    );
+    await expect(page.locator('.summary-coverage-note')).toContainText('洞察仅覆盖前 3 条发言');
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.locator('.summary-title').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `test-results/live/local-summary-${width}.png`, fullPage: true });
+  }
+  await page.setViewportSize({ width: 375, height: 900 });
+  await page.getByRole('button', { name: '查看整理来源发言 2', exact: true }).first().click();
+  await expect(page.locator('#sample-1-m2')).toBeInViewport();
+  summary.summaryMeta = {
+    ...summary.summaryMeta,
+    source: 'model',
+    model: '备用验证模型',
+    provider: 'gpt',
+    connectionId: 'env:GPT',
+    connectionVersion: 1,
+    reason: null,
+  };
+  summary.content = '这是本地HTTP测试数据中的备用模型总结。';
+  await page.reload();
+  await expect(page.locator('.summary-title')).toHaveText('本场圆桌总结');
+  await expect(page.locator('.summary-provenance')).toContainText('备用模型完成：备用验证模型');
+  await expect(page.locator('.local-summary-message')).toHaveCount(0);
 });

@@ -16,6 +16,7 @@ import { DiscussionService } from './discussions';
 import { registerEvents } from './sse';
 import { openapi } from './openapi';
 import { readModelCatalog } from './model-catalog';
+import type { ClosingOptions } from './insights';
 export async function createApp(
   options: {
     dataDir?: string;
@@ -24,6 +25,7 @@ export async function createApp(
     origins?: string[];
     modelEnv?: NodeJS.ProcessEnv;
     gatewayOptions?: ConstructorParameters<typeof ModelGateway>[1];
+    closingOptions?: ClosingOptions;
   } = {},
 ) {
   const catalog = options.modelEnv ? readModelCatalog(options.modelEnv) : undefined;
@@ -34,9 +36,16 @@ export async function createApp(
     repo.close();
     throw error;
   }
-  if (options.recover !== false) repo.recover();
+  const recoverable = options.recover !== false ? repo.recover() : [];
   const gateway = new ModelGateway(repo, options.gatewayOptions || config);
-  const discussions = new DiscussionService(repo, gateway);
+  const discussions = new DiscussionService(
+    repo,
+    gateway,
+    options.closingOptions || {
+      timeoutMs: config.closingTimeout,
+      maxModelAttempts: config.closingMaxAttempts,
+    },
+  );
   const app = Fastify({
     logger: options.logger ?? false,
     logController: new LogController({ disableRequestLogging: true }),
@@ -204,5 +213,6 @@ export async function createApp(
     await discussions.close();
     repo.close();
   });
+  discussions.resumeRecovered(recoverable, config.maxDiscussions);
   return { app, repo, gateway, discussions };
 }

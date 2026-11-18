@@ -227,12 +227,16 @@ describe('主持人总结独立超时与输出额度', () => {
     }
   });
 
-  it('retries a timed-out summary without repeating already completed insights or expert messages', async () => {
-    let slowSummary = true;
+  it('automatically retries a timed-out summary without repeating already completed insights or expert messages', async () => {
+    let summaryAttempts = 0;
+    let insightCallsBeforeSummary = 0;
     const purposes: string[] = [];
     const h = await harness(async (task) => {
       purposes.push(task.purpose);
-      if (task.purpose === 'summary' && slowSummary) await delay(1700);
+      if (task.purpose === 'summary' && ++summaryAttempts === 1) {
+        insightCallsBeforeSummary = purposes.filter((purpose) => purpose === 'insights').length;
+        await delay(1700);
+      }
       return defaultResponse(task);
     });
     try {
@@ -250,27 +254,18 @@ describe('主持人总结独立超时与输出额度', () => {
       h.discussions.run(id);
       await h.discussions.idle(id);
       s = h.repo.snapshot(id);
-      expect(s.discussion.status).toBe('failed');
-      expect(s.discussion.failureStage).toBe('summary');
-      expect(s.discussion.error).toMatch(/主持人总结.*1\.5\s*秒/);
-      expect(s.draft).toBeNull();
-      expect(s.discussion.insightsThrough).toBe(s.messages.at(-1)?.messageSeq);
-      expect(s.insights.length).toBeGreaterThan(0);
-      const before = s;
-      const insightCalls = purposes.filter((purpose) => purpose === 'insights').length;
-      slowSummary = false;
-      const retry = await h.command('POST', `/api/discussions/${id}/retry`, {
-        expectedVersion: s.discussion.version,
-      });
-      expect(retry.statusCode).toBe(202);
-      await h.discussions.idle(id);
-      s = h.repo.snapshot(id);
       expect(s.discussion.status).toBe('completed');
-      expect(s.messages.slice(0, before.messages.length)).toEqual(before.messages);
+      expect(s.discussion.failureStage).toBeNull();
+      expect(s.discussion.error).toBeNull();
+      expect(s.discussion.insightsThrough).toBe(s.messages.at(-2)?.messageSeq);
+      expect(s.insights.length).toBeGreaterThan(0);
+      expect(s.messages.filter((message) => message.kind === 'expert')).toHaveLength(3);
       expect(s.messages.filter((message) => message.kind === 'summary')).toHaveLength(1);
+      expect(s.messages.at(-1)?.summaryMeta?.source).toBe('model');
       expect(s.draft).toBeNull();
-      expect(s.insights).toEqual(before.insights);
-      expect(purposes.filter((purpose) => purpose === 'insights')).toHaveLength(insightCalls);
+      expect(purposes.filter((purpose) => purpose === 'insights')).toHaveLength(
+        insightCallsBeforeSummary,
+      );
       expect(purposes.filter((purpose) => purpose === 'summary')).toHaveLength(2);
     } finally {
       await h.close();

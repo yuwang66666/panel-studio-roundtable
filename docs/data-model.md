@@ -8,6 +8,7 @@ erDiagram
   model_connection_versions ||--o{ agent_bindings : references
   participants ||--o{ messages : speaks
   discussions ||--o| speech_drafts : streams
+  discussions ||--o| closing_jobs : finalizes
   participants ||--o{ speech_drafts : generates
   discussions ||--o{ insights : contains
   insights ||--o{ insight_evidence : supports
@@ -22,3 +23,7 @@ erDiagram
 环境模型使用 `env:<模型标识>` 作为稳定连接 ID。启动同步在同一事务中执行：新条目创建、变化条目新增版本、未变化条目保留版本与测试状态、不再列出的条目停用。历史连接版本保留，既有讨论的冻结绑定不重写；默认主持人优先采用显式环境选择，否则保留仍有效的网页选择，再回退到清单首项。
 
 迁移 `002.sql` 新增 `speech_drafts`：每场至多一个草稿，保存 turn_id、generation、participant_id 和公开正文；复合外键约束参与者属于当前讨论。草稿更新与 `speech.updated` 事件同事务保存，完整发言与 `message.committed` 事件提交时同事务删除相同 turn_id 草稿。清理产生 `speech.cleared`，状态切换和重启恢复也会清理。草稿没有 message_seq，不进入 transcript、上下文或洞察证据。
+
+迁移 `003.sql` 新增 `closing_jobs`：保存generation、绝对deadlineAt、已使用尝试数、最大次数、主持人优先的冻结候选版本、最终洞察是否已尝试和失败连接。一次网络请求之前原子认领次数，进程重启后未完成请求仍计入额度；恢复只更换generation，不延后期限或清零次数。总结成功时与消息/完成事件一起删除任务。明确的手动重试可以创建新的收尾任务。
+
+新总结的summaryMeta单独保存全文覆盖序号与真实洞察覆盖序号。模型来源须匹配本场冻结绑定；本地来源不能声明模型或连接。洞察进度落后时也允许提交有完整发言覆盖声明的总结，原insightsThrough不被修改。旧JSON历史不强制补写来源。

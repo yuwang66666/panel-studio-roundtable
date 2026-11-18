@@ -13,6 +13,7 @@ import {
   DiscussionSchema,
   PublicEventSchema,
   SpeechDraftSchema,
+  SummaryMetaSchema,
   type ConnectionInput,
   type ModelConnectionSummary,
   type Discussion,
@@ -30,6 +31,19 @@ import { connections } from './schema';
 import { AppError, conflict } from './errors';
 import type { ModelCatalog } from './model-catalog';
 export type PrivateConnection = ModelConnectionSummary & { apiKey: string };
+export type ClosingCandidate = { connectionId: string; connectionVersion: number };
+export type ClosingJob = {
+  generation: number;
+  deadlineAt: number;
+  attempts: number;
+  maxAttempts: number;
+  candidates: ClosingCandidate[];
+  insightsAttempted: boolean;
+  lastErrorCode: string | null;
+  unavailableConnections: string[];
+};
+const closingConnectionKey = (candidate: ClosingCandidate) =>
+  JSON.stringify([candidate.connectionId, candidate.connectionVersion]);
 const now = () => new Date().toISOString();
 export class Repository {
   readonly db: Database.Database;
@@ -55,7 +69,7 @@ export class Repository {
     this.db.pragma('foreign_keys = ON');
     this.db.pragma('busy_timeout = 5000');
     this.db.transaction(() => {
-      for (const name of ['001', '002'])
+      for (const name of ['001', '002', '003'])
         this.db.exec(
           readFileSync(new URL(`../../../db/migrations/${name}.sql`, import.meta.url), 'utf8'),
         );
@@ -563,6 +577,124 @@ export class Repository {
     d.maxCalls = Math.max(d.maxCalls, d.callCount + 12);
     this.persist(d);
   }
+  closingJob(id: string, generation: number): ClosingJob | null {
+    if (this.discussion(id).generation !== generation) return null;
+    const row = this.db
+      .prepare('SELECT data_json FROM closing_jobs WHERE discussion_id=? AND generation=?')
+      .get(id, generation) as { data_json: string } | undefined;
+    return row ? (JSON.parse(row.data_json) as ClosingJob) : null;
+  }
+  private persistClosingJob(id: string, job: ClosingJob) {
+    this.db
+      .prepare(
+        'INSERT INTO closing_jobs(discussion_id,generation,data_json) VALUES(?,?,?) ON CONFLICT(discussion_id) DO UPDATE SET generation=excluded.generation,data_json=excluded.data_json',
+      )
+      .run(id, job.generation, JSON.stringify(job));
+  }
+  ensureClosingJob(
+    id: string,
+    generation: number,
+    options: { timeoutMs: number; maxAttempts: number },
+  ): ClosingJob {
+    return this.transaction(() => {
+      this.guard(id, generation, ['summarizing']);
+      const existing = this.closingJob(id, generation);
+      if (existing) return existing;
+      if (
+        !Number.isSafeInteger(options.timeoutMs) ||
+        options.timeoutMs < 1 ||
+        !Number.isSafeInteger(options.maxAttempts) ||
+        options.maxAttempts < 1 ||
+        !Number.isSafeInteger(Date.now() + options.timeoutMs)
+      )
+        throw conflict('收尾期限与尝试次数必须为有效正整数');
+      const s = this.snapshot(id);
+      const moderator = s.participants.find((p) => p.role === 'moderator');
+      if (!moderator) throw conflict('当前讨论没有主持人');
+      const ordered = [moderator, ...s.participants.filter((p) => p.role === 'expert')];
+      const candidates: ClosingCandidate[] = [];
+      const seen = new Set<string>();
+      for (const participant of ordered) {
+        const binding = s.bindings.find((b) => b.participantId === participant.id);
+        if (!binding) throw conflict('收尾角色没有冻结模型绑定');
+        const candidate = {
+          connectionId: binding.connectionId,
+          connectionVersion: binding.connectionVersion,
+        };
+        const key = closingConnectionKey(candidate);
+        if (!seen.has(key)) {
+          candidates.push(candidate);
+          seen.add(key);
+        }
+      }
+      const job: ClosingJob = {
+        generation,
+        deadlineAt: Date.now() + options.timeoutMs,
+        attempts: 0,
+        maxAttempts: options.maxAttempts,
+        candidates,
+        insightsAttempted: false,
+        lastErrorCode: null,
+        unavailableConnections: [],
+      };
+      this.persistClosingJob(id, job);
+      return job;
+    });
+  }
+  markClosingInsightsAttempted(id: string, generation: number) {
+    this.transaction(() => {
+      this.guard(id, generation, ['summarizing']);
+      const job = this.closingJob(id, generation);
+      if (!job) throw conflict('收尾任务不存在');
+      job.insightsAttempted = true;
+      this.persistClosingJob(id, job);
+    });
+  }
+  claimClosingAttempt(id: string, generation: number) {
+    return this.transaction(() => {
+      const d = this.guard(id, generation, ['summarizing']);
+      const job = this.closingJob(id, generation);
+      if (!job) throw conflict('收尾任务不存在');
+      if (Date.now() >= job.deadlineAt || d.callCount >= d.maxCalls || !job.candidates.length)
+        return null;
+      while (job.attempts < job.maxAttempts) {
+        const candidate = job.candidates[job.attempts % job.candidates.length];
+        job.attempts++;
+        if (job.unavailableConnections.includes(closingConnectionKey(candidate))) continue;
+        this.persistClosingJob(id, job);
+        return {
+          ...candidate,
+          attempt: job.attempts,
+          repair: job.lastErrorCode === 'INVALID_OUTPUT',
+        };
+      }
+      this.persistClosingJob(id, job);
+      return null;
+    });
+  }
+  recordClosingFailure(
+    id: string,
+    generation: number,
+    code: string,
+    connection?: ClosingCandidate,
+  ) {
+    this.transaction(() => {
+      this.guard(id, generation, ['summarizing']);
+      const job = this.closingJob(id, generation);
+      if (!job) throw conflict('收尾任务不存在');
+      if (
+        connection &&
+        !job.candidates.some((c) => closingConnectionKey(c) === closingConnectionKey(connection))
+      )
+        throw conflict('失败连接不属于本场收尾候选');
+      job.lastErrorCode = code;
+      if (connection && ['UPSTREAM_AUTH', 'AUTH', 'UPSTREAM_REQUEST'].includes(code)) {
+        const key = closingConnectionKey(connection);
+        if (!job.unavailableConnections.includes(key)) job.unavailableConnections.push(key);
+      }
+      this.persistClosingJob(id, job);
+    });
+  }
   setParticipantState(
     id: string,
     generation: number,
@@ -692,11 +824,34 @@ export class Repository {
         throw conflict('正式发言与当前流式发言不匹配');
       if (!p || (input.kind === 'expert') !== (p.role === 'expert'))
         throw conflict('发言角色不匹配');
-      if (
-        input.kind === 'summary' &&
-        d.insightsThrough < (s.messages.filter((m) => m.kind !== 'summary').at(-1)?.messageSeq || 0)
-      )
-        throw conflict('洞察尚未覆盖全部发言，不能提交总结');
+      if (input.kind === 'summary') {
+        if (!input.summaryMeta) throw conflict('总结必须声明来源及覆盖范围');
+        const meta = SummaryMetaSchema.parse(input.summaryMeta);
+        const through = s.messages.filter((m) => m.kind !== 'summary').at(-1)?.messageSeq || 0;
+        if (
+          meta.throughMessageSeq !== through ||
+          meta.insightsThroughMessageSeq !== d.insightsThrough
+        )
+          throw conflict('总结覆盖范围与已保存发言或洞察不一致');
+        if (meta.source === 'model') {
+          if (
+            !s.bindings.some(
+              (b) =>
+                b.connectionId === meta.connectionId &&
+                b.connectionVersion === meta.connectionVersion &&
+                b.model === meta.model &&
+                b.provider === meta.provider,
+            )
+          )
+            throw conflict('总结模型不属于本场冻结绑定');
+        } else if (
+          meta.model !== null ||
+          meta.provider !== null ||
+          meta.connectionId !== null ||
+          meta.connectionVersion !== null
+        )
+          throw conflict('本地整理不能声明模型来源');
+      } else if (input.summaryMeta !== undefined) throw conflict('只有总结可以携带总结来源');
       if (
         input.replyToMessageId &&
         !s.messages.some((m) => m.id === input.replyToMessageId && m.kind !== 'summary')
@@ -733,6 +888,7 @@ export class Repository {
         assertTransition(d.status, 'completed');
         d.status = 'completed';
         d.version++;
+        this.db.prepare('DELETE FROM closing_jobs WHERE discussion_id=?').run(id);
       }
       this.persist(d);
       this.emit(id, 'participant.state_changed', {
@@ -854,19 +1010,41 @@ export class Repository {
       );
   }
   recover() {
+    const resumable: string[] = [];
     for (const r of this.db
       .prepare(
-        "SELECT id,status FROM discussions WHERE status IN ('casting','running','summarizing')",
+        "SELECT id,status FROM discussions WHERE status IN ('casting','running','summarizing','interrupted')",
       )
       .all() as any[]) {
-      this.transition(r.id, r.status === 'casting' ? 'failed' : 'interrupted', {
-        bumpGeneration: true,
-        failureStage:
-          r.status === 'casting' ? 'cast' : r.status === 'summarizing' ? 'summary' : 'discussion',
-        error: '服务重启导致执行中断，已有内容已保存',
+      this.transaction(() => {
+        const prior = this.discussion(r.id);
+        if (r.status === 'interrupted') {
+          if (!['summary', 'insights'].includes(prior.failureStage || '')) return;
+          const row = this.db
+            .prepare('SELECT data_json FROM closing_jobs WHERE discussion_id=?')
+            .get(r.id) as { data_json: string } | undefined;
+          if (!row || !this.snapshot(r.id).messages.some((m) => m.kind !== 'summary')) return;
+          const job = JSON.parse(row.data_json) as ClosingJob;
+          this.persistClosingJob(r.id, { ...job, generation: prior.generation });
+          this.clearStates(r.id);
+          resumable.push(r.id);
+          return;
+        }
+        const job = this.closingJob(r.id, prior.generation);
+        const next = this.transition(r.id, r.status === 'casting' ? 'failed' : 'interrupted', {
+          bumpGeneration: true,
+          failureStage:
+            r.status === 'casting' ? 'cast' : r.status === 'summarizing' ? 'summary' : 'discussion',
+          error: '服务重启导致执行中断，已有内容已保存',
+        });
+        this.clearStates(r.id);
+        if (r.status === 'summarizing') {
+          if (job) this.persistClosingJob(r.id, { ...job, generation: next.discussion.generation });
+          if (next.messages.some((m) => m.kind !== 'summary')) resumable.push(r.id);
+        }
       });
-      this.clearStates(r.id);
     }
+    return resumable;
   }
   importSample(s: DiscussionSnapshot) {
     this.transaction(() => {

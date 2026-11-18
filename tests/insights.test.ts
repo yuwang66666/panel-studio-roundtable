@@ -50,10 +50,9 @@ describe('洞察与最终总结', () => {
       await h.close();
     }
   });
-  it('keeps transcript after summary failure and retries without duplicating expert messages', async () => {
-    let failSummary = true;
+  it('keeps transcript and completes locally when every summary attempt fails', async () => {
     const h = await harness((task) =>
-      task.purpose === 'summary' && failSummary ? 'invalid json' : defaultResponse(task),
+      task.purpose === 'summary' ? 'invalid json' : defaultResponse(task),
     );
     try {
       const created = h.repo.createDiscussion(
@@ -70,22 +69,15 @@ describe('洞察与最终总结', () => {
       h.discussions.run(id);
       await h.discussions.idle(id);
       s = h.repo.snapshot(id);
-      expect(s.discussion.status).toBe('failed');
-      expect(s.discussion.failureStage).toBe('summary');
-      expect(s.messages.filter((m) => m.kind === 'expert')).toHaveLength(3);
-      failSummary = false;
-      expect(
-        (
-          await h.command('POST', `/api/discussions/${id}/retry`, {
-            expectedVersion: s.discussion.version,
-          })
-        ).statusCode,
-      ).toBe(202);
-      await h.discussions.idle(id);
-      s = h.repo.snapshot(id);
       expect(s.discussion.status).toBe('completed');
+      expect(s.discussion.failureStage).toBeNull();
       expect(s.messages.filter((m) => m.kind === 'expert')).toHaveLength(3);
       expect(s.messages.filter((m) => m.kind === 'summary')).toHaveLength(1);
+      expect(s.messages.at(-1)?.summaryMeta).toMatchObject({
+        source: 'local',
+        reason: 'models_unavailable',
+      });
+      expect(s.messages.at(-1)?.content).toContain('本地整理摘要');
     } finally {
       await h.close();
     }

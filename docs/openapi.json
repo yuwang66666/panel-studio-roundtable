@@ -1222,6 +1222,66 @@
                 },
                 "createdAt": {
                   "type": "string"
+                },
+                "summaryMeta": {
+                  "type": "object",
+                  "properties": {
+                    "source": {
+                      "type": "string",
+                      "enum": ["model", "local"]
+                    },
+                    "throughMessageSeq": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "insightsThroughMessageSeq": {
+                      "type": "integer",
+                      "minimum": 0
+                    },
+                    "model": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 120,
+                      "nullable": true
+                    },
+                    "provider": {
+                      "type": "string",
+                      "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"],
+                      "nullable": true
+                    },
+                    "connectionId": {
+                      "type": "string",
+                      "minLength": 1,
+                      "maxLength": 100,
+                      "nullable": true
+                    },
+                    "connectionVersion": {
+                      "type": "integer",
+                      "exclusiveMinimum": true,
+                      "minimum": 0,
+                      "nullable": true
+                    },
+                    "fallbackUsed": {
+                      "type": "boolean"
+                    },
+                    "reason": {
+                      "type": "string",
+                      "enum": ["models_unavailable", "budget_exhausted", "deadline_exceeded"],
+                      "nullable": true
+                    }
+                  },
+                  "required": [
+                    "source",
+                    "throughMessageSeq",
+                    "insightsThroughMessageSeq",
+                    "model",
+                    "provider",
+                    "connectionId",
+                    "connectionVersion",
+                    "fallbackUsed",
+                    "reason"
+                  ],
+                  "additionalProperties": false
                 }
               },
               "required": [
@@ -2113,6 +2173,66 @@
                       },
                       "createdAt": {
                         "type": "string"
+                      },
+                      "summaryMeta": {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "enum": ["model", "local"]
+                          },
+                          "throughMessageSeq": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "insightsThroughMessageSeq": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "model": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120,
+                            "nullable": true
+                          },
+                          "provider": {
+                            "type": "string",
+                            "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"],
+                            "nullable": true
+                          },
+                          "connectionId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "nullable": true
+                          },
+                          "connectionVersion": {
+                            "type": "integer",
+                            "exclusiveMinimum": true,
+                            "minimum": 0,
+                            "nullable": true
+                          },
+                          "fallbackUsed": {
+                            "type": "boolean"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": ["models_unavailable", "budget_exhausted", "deadline_exceeded"],
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "source",
+                          "throughMessageSeq",
+                          "insightsThroughMessageSeq",
+                          "model",
+                          "provider",
+                          "connectionId",
+                          "connectionVersion",
+                          "fallbackUsed",
+                          "reason"
+                        ],
+                        "additionalProperties": false
                       }
                     },
                     "required": [
@@ -2523,6 +2643,66 @@
                       },
                       "createdAt": {
                         "type": "string"
+                      },
+                      "summaryMeta": {
+                        "type": "object",
+                        "properties": {
+                          "source": {
+                            "type": "string",
+                            "enum": ["model", "local"]
+                          },
+                          "throughMessageSeq": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "insightsThroughMessageSeq": {
+                            "type": "integer",
+                            "minimum": 0
+                          },
+                          "model": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 120,
+                            "nullable": true
+                          },
+                          "provider": {
+                            "type": "string",
+                            "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"],
+                            "nullable": true
+                          },
+                          "connectionId": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100,
+                            "nullable": true
+                          },
+                          "connectionVersion": {
+                            "type": "integer",
+                            "exclusiveMinimum": true,
+                            "minimum": 0,
+                            "nullable": true
+                          },
+                          "fallbackUsed": {
+                            "type": "boolean"
+                          },
+                          "reason": {
+                            "type": "string",
+                            "enum": ["models_unavailable", "budget_exhausted", "deadline_exceeded"],
+                            "nullable": true
+                          }
+                        },
+                        "required": [
+                          "source",
+                          "throughMessageSeq",
+                          "insightsThroughMessageSeq",
+                          "model",
+                          "provider",
+                          "connectionId",
+                          "connectionVersion",
+                          "fallbackUsed",
+                          "reason"
+                        ],
+                        "additionalProperties": false
                       }
                     },
                     "required": [

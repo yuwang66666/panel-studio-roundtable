@@ -46,6 +46,7 @@ import {
   CircleHelp,
   ChevronDown,
   ExternalLink,
+  FileText,
 } from 'lucide-react';
 import {
   STATUS_LABEL,
@@ -1009,17 +1010,32 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
             {s.messages.map((m) => {
               const p = participant(m.participantId);
               if (!p) return null;
+              const summaryMeta = m.kind === 'summary' ? m.summaryMeta : undefined;
+              const localSummary = summaryMeta?.source === 'local';
+              const displayContent = localSummary
+                ? m.content.replace(/^本地整理摘要\s*\n/, '').trimStart()
+                : m.content;
               return (
                 <article
                   id={m.id}
                   key={m.id}
-                  className={`message ${m.kind === 'summary' ? 'summary-message' : ''}`}
+                  className={`message ${m.kind === 'summary' ? 'summary-message' : ''} ${localSummary ? 'local-summary-message' : ''}`}
                 >
-                  <Avatar p={p} small />
+                  {localSummary ? (
+                    <span className="avatar avatar-small local-summary-avatar" aria-hidden="true">
+                      <FileText size={17} />
+                    </span>
+                  ) : (
+                    <Avatar p={p} small />
+                  )}
                   <div className="message-body">
                     <div className="message-meta">
-                      <strong style={{ color: colors[p.colorKey] }}>{p.name}</strong>
-                      <span>{p.role === 'moderator' ? '主持人' : p.title}</span>
+                      <strong style={{ color: localSummary ? undefined : colors[p.colorKey] }}>
+                        {localSummary ? '本地整理' : p.name}
+                      </strong>
+                      <span>
+                        {localSummary ? '已保存记录' : p.role === 'moderator' ? '主持人' : p.title}
+                      </span>
                       <time>
                         {new Date(m.createdAt).toLocaleTimeString('zh-CN', {
                           hour: '2-digit',
@@ -1043,13 +1059,64 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
                     )}
                     {m.kind === 'summary' && (
                       <h3 className="summary-title">
-                        <Sparkles size={17} />
-                        本场圆桌总结
+                        {localSummary ? (
+                          <FileText size={17} aria-hidden="true" />
+                        ) : (
+                          <Sparkles size={17} aria-hidden="true" />
+                        )}
+                        {localSummary ? '本地整理摘要' : '本场圆桌总结'}
                       </h3>
                     )}
+                    {summaryMeta && (
+                      <div className="summary-provenance">
+                        <p>
+                          {localSummary
+                            ? '根据已保存发言与已核验洞察整理。发言序号可点击查看原文。'
+                            : `${summaryMeta.fallbackUsed ? '备用模型完成' : '总结模型'}：${summaryMeta.model || '本场主持人模型'}`}
+                        </p>
+                        {summaryMeta.insightsThroughMessageSeq < summaryMeta.throughMessageSeq && (
+                          <p className="summary-coverage-note">
+                            洞察仅覆盖前 {summaryMeta.insightsThroughMessageSeq} 条发言；
+                            {localSummary
+                              ? '后续观点见下方发言摘录。'
+                              : '本总结已参考全部已保存发言。'}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <div className="message-content">
-                      {m.content.split('\n').map((line, i) => (
-                        <p key={i}>{line || <br />}</p>
+                      {displayContent.split('\n').map((line, i) => (
+                        <p key={i}>
+                          {!line ? (
+                            <br />
+                          ) : !localSummary ? (
+                            line
+                          ) : (
+                            line.split(/(发言 #\d+)/g).map((part, j) => {
+                              const match = /^发言 #(\d+)$/.exec(part);
+                              const original =
+                                match &&
+                                s.messages.find(
+                                  (message) =>
+                                    message.kind !== 'summary' &&
+                                    message.messageSeq === Number(match[1]) &&
+                                    message.messageSeq <= summaryMeta!.throughMessageSeq,
+                                );
+                              return original ? (
+                                <button
+                                  key={j}
+                                  className="summary-evidence-link"
+                                  onClick={() => locate(original.id)}
+                                  aria-label={`查看整理来源发言 ${original.messageSeq}`}
+                                >
+                                  {part}
+                                </button>
+                              ) : (
+                                <span key={j}>{part}</span>
+                              );
+                            })
+                          )}
+                        </p>
                       ))}
                     </div>
                   </div>

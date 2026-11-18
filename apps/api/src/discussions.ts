@@ -4,17 +4,21 @@ import type { Repository } from './repository';
 import type { ModelGateway } from './gateway';
 import { AppError, safeError } from './errors';
 import { DiscussionEngine } from './engine';
-import { InsightsService } from './insights';
+import { InsightsService, isModelFailure, type ClosingOptions } from './insights';
 export class DiscussionService {
   private active = new Map<string, { controller: AbortController; promise: Promise<void> }>();
   private stopping = false;
+  private recoveryQueue: string[] = [];
+  private recoveryLimit = 3;
+  private recoveryWaiters = new Map<string, { promise: Promise<void>; resolve: () => void }>();
   readonly insights: InsightsService;
   readonly engine: DiscussionEngine;
   constructor(
     readonly repo: Repository,
     readonly gateway: ModelGateway,
+    closingOptions: ClosingOptions = {},
   ) {
-    this.insights = new InsightsService(repo, gateway);
+    this.insights = new InsightsService(repo, gateway, closingOptions);
     this.engine = new DiscussionEngine(repo, gateway, this.insights);
   }
   run(id: string) {
@@ -24,6 +28,43 @@ export class DiscussionService {
     this.launch(id, 'summary', (signal) =>
       this.insights.finish(id, this.repo.discussion(id).generation, signal),
     );
+  }
+  resumeRecovered(ids: string[], maxConcurrent: number) {
+    this.recoveryLimit = maxConcurrent;
+    for (const id of ids) {
+      if (this.recoveryWaiters.has(id)) continue;
+      let resolve!: () => void;
+      const promise = new Promise<void>((done) => {
+        resolve = done;
+      });
+      this.recoveryWaiters.set(id, { promise, resolve });
+      this.recoveryQueue.push(id);
+    }
+    this.drainRecovery();
+  }
+  private drainRecovery() {
+    while (!this.stopping && this.recoveryQueue.length) {
+      const active = (
+        this.repo.db
+          .prepare(
+            "SELECT count(*) AS n FROM discussions WHERE status IN ('running','summarizing')",
+          )
+          .get() as { n: number }
+      ).n;
+      if (active >= this.recoveryLimit) return;
+      const id = this.recoveryQueue.shift()!;
+      const d = this.repo.discussion(id);
+      if (d.status !== 'interrupted') {
+        this.resolveRecovery(id);
+        continue;
+      }
+      this.repo.transition(id, 'summarizing', { generation: d.generation });
+      this.summarize(id);
+    }
+  }
+  private resolveRecovery(id: string) {
+    this.recoveryWaiters.get(id)?.resolve();
+    this.recoveryWaiters.delete(id);
   }
   cast(id: string) {
     this.launch(id, 'cast', async (signal) => {
@@ -70,14 +111,31 @@ export class DiscussionService {
     const generation = this.repo.discussion(id).generation;
     const promise = Promise.resolve()
       .then(() => work(controller.signal))
-      .catch((error) => {
-        controller.abort();
-        const d = this.repo.discussion(id);
+      .catch(async (error) => {
+        let d = this.repo.discussion(id);
         if (
           d.generation !== generation ||
           !['casting', 'running', 'summarizing'].includes(d.status)
         )
           return;
+        if (
+          !this.stopping &&
+          !controller.signal.aborted &&
+          d.status === 'running' &&
+          isModelFailure(error)
+        ) {
+          this.repo.clearStates(id);
+          this.repo.transition(id, 'summarizing', { generation });
+          try {
+            await this.insights.finish(id, generation, controller.signal);
+            return;
+          } catch (closingError) {
+            error = closingError;
+            d = this.repo.discussion(id);
+            if (d.generation !== generation || d.status !== 'summarizing') return;
+          }
+        }
+        controller.abort();
         const e = safeError(error);
         this.repo.transition(
           id,
@@ -98,6 +156,8 @@ export class DiscussionService {
       })
       .finally(() => {
         if (this.active.get(id)?.controller === controller) this.active.delete(id);
+        this.resolveRecovery(id);
+        this.drainRecovery();
       });
     this.active.set(id, { controller, promise });
   }
@@ -105,10 +165,13 @@ export class DiscussionService {
     return this.active.has(id);
   }
   async idle(id: string) {
+    await this.recoveryWaiters.get(id)?.promise;
     await this.active.get(id)?.promise;
   }
   async close() {
     this.stopping = true;
+    this.recoveryQueue = [];
+    for (const id of this.recoveryWaiters.keys()) this.resolveRecovery(id);
     for (const job of this.active.values()) job.controller.abort();
     await Promise.allSettled([...this.active.values()].map((j) => j.promise));
     await this.insights.close();

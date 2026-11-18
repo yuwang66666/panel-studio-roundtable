@@ -23,3 +23,7 @@ SSE event 使用 `panel`，id 使用讨论内 eventSeq；data 为共享 PublicEv
 草稿和事件入库后才推送，刷新通过 snapshot 恢复；续传、缺口和去重与其他公开事件相同。终态或 generation 变化时丢弃过期草稿。失败和取消不会把未校验草稿变成正式发言；只有正式消息可用于引用和洞察证据。草稿公开正文最多6000字符，专家展示额外限制为400字符。
 
 所有公开对象采用严格 Zod 白名单。具体字段与枚举以 packages/contracts 为可执行来源。后端监听 127.0.0.1，写接口校验 Origin 及 JSON 内容类型；没有 Origin 的本地 CLI 需显式发送 X-Panel-Client: local。
+
+新总结消息携带可选的 `summaryMeta`（旧历史消息可以缺省）。字段包括 `source: model|local`、`throughMessageSeq`、`insightsThroughMessageSeq`、`model`、`provider`、`connectionId`、`connectionVersion`、`fallbackUsed` 和 `reason`。本地来源的模型及连接字段均为null，reason为models_unavailable/budget_exhausted/deadline_exceeded；模型来源使用实际执行总结的本场冻结连接。总结覆盖序号必须等于最后一条正式讨论发言，洞察覆盖序号必须等于已保存的真实进度。
+
+`summary.ready`沿用现有事件，携带包含summaryMeta的正式消息；同一事务清除草稿和内部收尾任务并进入completed。模型故障自动进入备用或本地整理，正常情况下不再要求用户反复点击retry。重启时已有收尾任务自动恢复；内部尝试队列、失败连接与计数不进入公开快照。取消、过期或存储错误仍保留既有错误处理，避免错误提交。

@@ -77,6 +77,20 @@ export const BindingSchema = z
   })
   .strict();
 export type AgentBinding = z.infer<typeof BindingSchema>;
+export const SummaryMetaSchema = z
+  .object({
+    source: z.enum(['model', 'local']),
+    throughMessageSeq: z.number().int().nonnegative(),
+    insightsThroughMessageSeq: z.number().int().nonnegative(),
+    model: z.string().min(1).max(120).nullable(),
+    provider: ProviderSchema.nullable(),
+    connectionId: id.nullable(),
+    connectionVersion: z.number().int().positive().nullable(),
+    fallbackUsed: z.boolean(),
+    reason: z.enum(['models_unavailable', 'budget_exhausted', 'deadline_exceeded']).nullable(),
+  })
+  .strict();
+export type SummaryMeta = z.infer<typeof SummaryMetaSchema>;
 export const MessageSchema = z
   .object({
     id,
@@ -88,6 +102,7 @@ export const MessageSchema = z
     content: z.string().min(1),
     replyToMessageId: id.nullable(),
     createdAt: timestamp,
+    summaryMeta: SummaryMetaSchema.optional(),
   })
   .strict();
 export type Message = z.infer<typeof MessageSchema>;

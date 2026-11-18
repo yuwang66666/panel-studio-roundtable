@@ -50,7 +50,7 @@ describe('最终可靠性检查', () => {
       await h.close();
     }
   });
-  it('does not commit malformed evidence and refuses a summary before final insight coverage', async () => {
+  it('does not commit malformed evidence and refuses a summary without explicit transcript coverage', async () => {
     const h = await harness();
     try {
       const r = await h.command('POST', '/api/discussions', {

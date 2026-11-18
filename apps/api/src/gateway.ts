@@ -17,6 +17,10 @@ export interface ModelRequest<T> {
   validate?: (data: T) => void;
   /** The current accumulated public speech; an empty value starts a fresh attempt. */
   onText?: (text: string) => void;
+  /** Server-owned orchestration accounts for every request in its durable attempt budget. */
+  maxRetries?: 0 | 1 | 2;
+  maxRepairs?: 0 | 1;
+  repairHint?: boolean;
 }
 const instructions: Record<Purpose, string> = {
   test: '返回 {"ok":true}。',
@@ -31,7 +35,7 @@ const instructions: Record<Purpose, string> = {
   insights:
     '根据公开发言更新整组洞察，保留仍有效的已有洞察，修订时复用 id。返回 {"insights":[{"id":"稳定短ID","kind":"consensus|divergence|open_question","status":"emerging|stable|revised|resolved","scope":"local|all或null","text":"忠于发言的简短洞察","participantIds":["专家ID"],"evidence":[{"messageId":"已提供的消息ID","relation":"supports|opposes|qualifies"}]}]}。共识至少两位不同专家明确支持，scope=all 必须全部专家明确支持，沉默不是赞成。participantIds 必须与支持证据中的专家匹配。其余 kind 的 scope 为 null。只引用已给出的真实 ID，不引用总结，洞察最多20条，没有足够证据时数组为空。不要把自己的推断写成专家已达成的共识。',
   summary:
-    '主持人根据最终公开发言和已核验洞察，以中文自然语言总结主题、共识及其范围、剩余分歧、待验证问题。返回 {"content":"以空行分段的总结正文"}。忠于证据，不把局部共识写成全体共识，不添加新的事实。',
+    '主持人根据全部最终公开发言和已有核验洞察，以中文自然语言总结主题、共识及其范围、剩余分歧、待验证问题。返回 {"content":"以空行分段的总结正文"}。若insightsComplete=false，说明洞察尚未覆盖全部发言，后续观点依据完整发言整理，不把未核验的推断写成共识。忠于证据，不把局部共识写成全体共识，不添加新的事实。',
 };
 const purposeLabels: Record<Purpose, string> = {
   test: '模型连接测试',
@@ -137,9 +141,10 @@ export class ModelGateway {
     this.global = new Semaphore(this.options.globalConcurrency);
   }
   async generate<T>(request: ModelRequest<T>): Promise<T> {
-    for (let repair = 0; repair <= 1; repair++) {
+    const repairs = request.maxRepairs ?? 1;
+    for (let repair = 0; repair <= repairs; repair++) {
       try {
-        return await this.call(request, repair > 0);
+        return await this.call(request, repair > 0 || request.repairHint === true);
       } catch (e) {
         if (e instanceof AppError && this.callbackErrors.has(e)) throw e;
         const invalid =
@@ -147,7 +152,8 @@ export class ModelGateway {
           e instanceof z.ZodError ||
           (e instanceof AppError && ['INVALID_OUTPUT', 'CONFLICT'].includes(e.code));
         if (!invalid) throw e;
-        if (repair === 1) throw new AppError('INVALID_OUTPUT', '模型输出未通过格式或业务校验', 502);
+        if (repair === repairs)
+          throw new AppError('INVALID_OUTPUT', '模型输出未通过格式或业务校验', 502);
       }
     }
     throw new AppError('INVALID_OUTPUT', '模型输出无效', 502);
@@ -174,7 +180,8 @@ export class ModelGateway {
         : r.purpose === 'summary'
           ? this.options.summaryTimeout
           : this.options.timeout;
-    for (let retry = 0; retry <= 2; retry++) {
+    const retries = r.maxRetries ?? 2;
+    for (let retry = 0; retry <= retries; retry++) {
       const started = Date.now(),
         deadline = AbortSignal.timeout(timeoutMs),
         signal = r.signal ? AbortSignal.any([r.signal, deadline]) : deadline;
@@ -385,7 +392,7 @@ export class ModelGateway {
           );
         errorCode = e.code;
         if (
-          retry < 2 &&
+          retry < retries &&
           ['UPSTREAM_RATE_LIMIT', 'UPSTREAM_TEMPORARY', 'UPSTREAM_NETWORK'].includes(e.code) &&
           !this.callbackErrors.has(e) &&
           !r.signal?.aborted

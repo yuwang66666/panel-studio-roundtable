@@ -35,6 +35,17 @@ function testInsights(repo: ReturnType<typeof Object> & any): InsightsPort {
         kind: 'summary',
         content: '测试收尾已完成。',
         replyToMessageId: null,
+        summaryMeta: {
+          source: 'local',
+          throughMessageSeq: s.messages.at(-1)?.messageSeq || 0,
+          insightsThroughMessageSeq: s.messages.at(-1)?.messageSeq || 0,
+          model: null,
+          provider: null,
+          connectionId: null,
+          connectionVersion: null,
+          fallbackUsed: true,
+          reason: 'models_unavailable',
+        },
       });
     },
   };

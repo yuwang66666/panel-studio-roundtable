@@ -16,6 +16,8 @@ export const config = {
   dataDir: process.env.DATA_DIR ? resolve(process.env.DATA_DIR) : resolve(repoRoot, '.data'),
   port: positive('API_PORT', 3001),
   maxDiscussions: positive('MAX_CONCURRENT_DISCUSSIONS', 3),
+  closingTimeout: positive('FINALIZATION_TIMEOUT_MS', 360000),
+  closingMaxAttempts: positive('FINALIZATION_MAX_MODEL_ATTEMPTS', 4),
   ...readGatewayOptions(process.env),
   origins: (process.env.ALLOWED_ORIGINS || 'http://127.0.0.1:5173,http://localhost:5173').split(
     ',',

@@ -1353,6 +1353,52 @@ input[type='checkbox'] {
   font-weight: 500;
   margin-bottom: 14px;
 }
+.summary-provenance {
+  margin: -4px 0 16px;
+  color: #bfccba;
+  font-size: 13px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.summary-coverage-note {
+  margin-top: 6px;
+  color: #e7c69b;
+}
+.local-summary-message {
+  background: #1b232b;
+  border-color: #3c4c5b !important;
+}
+.local-summary-message .summary-title,
+.local-summary-message .message-meta strong {
+  color: #c5def0;
+}
+.local-summary-avatar {
+  color: #c5def0;
+  background: #283745;
+  border-color: #4c6478;
+}
+.local-summary-message .message-content,
+.local-summary-message .summary-provenance {
+  color: #c4d2df;
+}
+.summary-message.local-summary-message .message-content {
+  font-size: 16px;
+}
+.summary-evidence-link {
+  display: inline;
+  padding: 3px 1px;
+  border-radius: 3px;
+  color: #c5def0;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.summary-evidence-link:hover {
+  color: #fff;
+}
+.summary-evidence-link:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
 .transcript-end {
   display: flex;
   align-items: center;
