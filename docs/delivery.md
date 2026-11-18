@@ -17,7 +17,8 @@
 | README完整度      | [运行指南与选型](../README.md)                                                     | 运行、环境变量、技术选型、主要API、已完成能力及后续方向           |
 | Git演进层次       | [提交演进映射](git-history.md)                                                     | 真实docs/schema→ui→tests→feat logic及后续修复可用git show逐条核对 |
 | 核心Prompt记录    | [多范式工程Prompt](prompts.md)                                                     | 10段重构稿，标记SDD/DDD/TDD/E2E；每段1–2句说明及实际提交依据      |
-| 过程与证据        | [任务](tasks.md)、[验收](verification.md)、[反思](workflow-reflection.md)          | 每项产出和实际结果对应                                            |
+| 开发过程与工作流  | [开发者视角说明](workflow-reflection.md)                                           | 约1–1.5页篇幅，Codex与GPT6 Astra协作设定、3个真实问题及工程化理解 |
+| 过程与证据        | [任务](tasks.md)、[验收](verification.md)                                          | 每项产出和实际结果对应                                            |
 
 ## 样例质量说明
 
