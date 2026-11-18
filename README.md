@@ -80,7 +80,7 @@ MODEL_DEEPSEEK_STRUCTURED_OUTPUT=false
 
 `pnpm seed` 幂等初始化 5 场历史样例，每场都有阵容、发言、证据洞察和总结。所有样例均明确标识为预置内容。
 
-自动验收已覆盖三种协议的本地 HTTP 模型测试服务、混合协议讨论、两场并行隔离、异常恢复及真实 Edge 浏览器操作。**尚未提供真实供应商 API 配置，真实模型输出质量、延迟和计费尚未验收。** 详见 [供应商验证表](docs/provider-validation.md)。`/preview` 路径仅用于静态界面原型验证，不调用模型。
+自动验收已覆盖三种协议的本地 HTTP 模型测试服务、混合协议讨论、两场并行隔离、异常恢复及真实 Edge 浏览器操作。**已配置的5个模型逐个实测后，DeepSeek、百炼Qwen和百炼Kimi的最小连接测试通过；GPT和Claude中转站连接超时。真实讨论完整闭环及质量、计费仍待验收。** 详见 [供应商验证表](docs/provider-validation.md)。`/preview` 路径仅用于静态界面原型验证，不调用模型。
 
 ## 验证命令
 
