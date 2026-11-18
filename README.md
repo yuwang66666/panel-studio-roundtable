@@ -4,17 +4,17 @@
 
 源码仓库：<https://github.com/yuwang66666/panel-studio-roundtable>。交付入口见 [交付清单](docs/delivery.md)，真实提交阶段见 [Git 演进记录](docs/git-history.md)。
 
-| 文档                                                                     | 阅读内容                                     |
-| ------------------------------------------------------------------------ | -------------------------------------------- |
-| [PRD](docs/PRD.md)                                                       | 用户流程、需求边界、默认参数与验收要求       |
-| [架构与状态机](docs/architecture.md)                                     | 模块职责、Mermaid 状态机、请求与事件时序     |
-| [ER 图与数据模型](docs/data-model.md)                                    | Mermaid 实体关系、主外键、事务与迁移         |
-| [数据库初始化](docs/database.md)                                         | 空库初始化、幂等样例导入、持久化与备份       |
-| [5 场完整样例](docs/samples.md)                                          | 预设话题、对应嘉宾、发言、共识分歧证据和总结 |
-| [API 文档](docs/api.md)                                                  | REST 请求/响应、版本锁、幂等、SSE 和错误处理 |
-| [测试指南](docs/testing.md)                                              | 单元/集成/浏览器测试入口、覆盖范围与复现方式 |
-| [阶段验收](docs/verification.md)                                         | 每阶段的实际运行结果与已知边界               |
-| [Prompt 记录](docs/prompts.md) / [开发反思](docs/workflow-reflection.md) | 真实需求演进、实现选择和复盘                 |
+| 文档                                                                         | 阅读内容                                     |
+| ---------------------------------------------------------------------------- | -------------------------------------------- |
+| [PRD](docs/PRD.md)                                                           | 用户流程、需求边界、默认参数与验收要求       |
+| [架构与状态机](docs/architecture.md)                                         | 模块职责、Mermaid 状态机、请求与事件时序     |
+| [ER 图与数据模型](docs/data-model.md)                                        | Mermaid 实体关系、主外键、事务与迁移         |
+| [数据库初始化](docs/database.md)                                             | 空库初始化、幂等样例导入、持久化与备份       |
+| [5 场完整样例](docs/samples.md)                                              | 预设话题、对应嘉宾、发言、共识分歧证据和总结 |
+| [API 文档](docs/api.md)                                                      | REST 请求/响应、版本锁、幂等、SSE 和错误处理 |
+| [测试指南](docs/testing.md)                                                  | 单元/集成/浏览器测试入口、覆盖范围与复现方式 |
+| [阶段验收](docs/verification.md)                                             | 每阶段的实际运行结果与已知边界               |
+| [核心开发 Prompt](docs/prompts.md) / [开发反思](docs/workflow-reflection.md) | 10段多范式工程Prompt重构稿、阶段依据与复盘   |
 
 ## 启动
 

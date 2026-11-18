@@ -60,4 +60,4 @@ git show --stat 0ef736c
 git show --stat b2dab1c
 ```
 
-提交信息用于导航，真实改动以diff为准；每阶段验收命令、失败修复和通过结果见[阶段验收](verification.md)，真实过程指令见[Prompt记录](prompts.md)。
+提交信息用于导航，真实改动以diff为准；每阶段验收命令、失败修复和通过结果见[阶段验收](verification.md)，依据这些过程重新编写的工程指令见[核心开发Prompt](prompts.md)，其来源与历史逐字原文的区别在文档开头说明。

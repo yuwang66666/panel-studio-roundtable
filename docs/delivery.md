@@ -6,17 +6,18 @@
 
 ## 内容对应
 
-| 交付要求          | 文件与目录                                                                                      | 如何核验                                                          |
-| ----------------- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| 完整前后端源码    | `apps/web`、`apps/api`、`packages/contracts`、`packages/domain`                                 | `pnpm build`，前后端可分别启动                                    |
-| 数据库初始化脚本  | `db/migrations/001.sql`–`003.sql`、`apps/api/src/init-db.ts`                                    | `pnpm db:init`，见[初始化文档](database.md)                       |
-| 至少5条高质量样例 | `packages/domain/src/samples.ts`、`apps/api/src/seed.ts`                                        | `pnpm seed`；[样例全文](samples.md)列明对应阵容、发言与证据       |
-| PRD与开发文档     | [PRD](PRD.md)、[架构/状态机/时序](architecture.md)、[ER图/数据模型](data-model.md)              | 均为Markdown，图使用Mermaid                                       |
-| API文档           | [REST/SSE文档](api.md)、`docs/openapi.json`                                                     | Markdown请求示例与机器可读Schema，`pnpm docs:api`可重建           |
-| 测试代码          | `tests/*.test.ts`、`tests/e2e`、`tests/fixtures`                                                | [测试指南](testing.md)，无需真实模型完成自动回归                  |
-| README完整度      | [运行指南与选型](../README.md)                                                                  | 运行、环境变量、技术选型、主要API、已完成能力及后续方向           |
-| Git演进层次       | [提交演进映射](git-history.md)                                                                  | 真实docs/schema→ui→tests→feat logic及后续修复可用git show逐条核对 |
-| 过程与证据        | [任务](tasks.md)、[验收](verification.md)、[Prompt](prompts.md)、[反思](workflow-reflection.md) | 每项产出和实际结果对应                                            |
+| 交付要求          | 文件与目录                                                                         | 如何核验                                                          |
+| ----------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
+| 完整前后端源码    | `apps/web`、`apps/api`、`packages/contracts`、`packages/domain`                    | `pnpm build`，前后端可分别启动                                    |
+| 数据库初始化脚本  | `db/migrations/001.sql`–`003.sql`、`apps/api/src/init-db.ts`                       | `pnpm db:init`，见[初始化文档](database.md)                       |
+| 至少5条高质量样例 | `packages/domain/src/samples.ts`、`apps/api/src/seed.ts`                           | `pnpm seed`；[样例全文](samples.md)列明对应阵容、发言与证据       |
+| PRD与开发文档     | [PRD](PRD.md)、[架构/状态机/时序](architecture.md)、[ER图/数据模型](data-model.md) | 均为Markdown，图使用Mermaid                                       |
+| API文档           | [REST/SSE文档](api.md)、`docs/openapi.json`                                        | Markdown请求示例与机器可读Schema，`pnpm docs:api`可重建           |
+| 测试代码          | `tests/*.test.ts`、`tests/e2e`、`tests/fixtures`                                   | [测试指南](testing.md)，无需真实模型完成自动回归                  |
+| README完整度      | [运行指南与选型](../README.md)                                                     | 运行、环境变量、技术选型、主要API、已完成能力及后续方向           |
+| Git演进层次       | [提交演进映射](git-history.md)                                                     | 真实docs/schema→ui→tests→feat logic及后续修复可用git show逐条核对 |
+| 核心Prompt记录    | [多范式工程Prompt](prompts.md)                                                     | 10段重构稿，标记SDD/DDD/TDD/E2E；每段1–2句说明及实际提交依据      |
+| 过程与证据        | [任务](tasks.md)、[验收](verification.md)、[反思](workflow-reflection.md)          | 每项产出和实际结果对应                                            |
 
 ## 样例质量说明
 
