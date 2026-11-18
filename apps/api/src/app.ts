@@ -1,8 +1,6 @@
 import Fastify, { LogController } from 'fastify';
 import { z } from 'zod';
 import {
-  ConnectionInputSchema,
-  ConnectionPatchSchema,
   SettingsSchema,
   CreateDiscussionSchema,
   BindingsCommandSchema,
@@ -17,16 +15,25 @@ import { AppError, safeError } from './errors';
 import { DiscussionService } from './discussions';
 import { registerEvents } from './sse';
 import { openapi } from './openapi';
+import { readModelCatalog } from './model-catalog';
 export async function createApp(
   options: {
     dataDir?: string;
     logger?: boolean;
     recover?: boolean;
     origins?: string[];
+    modelEnv?: NodeJS.ProcessEnv;
     gatewayOptions?: ConstructorParameters<typeof ModelGateway>[1];
   } = {},
 ) {
+  const catalog = options.modelEnv ? readModelCatalog(options.modelEnv) : undefined;
   const repo = new Repository(options.dataDir || config.dataDir);
+  try {
+    if (catalog) repo.syncModelCatalog(catalog);
+  } catch (error) {
+    repo.close();
+    throw error;
+  }
   if (options.recover !== false) repo.recover();
   const gateway = new ModelGateway(repo, options.gatewayOptions || { ...config, retryDelay: 400 });
   const discussions = new DiscussionService(repo, gateway);
@@ -70,24 +77,11 @@ export async function createApp(
     repo.usage(req.params.id),
   );
   app.get('/api/model-connections', async () => repo.listConnections());
-  app.post('/api/model-connections', async (req, reply) => {
-    const body = ConnectionInputSchema.parse(req.body);
-    const key = req.headers['idempotency-key'];
-    const result =
-      typeof key === 'string'
-        ? repo.command('connection:create', key, body, () => repo.saveConnection(body)).result
-        : repo.saveConnection(body);
-    return reply.code(201).send(result);
-  });
-  app.patch<{ Params: { id: string } }>('/api/model-connections/:id', async (req) => {
-    const body = ConnectionPatchSchema.parse(req.body);
-    const key = req.headers['idempotency-key'];
-    return typeof key === 'string'
-      ? repo.command('connection:' + req.params.id, key, body, () =>
-          repo.patchConnection(req.params.id, body),
-        ).result
-      : repo.patchConnection(req.params.id, body);
-  });
+  const envOnly = async () => {
+    throw new AppError('ENV_MANAGED', '模型由本地 .env 管理，请修改配置后重启服务', 405);
+  };
+  app.post('/api/model-connections', envOnly);
+  app.patch('/api/model-connections/:id', envOnly);
   app.post<{ Params: { id: string } }>('/api/model-connections/:id/test', async (req) => {
     const c = repo.connection(req.params.id);
     if (!c.active) throw new AppError('DISABLED', '请先启用连接', 409);

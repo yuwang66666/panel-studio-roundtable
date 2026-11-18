@@ -26,6 +26,7 @@ import {
 import { assertTransition, callBudget } from '@panel/domain';
 import { connections } from './schema';
 import { AppError, conflict } from './errors';
+import type { ModelCatalog } from './model-catalog';
 export type PrivateConnection = ModelConnectionSummary & { apiKey: string };
 const now = () => new Date().toISOString();
 export class Repository {
@@ -100,7 +101,10 @@ export class Repository {
   saveConnection(input: ConnectionInput, id?: string) {
     return this.transaction(() => {
       const parsed = ConnectionInputSchema.parse(input);
-      const previous = id ? this.connection(id) : undefined;
+      const previous =
+        id && this.db.prepare('SELECT 1 FROM model_connections WHERE id=?').get(id)
+          ? this.connection(id)
+          : undefined;
       const { apiKey, ...publicConfig } = parsed;
       const summary: ModelConnectionSummary = {
         ...publicConfig,
@@ -148,6 +152,30 @@ export class Repository {
       ...patch,
     };
     return this.saveConnection(input, id);
+  }
+  syncModelCatalog(catalog: ModelCatalog) {
+    return this.transaction(() => {
+      const current = this.listConnections();
+      const ids = new Set(catalog.models.map((m) => m.id));
+      for (const { id, input } of catalog.models) {
+        const previous = current.some((c) => c.id === id) ? this.connection(id) : null;
+        if (
+          !previous ||
+          (Object.keys(input) as (keyof ConnectionInput)[]).some(
+            (key) => previous[key] !== input[key],
+          )
+        )
+          this.saveConnection(input, id);
+      }
+      // Keep encrypted historical versions for already-bound discussions.
+      for (const c of current)
+        if (c.active && !ids.has(c.id)) this.patchConnection(c.id, { active: false });
+      const savedDefault = this.settings().defaultModeratorConnectionId;
+      this.saveSettings(
+        catalog.defaultModeratorId ||
+          (savedDefault && ids.has(savedDefault) ? savedDefault : catalog.models[0]?.id || null),
+      );
+    });
   }
   markTest(id: string, version: number, passed: boolean) {
     this.transaction(() => {

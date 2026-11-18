@@ -47,7 +47,6 @@ import {
   type DiscussionSnapshot,
   type Participant,
   type ModelConnectionSummary,
-  type ConnectionInput,
   type AgentBinding,
 } from '@panel/contracts';
 import { Button } from './components/ui/button';
@@ -295,7 +294,7 @@ function Home() {
           <strong>
             {(connections.data?.filter((c) => c.active).length || 0).toString().padStart(2, '0')}
           </strong>
-          <span>模型连接</span>
+          <span>可用模型</span>
           <Link to="/settings">
             管理
             <ArrowUpRight size={14} />
@@ -412,7 +411,7 @@ function Home() {
               onChange={(e) => setHost(e.target.value)}
               required={!isPreview}
             >
-              <option value="">请选择模型连接</option>
+              <option value="">请选择模型</option>
               {connections.data
                 ?.filter((c) => c.active)
                 .map((c) => (
@@ -424,7 +423,8 @@ function Home() {
           </label>
           {!connections.data?.some((c) => c.active) && (
             <p className="hint">
-              请先<Link to="/settings">添加模型连接</Link>，用于生成阵容和主持讨论。
+              尚未配置可用模型。请在 .env 中填写模型配置并重启服务，
+              <Link to="/settings">查看模型列表</Link>。
             </p>
           )}
           <ErrorNotice error={create.error} />
@@ -450,28 +450,9 @@ function Home() {
     </main>
   );
 }
-const presets: Record<string, { baseUrl: string; protocol: ConnectionInput['protocol'] }> = {
-  deepseek: { baseUrl: 'https://api.deepseek.com/v1', protocol: 'openai-chat' },
-  claude: { baseUrl: 'https://api.anthropic.com/v1', protocol: 'anthropic' },
-  qwen: { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', protocol: 'openai-chat' },
-  gpt: { baseUrl: 'https://api.openai.com/v1', protocol: 'openai-responses' },
-  kimi: { baseUrl: 'https://api.moonshot.cn/v1', protocol: 'openai-chat' },
-  custom: { baseUrl: '', protocol: 'openai-chat' },
-};
-const blank: ConnectionInput = {
-  name: '',
-  provider: 'deepseek',
-  protocol: 'openai-chat',
-  baseUrl: presets.deepseek.baseUrl,
-  model: '',
-  apiKey: '',
-  structuredOutput: false,
-  active: true,
-};
 function Settings() {
   const qc = useQueryClient(),
-    [editing, setEditing] = useState<ModelConnectionSummary | null>(null),
-    [form, setForm] = useState<ConnectionInput>(blank),
+    [search, setSearch] = useState(''),
     [notice, setNotice] = useState('');
   const list = useQuery({
     queryKey: ['connections'],
@@ -481,25 +462,10 @@ function Settings() {
     queryKey: ['settings'],
     queryFn: () => request<{ defaultModeratorConnectionId: string | null }>('/settings'),
   });
-  const save = useMutation({
-    mutationFn: () => {
-      const { apiKey, ...rest } = form;
-      return request(
-        '/model-connections' + (editing ? '/' + editing.id : ''),
-        editing ? 'PATCH' : 'POST',
-        { ...rest, ...(apiKey ? { apiKey } : {}) },
-      );
-    },
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ['connections'] });
-      setEditing(null);
-      setForm({ ...blank });
-      setNotice('模型连接已保存。请测试连接，确认接口与模型可用。');
-    },
-  });
   const test = useMutation({
     mutationFn: (id: string) =>
       request<{ ok: boolean; message: string }>(`/model-connections/${id}/test`, 'POST', {}),
+    onMutate: () => setNotice(''),
     onSuccess: (r) => {
       setNotice(r.message);
       qc.invalidateQueries({ queryKey: ['connections'] });
@@ -511,28 +477,27 @@ function Settings() {
       request('/settings', 'PATCH', { defaultModeratorConnectionId: id || null }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
   });
-  const toggle = useMutation({
-    mutationFn: (c: ModelConnectionSummary) =>
-      request(`/model-connections/${c.id}`, 'PATCH', { active: !c.active }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['connections'] }),
-  });
-  const set = <K extends keyof ConnectionInput>(k: K, v: ConnectionInput[K]) =>
-    setForm((f) => ({ ...f, [k]: v }));
+  const models = list.data?.filter((c) => c.active) || [];
+  const shown = models.filter((c) =>
+    `${c.name} ${c.model} ${PROVIDER_LABEL[c.provider]}`
+      .toLowerCase()
+      .includes(search.trim().toLowerCase()),
+  );
   return (
     <main className="page-width settings-page">
       <div className="page-title">
-        <div className="eyebrow">连接不同的智能</div>
+        <div className="eyebrow">让不同的能力在圆桌相遇</div>
         <h1>模型设置</h1>
-        <p>为每位专家选择合适的模型，让不同的能力在圆桌相遇。</p>
+        <p>模型已提前配置，选择默认主持人，并在每场讨论中为专家分配模型。</p>
       </div>
-      <div className="settings-layout">
-        <section>
+      <div className="settings-layout model-library">
+        <section aria-label="可用模型列表">
           <div className="section-heading">
             <h2>
-              我的连接<span>{list.data?.length || 0}</span>
+              可用模型<span>{models.length}</span>
             </h2>
           </div>
-          <ErrorNotice error={list.error || test.error || toggle.error} />
+          <ErrorNotice error={list.error || test.error} />
           {notice && (
             <div className="success-notice" role="status">
               <Check size={17} />
@@ -541,222 +506,115 @@ function Settings() {
           )}
           {list.isPending ? (
             <Loading />
-          ) : !list.data?.length ? (
+          ) : list.isError ? (
+            <Button variant="outline" onClick={() => list.refetch()}>
+              重新加载模型
+            </Button>
+          ) : !models.length ? (
             <div className="empty empty-card">
               <PlugZap size={32} />
-              <h3>连接你的第一个模型</h3>
-              <p>
-                支持 DeepSeek、Claude、Qwen、GPT、Kimi
-                <br />
-                以及兼容的自定义接口。
-              </p>
+              <h3>尚未配置可用模型</h3>
+              <p>在项目根目录的 .env 中填写模型与 API Key，重启服务后即可在这里选择。</p>
             </div>
           ) : (
-            <div className="connection-list">
-              {list.data.map((c) => (
-                <article
-                  className={`connection-card ${!c.active ? 'disabled-card' : ''}`}
-                  key={c.id}
-                >
-                  <div className="connection-title">
-                    <span className="provider-logo">{PROVIDER_LABEL[c.provider].slice(0, 1)}</span>
-                    <div>
-                      <h3>{c.name}</h3>
-                      <p>
-                        {PROVIDER_LABEL[c.provider]} · {c.model}
-                      </p>
-                    </div>
-                    <span className={`test-tag ${c.testStatus}`}>
-                      {!c.active
-                        ? '已停用'
-                        : c.testStatus === 'passed'
-                          ? '连接验证通过'
-                          : c.testStatus === 'failed'
-                            ? '测试失败'
-                            : '待测试'}
-                    </span>
-                  </div>
-                  <div className="connection-meta">
-                    <span>{c.protocol}</span>
-                    <span>凭据已保存 · v{c.version}</span>
-                  </div>
-                  <div className="connection-actions">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      disabled={test.isPending || !c.active}
-                      onClick={() => test.mutate(c.id)}
-                    >
-                      {test.isPending && test.variables === c.id ? (
-                        <LoaderCircle className="spin" size={14} />
-                      ) : (
-                        <PlugZap size={14} />
-                      )}
-                      测试连接
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setEditing(c);
-                        setForm({
-                          name: c.name,
-                          provider: c.provider,
-                          protocol: c.protocol,
-                          baseUrl: c.baseUrl,
-                          model: c.model,
-                          apiKey: '',
-                          structuredOutput: c.structuredOutput,
-                          active: c.active,
-                        });
-                      }}
-                    >
-                      编辑
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      disabled={toggle.isPending}
-                      onClick={() => toggle.mutate(c)}
-                    >
-                      {c.active ? '停用' : '启用'}
-                    </Button>
-                  </div>
-                </article>
-              ))}
-            </div>
+            <>
+              <label className="field model-search">
+                搜索模型
+                <input
+                  type="search"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="按名称、模型 ID 或服务商搜索"
+                />
+              </label>
+              {!shown.length ? (
+                <div className="empty empty-card">
+                  <h3>没有匹配的模型</h3>
+                  <p>换一个关键词，或清空搜索查看全部模型。</p>
+                  <Button variant="outline" onClick={() => setSearch('')}>
+                    清空搜索
+                  </Button>
+                </div>
+              ) : (
+                <div className="connection-list">
+                  {shown.map((c) => (
+                    <article className="connection-card" key={c.id}>
+                      <div className="connection-title">
+                        <span className="provider-logo" aria-hidden="true">
+                          {PROVIDER_LABEL[c.provider].slice(0, 1)}
+                        </span>
+                        <div>
+                          <h3>{c.name}</h3>
+                          <p>
+                            {PROVIDER_LABEL[c.provider]} · {c.model}
+                          </p>
+                        </div>
+                        <span className={`test-tag ${c.testStatus}`}>
+                          {c.testStatus === 'passed'
+                            ? '连接验证通过'
+                            : c.testStatus === 'failed'
+                              ? '测试失败'
+                              : '待测试'}
+                        </span>
+                      </div>
+                      <div className="connection-meta">
+                        <span>{isPreview ? '界面样例模型' : '预配置模型'}</span>
+                        <span>
+                          {settings.data?.defaultModeratorConnectionId === c.id
+                            ? '默认主持人'
+                            : '可用于主持人或专家'}
+                        </span>
+                      </div>
+                      <div className="connection-actions">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          disabled={test.isPending}
+                          onClick={() => test.mutate(c.id)}
+                        >
+                          {test.isPending && test.variables === c.id ? (
+                            <LoaderCircle className="spin" size={14} />
+                          ) : (
+                            <PlugZap size={14} />
+                          )}
+                          测试连接
+                        </Button>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              )}
+            </>
           )}
-          <section className="default-host">
-            <h3>默认主持人</h3>
-            <p>负责生成阵容、组织讨论、提炼洞察与最终总结。</p>
+        </section>
+        <aside className="configuration-panel model-preferences">
+          <div className="section-heading">
+            <h2>默认主持人</h2>
+          </div>
+          <p>负责生成阵容、组织讨论、提炼洞察与最终总结。创建讨论时也可以单独选择。</p>
+          <label className="field">
+            默认主持人模型
             <select
-              aria-label="默认主持人模型"
               value={settings.data?.defaultModeratorConnectionId || ''}
-              disabled={changeDefault.isPending}
+              disabled={changeDefault.isPending || settings.isPending || !models.length}
               onChange={(e) => changeDefault.mutate(e.target.value)}
             >
-              <option value="">选择默认连接</option>
-              {list.data
-                ?.filter((c) => c.active)
-                .map((c) => (
-                  <option value={c.id} key={c.id}>
-                    {c.name}
-                  </option>
-                ))}
+              <option value="">选择默认模型</option>
+              {models.map((c) => (
+                <option value={c.id} key={c.id}>
+                  {c.name} · {c.model}
+                </option>
+              ))}
             </select>
-            <ErrorNotice error={changeDefault.error} />
-          </section>
-        </section>
-        <aside className="configuration-panel">
-          <div className="section-heading">
-            <h2>{editing ? '编辑连接' : '添加模型连接'}</h2>
-            {editing && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setEditing(null);
-                  setForm({ ...blank });
-                }}
-              >
-                取消编辑
-              </Button>
-            )}
+          </label>
+          <ErrorNotice error={settings.error || changeDefault.error} />
+          <div className="model-guide">
+            <h3>为每个角色选择模型</h3>
+            <p>同一模型可以分配给多位专家，也可以让不同服务商的模型参与同场讨论。</p>
+            <Link to="/">
+              前往讨论空间 <ArrowRight size={14} />
+            </Link>
           </div>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              save.mutate();
-            }}
-          >
-            <label className="field">
-              连接名称
-              <input
-                required
-                maxLength={60}
-                value={form.name}
-                onChange={(e) => set('name', e.target.value)}
-                placeholder="例如：DeepSeek · 研究视角"
-              />
-            </label>
-            <div className="field-grid">
-              <label className="field">
-                服务商
-                <select
-                  value={form.provider}
-                  onChange={(e) => {
-                    const p = e.target.value as ConnectionInput['provider'];
-                    setForm((f) => ({ ...f, provider: p, ...presets[p], structuredOutput: false }));
-                  }}
-                >
-                  {Object.entries(PROVIDER_LABEL).map(([v, l]) => (
-                    <option key={v} value={v}>
-                      {l}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label className="field">
-                接口协议
-                <select
-                  value={form.protocol}
-                  onChange={(e) => set('protocol', e.target.value as ConnectionInput['protocol'])}
-                >
-                  <option value="openai-chat">Chat Completions</option>
-                  <option value="openai-responses">Responses</option>
-                  <option value="anthropic">Anthropic Messages</option>
-                </select>
-              </label>
-            </div>
-            <label className="field">
-              API 地址
-              <input
-                required
-                type="url"
-                value={form.baseUrl}
-                onChange={(e) => set('baseUrl', e.target.value)}
-                placeholder="https://…/v1"
-              />
-              <small>填写基础地址，不附加 /chat/completions 等操作路径。</small>
-            </label>
-            <label className="field">
-              模型名称
-              <input
-                required
-                maxLength={120}
-                value={form.model}
-                onChange={(e) => set('model', e.target.value)}
-                placeholder="填写服务商提供的模型 ID"
-              />
-            </label>
-            <label className="field">
-              API Key
-              <input
-                aria-label="API Key"
-                autoComplete="off"
-                type="password"
-                required={!editing}
-                value={form.apiKey}
-                onChange={(e) => set('apiKey', e.target.value)}
-                placeholder={editing ? '留空保留已有凭据' : '输入 API Key'}
-              />
-              <small>仅保存在本机后端，保存后不会回显完整凭据。</small>
-            </label>
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                checked={form.structuredOutput}
-                disabled={form.protocol === 'anthropic'}
-                onChange={(e) => set('structuredOutput', e.target.checked)}
-              />
-              启用接口原生 JSON 输出<small>仅在模型支持时开启</small>
-            </label>
-            <ErrorNotice error={save.error} />
-            <Button className="full-width" disabled={save.isPending}>
-              {save.isPending ? <LoaderCircle size={16} className="spin" /> : <Plus size={16} />}
-              保存连接
-            </Button>
-          </form>
         </aside>
       </div>
     </main>
@@ -893,7 +751,7 @@ function Cast({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
                     }
                     onChange={(e) => setBindings((b) => ({ ...b, [p.id]: e.target.value }))}
                   >
-                    <option value="">选择连接</option>
+                    <option value="">选择模型</option>
                     {list.data
                       ?.filter((c) => c.active)
                       .map((c) => (

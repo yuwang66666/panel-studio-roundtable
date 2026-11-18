@@ -3,7 +3,7 @@
   "info": {
     "title": "AI Panel Studio 本地 API",
     "version": "0.1.0",
-    "description": "写接口只允许配置的本地 Origin；无 Origin 的 CLI 需发送 X-Panel-Client: local。凭据仅在输入中存在，所有公开响应均为白名单类型。"
+    "description": "模型配置与凭据从根目录 .env 由后端启动时加载，网页仅选择已配置模型。旧 POST /model-connections 与 PATCH /model-connections/{id} 对合法本地 JSON 请求返回 405 ENV_MANAGED。写接口只允许配置的本地 Origin；无 Origin 的 CLI 需发送 X-Panel-Client: local。所有公开响应均为白名单类型，不包含密钥。"
   },
   "servers": [
     {
@@ -54,7 +54,7 @@
     },
     "/model-connections": {
       "get": {
-        "summary": "列出模型连接摘要",
+        "summary": "列出环境管理的模型摘要，选择时使用 active=true 的项",
         "parameters": [],
         "responses": {
           "200": {
@@ -66,105 +66,6 @@
                   "items": {
                     "$ref": "#/components/schemas/ConnectionSummary"
                   }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "参数错误"
-          },
-          "403": {
-            "description": "本地来源校验失败"
-          },
-          "404": {
-            "description": "资源不存在"
-          },
-          "409": {
-            "description": "状态或版本冲突"
-          },
-          "429": {
-            "description": "并发或调用预算限制"
-          },
-          "502": {
-            "description": "模型调用或输出校验失败"
-          }
-        }
-      },
-      "post": {
-        "summary": "创建加密保存的模型连接",
-        "parameters": [],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConnectionInput"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConnectionSummary"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "参数错误"
-          },
-          "403": {
-            "description": "本地来源校验失败"
-          },
-          "404": {
-            "description": "资源不存在"
-          },
-          "409": {
-            "description": "状态或版本冲突"
-          },
-          "429": {
-            "description": "并发或调用预算限制"
-          },
-          "502": {
-            "description": "模型调用或输出校验失败"
-          }
-        }
-      }
-    },
-    "/model-connections/{id}": {
-      "patch": {
-        "summary": "更新或停用连接并保存新版本",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConnectionPatch"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "成功",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConnectionSummary"
                 }
               }
             }
@@ -886,89 +787,6 @@
       "Empty": {
         "type": "object",
         "properties": {},
-        "additionalProperties": false
-      },
-      "ConnectionInput": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 60
-          },
-          "provider": {
-            "type": "string",
-            "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"]
-          },
-          "protocol": {
-            "type": "string",
-            "enum": ["openai-chat", "openai-responses", "anthropic"]
-          },
-          "baseUrl": {
-            "type": "string",
-            "format": "uri"
-          },
-          "model": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 120
-          },
-          "apiKey": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 4096
-          },
-          "structuredOutput": {
-            "type": "boolean",
-            "default": false
-          },
-          "active": {
-            "type": "boolean",
-            "default": true
-          }
-        },
-        "required": ["name", "provider", "protocol", "baseUrl", "model", "apiKey"],
-        "additionalProperties": false
-      },
-      "ConnectionPatch": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 60
-          },
-          "provider": {
-            "type": "string",
-            "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"]
-          },
-          "protocol": {
-            "type": "string",
-            "enum": ["openai-chat", "openai-responses", "anthropic"]
-          },
-          "baseUrl": {
-            "type": "string",
-            "format": "uri"
-          },
-          "model": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 120
-          },
-          "apiKey": {
-            "type": "string",
-            "minLength": 1,
-            "maxLength": 4096
-          },
-          "structuredOutput": {
-            "type": "boolean",
-            "default": false
-          },
-          "active": {
-            "type": "boolean",
-            "default": true
-          }
-        },
         "additionalProperties": false
       },
       "ConnectionSummary": {

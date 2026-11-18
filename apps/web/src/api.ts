@@ -2,8 +2,24 @@ import type { DiscussionSnapshot, ModelConnectionSummary } from '@panel/contract
 import { makeSample } from '../../../packages/domain/src/samples';
 export const isPreview = window.location.pathname.startsWith('/preview');
 const samples = Array.from({ length: 5 }, (_, i) => makeSample(i));
-let previewConnections: ModelConnectionSummary[] = [];
-let defaultConnection: string | null = null;
+const previewConnections: ModelConnectionSummary[] = [
+  {
+    id: 'preview-model',
+    name: '样例模型',
+    provider: 'custom',
+    protocol: 'openai-chat',
+    baseUrl: 'https://example.invalid/v1',
+    model: 'preview-model',
+    structuredOutput: false,
+    active: true,
+    version: 1,
+    hasApiKey: false,
+    testedAt: null,
+    testStatus: 'untested',
+    createdAt: '2026-11-18T00:00:00.000Z',
+  },
+];
+let defaultConnection: string | null = previewConnections[0].id;
 export async function request<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
   if (isPreview) return previewRequest(path, method, body) as T;
   const response = await fetch(`/api${path}`, {
@@ -23,31 +39,9 @@ function previewRequest(path: string, method: string, body: any): unknown {
     if (method === 'PATCH') defaultConnection = body.defaultModeratorConnectionId;
     return { defaultModeratorConnectionId: defaultConnection };
   }
-  if (path === '/model-connections') {
-    if (method === 'POST') {
-      const { apiKey: _, ...rest } = body;
-      const c = {
-        ...rest,
-        id: crypto.randomUUID(),
-        version: 1,
-        hasApiKey: true,
-        testedAt: null,
-        testStatus: 'untested',
-        createdAt: new Date().toISOString(),
-      };
-      previewConnections.push(c);
-      return c;
-    }
-    return previewConnections;
-  }
-  if (path.startsWith('/model-connections/')) {
-    const c = previewConnections.find((c) => c.id === path.split('/')[2]);
-    if (!c) throw Error('连接不存在');
-    if (path.endsWith('/test')) throw Error('原型不调用模型，请在正式模式配置连接。');
-    const { apiKey: _, ...rest } = body;
-    Object.assign(c, rest);
-    return c;
-  }
+  if (path === '/model-connections' && method === 'GET') return previewConnections;
+  if (path.startsWith('/model-connections'))
+    throw Error('原型仅展示样例模型，真实模型请在项目 .env 中配置。');
   if (path.startsWith('/discussions?') || path === '/discussions') {
     if (method === 'POST') {
       const s = structuredClone(samples[0]);

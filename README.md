@@ -29,18 +29,52 @@ pnpm --filter @panel/web dev
 
 开发环境支持 Vite 热更新和后端监听重启；重启会中断正在运行的讨论，历史发言保留，可请求收尾总结。生产前端构建使用 `pnpm build`，本项目按本地开发服务器运行方式交付，不包含云部署。
 
+## 预先配置模型
+
+模型、接口地址和 API Key 统一在仓库根目录 `.env` 配置。网页直接显示可选模型，不需要手动添加连接，也不提供密钥输入框。
+
+首次配置时，如果根目录还没有 `.env`，复制模板：
+
+```powershell
+Copy-Item .env.example .env
+```
+
+模板已准备 DeepSeek、Claude、Qwen、GPT、Kimi 的服务商、协议和基础地址。填写需要使用的条目中的 `MODEL` 和 `API_KEY`，按实际服务商或中转服务调整地址与协议，然后启动或重启后端。未使用条目的 `MODEL` 和 `API_KEY` 都保持为空，会自动跳过；只填写其中一个会在启动时报告对应变量名。
+
+例如一个模型条目由以下字段组成（模型 ID 与密钥需换成实际值）：
+
+```dotenv
+PANEL_MODELS=DEEPSEEK
+PANEL_DEFAULT_MODERATOR=DEEPSEEK
+MODEL_DEEPSEEK_NAME="研究模型"
+MODEL_DEEPSEEK_PROVIDER=deepseek
+MODEL_DEEPSEEK_PROTOCOL=openai-chat
+MODEL_DEEPSEEK_BASE_URL=https://api.deepseek.com/v1
+MODEL_DEEPSEEK_MODEL="填写账号可用的实际模型ID"
+MODEL_DEEPSEEK_API_KEY="填写实际API Key"
+MODEL_DEEPSEEK_STRUCTURED_OUTPUT=false
+```
+
+`PANEL_MODELS` 是以逗号分隔的模型标识清单。标识以大写字母开头，只包含大写字母、数字和下划线，最多40字符。每个标识对应一组 `MODEL_<标识>_*` 字段。同一服务商的多个模型使用不同标识，例如 `DEEPSEEK_FAST` 与 `DEEPSEEK_REASONING`；复制完整字段组并加入清单即可，共用凭据时也填写实际密钥。标识决定连接身份，修改显示名称用 `NAME`，不要通过改标识改名。
+
+`PANEL_DEFAULT_MODERATOR` 可留空：优先保留网页已选且仍有效的默认模型，否则使用清单中第一个可用模型。填写时必须指向完整配置的标识，每次重启都会将它设为默认主持人。网页中的默认选择在本次运行期间仍可调整。
+
+支持 `openai-chat`（Chat Completions 兼容协议）、`openai-responses` 和 `anthropic`（Anthropic Messages）。服务商品牌与协议分别填写，不按模型名称猜测协议。`PROVIDER` 可填 `deepseek`、`claude`、`qwen`、`gpt`、`kimi`、`custom`；基础地址不附加 `/chat/completions` 等操作路径。`STRUCTURED_OUTPUT` 默认为 `false`，服务商支持原生 JSON 输出时才改为 `true`。默认使用 Prompt 和严格 Schema 验证输出。
+
+含 `#` 或空格的值加引号；此配置不支持 `${变量名}` 插值。`.env` 只由后端读取，不会作为前端配置打包，也不应使用 `VITE_` 前缀保存密钥。`.env` 中的密钥是明文；后端同步连接版本后，历史凭据使用 AES-256-GCM 加密保存在 `.data/panel.sqlite`，主密钥位于 `.data/master.key`。备份历史数据库时需同时保留主密钥。`.env`、数据库及密钥文件均已被 Git 忽略，`.env.example` 只保存空白模板。
+
+后端启动时以环境模型清单为准：相同配置不会重复创建连接版本；配置或密钥改变后生成新版本，并清除该版本的旧测试状态；从清单移除的模型以及旧网页创建的连接停用，历史版本仍保留。讨论启动时冻结模型版本，历史发言与绑定不被改写。修改 `.env` 后需要重启后端，重启会中断运行中的讨论，已保存内容可继续查看和请求总结。
+
 ## 开始真实讨论
 
-1. 打开“模型设置”，填写连接名称、服务商、接口协议、基础地址、实际模型 ID 和 API Key。
-2. 保存后点击“测试连接”。测试会产生一次最小 API 调用；失败时检查 Key、权限、模型名、协议和地址。
+1. 完成 `.env` 预配置并启动服务后，打开“模型设置”，直接浏览已配置的模型。
+2. 点击“测试连接”。测试会产生一次最小 API 调用；失败时在 `.env` 检查 Key、权限、模型 ID、协议和地址，修改后重启再测。
 3. 选择默认主持人。它默认负责阵容、主持、洞察和总结。
 4. 创建话题并选择 2–6 位专家；默认 4 位专家加 1 位主持人。
-5. 阵容生成后，为每位角色选择连接；不同专家可以使用不同服务商，也可共用连接。确认后冻结连接版本并启动。
+5. 阵容生成后，为每位角色从列表选择模型；不同专家可以使用不同服务商，也可共用模型。确认后冻结连接版本并启动。
 6. 在演播厅阅读发言，点击回应与洞察来源回到原文。可以提前结束并生成总结。
 
-支持 Chat Completions 兼容协议、OpenAI Responses、Anthropic Messages。服务商与协议分开设置；模型 ID 由实际账号提供，不预填未经验证的模型版本。自定义中转地址可修改。启用原生 JSON 输出前需确认服务商支持；默认通过 Prompt 和严格 Schema 验证输出。
-
-API Key 加密保存在本地 `.data/panel.sqlite`，主密钥在 `.data/master.key`。备份和恢复时应一起保留二者；主密钥丢失后不能解密已有连接。连接摘要不会回显 Key，前端不将 Key 写入 localStorage。运行中的讨论使用冻结版本，后续编辑仅影响新启动的讨论。Git 已忽略数据库、密钥、环境文件和缓存。
+模型摘要不会返回 API Key，网页不接收或持久化密钥。尚未完整配置任何模型时，可以阅读历史样例，真实讨论按钮保持不可用。
 
 ## 样例与验收状态
 
@@ -60,13 +94,13 @@ pnpm docs:api             # 从共享 Zod 契约重新生成 OpenAPI
 pnpm format:check         # 源文件格式检查
 ```
 
-本机也可使用 `.\scripts\tool.ps1 test` 等对应入口。E2E 默认使用本机 Microsoft Edge；其他环境可安装 Playwright Chromium，并将两份 Playwright 配置的 `channel` 改为已安装浏览器。正式 E2E 采用独立端口 5174，不使用工作空间中的实际模型连接；独立安装检查使用后端端口 3003。
+本机也可使用 `.\scripts\tool.ps1 test` 等对应入口。E2E 默认使用本机 Microsoft Edge；其他环境可安装 Playwright Chromium，并将两份 Playwright 配置的 `channel` 改为已安装浏览器。正式 E2E 采用独立端口 5174和隔离.env中的测试模型，原型 E2E 使用独立端口5175；均不使用工作空间中的实际模型连接。独立安装检查使用后端端口3003和公开空白.env模板，清除继承的模型环境变量，不复制本地凭据。
 
 ## 架构与接口
 
 前端为 React / Vite / TypeScript，TanStack Query 管理查询，Zustand 管理按讨论隔离的事件投影。后端为 Fastify 模块化单体，SQLite / Drizzle 保存业务数据，SSE 从持久事件日志推送。模型网关负责三协议、全局/连接/讨论并发、超时、重试与输出校验。
 
-- 模型连接：`GET/POST /api/model-connections`，`PATCH /api/model-connections/:id`，`POST /api/model-connections/:id/test`。
+- 模型目录：`GET /api/model-connections` 返回无密钥摘要，`POST /api/model-connections/:id/test` 验证已配置模型。旧创建和修改接口返回 `405 ENV_MANAGED`，模型配置只从 `.env` 加载。
 - 默认主持人：`GET/PATCH /api/settings`。
 - 讨论：`POST/GET /api/discussions`，`GET /:id/snapshot`，`PUT /:id/agent-bindings`，`POST /:id/start`、`/:id/finish`、`/:id/retry`。
 - 实时事件：`GET /api/discussions/:id/events?after=N`，自动重连使用 Last-Event-ID。

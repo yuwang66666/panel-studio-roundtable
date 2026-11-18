@@ -18,12 +18,18 @@ for (const file of listing.stdout.trim().split('\n').filter(Boolean)) {
   copyFileSync(resolve(root, file), dest);
 }
 const env = {
-  ...process.env,
+  ...Object.fromEntries(
+    Object.entries(process.env).filter(
+      ([key]) => !key.startsWith('MODEL_') && !key.startsWith('PANEL_'),
+    ),
+  ),
   npm_config_cache: join(root, '.cache', 'npm'),
   npm_config_devdir: join(root, '.cache', 'node-gyp'),
   API_PORT: '3003',
   DATA_DIR: join(clean, '.data'),
 };
+// Exercise the real startup loader with the public blank template, never local credentials.
+copyFileSync(join(clean, '.env.example'), join(clean, '.env'));
 const checks = [];
 function run(args) {
   const result = spawnSync(process.execPath, [pnpm, ...args], {
@@ -74,7 +80,7 @@ try {
   const spec = await (await fetch('http://127.0.0.1:3003/api/openapi.json')).json();
   if (spec.openapi !== '3.0.3') throw Error('Missing OpenAPI');
   checks.push(
-    'isolated API health; exactly 5 samples after two seed runs; no copied connections; OpenAPI available',
+    'isolated API health with blank .env template; exactly 5 samples after two seed runs; no copied connections or model environment; OpenAPI available',
   );
   const report = {
     source: root,

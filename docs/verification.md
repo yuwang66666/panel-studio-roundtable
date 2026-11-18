@@ -1,5 +1,26 @@
 # 阶段验收证据
 
+## T14A · 环境模型目录 · 2026-11-18
+
+- 用户要求将模型参数与 API Key 提前写入 `.env`，网页只选择模型。本阶段新增显式模型清单解析与启动事务同步，网页创建/修改连接接口改为返回 `405 ENV_MANAGED`。
+- 定向运行 `scripts/tool.ps1 exec vitest run tests/model-catalog.test.ts tests/gateway.test.ts tests/repository.test.ts`：18/18通过；随后完整 `scripts/tool.ps1 test`：46/46通过。
+- 后端 TypeScript 检查通过。验证同供应商多个模型、带引号的密钥、不完整配置安全错误、重复启动版本稳定、测试状态保留、配置轮换保留讨论冻结版本、移除模型停用和默认模型回退。
+- 三种协议均使用环境模型清单发起本地 HTTP 测试调用；连接摘要、错误及数据库版本元数据不包含明文密钥。实际供应商凭据尚未提供。
+
+## T14B · 网页模型选择 · 2026-11-18
+
+- `scripts/tool.ps1 build`：生产构建与前后端类型检查通过。
+- `scripts/tool.ps1 test:e2e:live`：3/3通过、退出0。隔离 `.env` 预置 Chat/Responses/Anthropic 模型后，网页直接选择并完成阵容、16次专家发言、洞察和总结；断网恢复与刷新后18条消息完整、不重复。
+- 验证页面不存在 API Key/密码输入框，公开模型 API 不含测试凭据；默认模型刷新后保留，模型搜索与无模型空态有效。设置页375/768/1024/1440宽度无横向溢出，键盘操作通过；桌面和手机截图已复核。
+- 原型2个场景虽通过，首次运行发现自动启动 `pnpm dev` 的 Windows 子进程清理挂起。改为测试进程直接管理独立5175端口的Vite；重跑 `scripts/tool.ps1 test:e2e` 2/2通过且退出0。
+
+## T14C · 环境配置交付 · 2026-11-18
+
+- 已创建被Git忽略的本地 `.env`，包含5家服务商的空白模型/密钥字段；不包含假凭据或未经验证的模型ID。README、PRD、数据模型、API和供应商验证表已同步。
+- `scripts/tool.ps1 docs:api` 成功；OpenAPI去除旧网页模型创建/修改契约，公开Schema不含apiKey。
+- `scripts/tool.ps1 verify:clean` 成功：独立目录按锁安装、构建、两次seed后恰好5场样例；通过公开空白.env模板启动实际API，无模型连接和复制凭据。独立验证进程清除继承的MODEL_/PANEL_变量；详情见clean-verification.json。
+- 本次仍按用户选择保留本地Git。真实供应商验证等待实际模型ID与API Key。
+
 ## T00 · 2026-11-18
 
 - `scripts/tool.ps1 install`：成功，pnpm 10.28.2，已生成锁文件。

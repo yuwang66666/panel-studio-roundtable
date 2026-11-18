@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 import { createRequire } from 'node:module';
 import { pathToFileURL } from 'node:url';
 import { resolve, sep } from 'node:path';
-import { mkdirSync, mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, readFileSync, writeFileSync } from 'node:fs';
+import { parseEnv } from 'node:util';
 import { createApp } from '../../apps/api/src/app';
 import { startProvider, defaultResponse } from '../fixtures/provider';
 import { makeSample } from '../../packages/domain/src/samples';
@@ -17,7 +18,46 @@ test.beforeAll(async () => {
     await new Promise((r) => setTimeout(r, task.purpose === 'utterance' ? 180 : 70));
     return defaultResponse(task);
   });
-  backend = await createApp({ dataDir: dir, origins: ['http://127.0.0.1:5174'] });
+  const fixtureEnv = [
+    'PANEL_MODELS=CHAT,CLAUDE,GPT',
+    'PANEL_DEFAULT_MODERATOR=CHAT',
+    ...[
+      {
+        id: 'CHAT',
+        name: '本地协议验收',
+        provider: 'custom',
+        protocol: 'openai-chat',
+        model: 'fixture-model',
+      },
+      {
+        id: 'CLAUDE',
+        name: 'Claude 协议专家',
+        provider: 'claude',
+        protocol: 'anthropic',
+        model: 'fixture-claude',
+      },
+      {
+        id: 'GPT',
+        name: 'GPT 协议专家',
+        provider: 'gpt',
+        protocol: 'openai-responses',
+        model: 'fixture-gpt',
+      },
+    ].flatMap((c) => [
+      `MODEL_${c.id}_NAME=${c.name}`,
+      `MODEL_${c.id}_PROVIDER=${c.provider}`,
+      `MODEL_${c.id}_PROTOCOL=${c.protocol}`,
+      `MODEL_${c.id}_BASE_URL=${provider.baseUrl}`,
+      `MODEL_${c.id}_MODEL=${c.model}`,
+      `MODEL_${c.id}_API_KEY=e2e-env-${c.id}-only`,
+    ]),
+  ].join('\n');
+  writeFileSync(resolve(dir, '.env'), fixtureEnv);
+  backend = await createApp({
+    dataDir: dir,
+    origins: ['http://127.0.0.1:5174'],
+    modelEnv: parseEnv(readFileSync(resolve(dir, '.env'), 'utf8')),
+  });
   for (let i = 0; i < 5; i++) backend.repo.importSample(makeSample(i));
   const target = await backend.app.listen({ port: 0, host: '127.0.0.1' });
   const require = createRequire(new URL('../../apps/web/package.json', import.meta.url));
@@ -34,40 +74,34 @@ test.afterAll(async () => {
   await provider?.close();
   if (dir?.startsWith(resolve('.tmp') + sep)) rmSync(dir, { recursive: true, force: true });
 });
-test('实际页面完成配置、阵容、实时讨论、断线恢复与总结', async ({ page, context }) => {
+test('预配置模型直接选择，完成阵容、讨论、断线恢复与总结', async ({ page, context }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/settings');
-  await page.getByLabel('连接名称').fill('本地协议验收');
-  await page.getByRole('combobox', { name: '服务商', exact: true }).selectOption('custom');
-  await page.getByLabel('API 地址').fill(provider.baseUrl);
-  await page.getByLabel('模型名称').fill('fixture-model');
-  await page.getByLabel('API Key', { exact: true }).fill('e2e-test-only');
-  await page.getByRole('button', { name: '保存连接', exact: true }).click();
-  await expect(page.getByRole('heading', { name: '本地协议验收' })).toBeVisible();
-  await page.getByRole('button', { name: '测试连接', exact: true }).click();
-  await expect(page.locator('.test-tag')).toHaveText('连接验证通过');
-  await page.getByLabel('默认主持人模型').selectOption({ label: '本地协议验收' });
+  await expect(page.locator('.connection-card')).toHaveCount(3);
+  await expect(page.locator('input[type="password"]')).toHaveCount(0);
+  await expect(page.getByLabel('API Key', { exact: true })).toHaveCount(0);
+  const publicModels = await (await page.request.get('/api/model-connections')).text();
+  expect(publicModels).not.toContain('e2e-env-');
+  expect(publicModels).not.toContain('"apiKey"');
+  await expect(page.getByLabel('默认主持人模型')).toHaveValue('env:CHAT');
+  const chatCard = page
+    .locator('.connection-card')
+    .filter({ has: page.getByRole('heading', { name: '本地协议验收', exact: true }) });
+  await chatCard.getByRole('button', { name: '测试连接', exact: true }).click();
+  await expect(chatCard.locator('.test-tag')).toHaveText('连接验证通过');
+  await page.getByLabel('默认主持人模型').selectOption('env:GPT');
+  await expect(page.getByLabel('默认主持人模型')).toHaveValue('env:GPT');
+  await page.reload();
+  await expect(page.getByLabel('默认主持人模型')).toHaveValue('env:GPT');
+  await page.getByLabel('默认主持人模型').selectOption('env:CHAT');
+  await expect(page.getByLabel('默认主持人模型')).toHaveValue('env:CHAT');
   await page.getByRole('link', { name: '讨论空间', exact: true }).click();
   await page.getByRole('button', { name: '开启一场圆桌' }).click();
   await page.getByLabel('想讨论什么？').fill('如何评估多智能体对企业决策的帮助？');
   await page.getByRole('button', { name: '生成讨论阵容' }).click();
   await expect(page.locator('.cast-card')).toHaveCount(5);
-  const extra = [
-    { name: 'Claude 协议专家', provider: 'claude', protocol: 'anthropic', model: 'fixture-claude' },
-    { name: 'GPT 协议专家', provider: 'gpt', protocol: 'openai-responses', model: 'fixture-gpt' },
-  ];
-  for (const c of extra)
-    backend.repo.saveConnection({
-      ...c,
-      provider: c.provider as 'claude' | 'gpt',
-      protocol: c.protocol as 'anthropic' | 'openai-responses',
-      baseUrl: provider.baseUrl,
-      apiKey: 'fixture-extra',
-      active: true,
-      structuredOutput: false,
-    });
   await page.reload();
   await expect(page.locator('.cast-card')).toHaveCount(5);
   await page.getByLabel('嘉宾1的模型').selectOption({ label: 'Claude 协议专家 · fixture-claude' });
@@ -116,8 +150,37 @@ test('手机页面、独立滚动与键盘焦点可用', async ({ page }) => {
   await page.goto('/');
   await page.screenshot({ path: 'test-results/home-desktop.png', fullPage: true });
   await page.getByRole('link', { name: '模型设置', exact: true }).click();
-  await page.getByLabel('连接名称').focus();
+  await page.getByLabel('搜索模型').focus();
   await page.keyboard.press('Tab');
-  await expect(page.getByRole('combobox', { name: '服务商', exact: true })).toBeFocused();
-  await page.screenshot({ path: 'test-results/settings-desktop.png', fullPage: true });
+  await expect(page.getByRole('button', { name: '测试连接', exact: true }).first()).toBeFocused();
+  await page.getByLabel('搜索模型').fill('fixture-gpt');
+  await expect(page.locator('.connection-card')).toHaveCount(1);
+  await expect(page.getByRole('heading', { name: 'GPT 协议专家' })).toBeVisible();
+  await page.getByLabel('搜索模型').fill('不存在的模型');
+  await expect(page.getByRole('heading', { name: '没有匹配的模型' })).toBeVisible();
+  await page.getByRole('button', { name: '清空搜索' }).click();
+  for (const width of [375, 768, 1024, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await expect(page.locator('.connection-card')).toHaveCount(3);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await expect(page.getByLabel('默认主持人模型')).toBeVisible();
+    await page.screenshot({ path: `test-results/settings-${width}.png`, fullPage: true });
+  }
+});
+
+test('没有环境模型时显示配置提示且不能创建讨论', async ({ page }) => {
+  await page.route('**/api/model-connections', (route) => route.fulfill({ json: [] }));
+  await page.route('**/api/settings', (route) =>
+    route.fulfill({ json: { defaultModeratorConnectionId: null } }),
+  );
+  await page.goto('/settings');
+  await expect(page.getByRole('heading', { name: '尚未配置可用模型' })).toBeVisible();
+  await expect(page.getByLabel('默认主持人模型')).toBeDisabled();
+  await expect(page.locator('input[type="password"]')).toHaveCount(0);
+  await page.getByRole('link', { name: '讨论空间', exact: true }).click();
+  await page.getByRole('button', { name: '开启一场圆桌' }).click();
+  await page.getByLabel('想讨论什么？').fill('未配置模型时应该如何提示？');
+  await expect(page.getByRole('button', { name: '生成讨论阵容' })).toBeDisabled();
 });

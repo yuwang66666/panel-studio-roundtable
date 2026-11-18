@@ -3,6 +3,7 @@ import { mkdtempSync, mkdirSync, rmSync } from 'node:fs';
 import { resolve, join } from 'node:path';
 import { z } from 'zod';
 import { createApp } from '../apps/api/src/app';
+import { readModelCatalog } from '../apps/api/src/model-catalog';
 import { startProvider } from './fixtures/provider';
 const opts = {
   globalConcurrency: 4,
@@ -37,22 +38,21 @@ describe('模型网关和设置 API', () => {
     async (protocol) => {
       const s = await setup();
       try {
-        const created = await s.app.inject({
-          method: 'POST',
-          url: '/api/model-connections',
-          headers,
-          payload: {
-            name: protocol,
-            provider: 'custom',
-            protocol,
-            baseUrl: s.provider.baseUrl,
-            model: 'test-model',
-            apiKey: 'secret-test-key',
-          },
-        });
-        expect(created.statusCode).toBe(201);
+        s.repo.syncModelCatalog(
+          readModelCatalog({
+            PANEL_MODELS: 'TEST',
+            MODEL_TEST_NAME: protocol,
+            MODEL_TEST_PROVIDER: 'custom',
+            MODEL_TEST_PROTOCOL: protocol,
+            MODEL_TEST_BASE_URL: s.provider.baseUrl,
+            MODEL_TEST_MODEL: 'test-model',
+            MODEL_TEST_API_KEY: 'secret-test-key',
+          }),
+        );
+        const created = await s.app.inject('/api/model-connections');
+        expect(created.statusCode).toBe(200);
         expect(created.body).not.toContain('secret-test-key');
-        const c = created.json();
+        const c = created.json()[0];
         const tested = await s.app.inject({
           method: 'POST',
           url: `/api/model-connections/${c.id}/test`,

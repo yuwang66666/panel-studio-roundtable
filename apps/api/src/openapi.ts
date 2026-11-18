@@ -1,8 +1,6 @@
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import {
-  ConnectionInputSchema,
-  ConnectionPatchSchema,
   ConnectionSummarySchema,
   CreateDiscussionSchema,
   BindingsCommandSchema,
@@ -15,8 +13,6 @@ import {
 } from '@panel/contracts';
 const schemas = {
   Empty: z.object({}).strict(),
-  ConnectionInput: ConnectionInputSchema,
-  ConnectionPatch: ConnectionPatchSchema,
   ConnectionSummary: ConnectionSummarySchema,
   CreateDiscussion: CreateDiscussionSchema,
   BindingsCommand: BindingsCommandSchema,
@@ -66,7 +62,7 @@ export function openapi() {
       title: 'AI Panel Studio 本地 API',
       version: '0.1.0',
       description:
-        '写接口只允许配置的本地 Origin；无 Origin 的 CLI 需发送 X-Panel-Client: local。凭据仅在输入中存在，所有公开响应均为白名单类型。',
+        '模型配置与凭据从根目录 .env 由后端启动时加载，网页仅选择已配置模型。旧 POST /model-connections 与 PATCH /model-connections/{id} 对合法本地 JSON 请求返回 405 ENV_MANAGED。写接口只允许配置的本地 Origin；无 Origin 的 CLI 需发送 X-Panel-Client: local。所有公开响应均为白名单类型，不包含密钥。',
     },
     servers: [{ url: '/api' }],
     paths: {
@@ -74,17 +70,10 @@ export function openapi() {
         get: operation('健康检查', { type: 'object', properties: { ok: { type: 'boolean' } } }),
       },
       '/model-connections': {
-        get: operation('列出模型连接摘要', { type: 'array', items: ref('ConnectionSummary') }),
-        post: operation('创建加密保存的模型连接', ref('ConnectionSummary'), 'ConnectionInput', 201),
-      },
-      '/model-connections/{id}': {
-        patch: operation(
-          '更新或停用连接并保存新版本',
-          ref('ConnectionSummary'),
-          'ConnectionPatch',
-          200,
-          true,
-        ),
+        get: operation('列出环境管理的模型摘要，选择时使用 active=true 的项', {
+          type: 'array',
+          items: ref('ConnectionSummary'),
+        }),
       },
       '/model-connections/{id}/test': {
         post: operation(

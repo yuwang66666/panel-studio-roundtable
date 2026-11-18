@@ -762,6 +762,45 @@ input[type='checkbox'] {
 .configuration-panel h2 {
   font-size: 16px;
 }
+.model-library {
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+}
+.model-library > section,
+.model-preferences {
+  min-width: 0;
+}
+.model-search {
+  margin-bottom: 20px;
+}
+.model-preferences > p,
+.model-guide p {
+  color: var(--muted);
+  line-height: 1.8;
+  margin-bottom: 22px;
+}
+.model-guide {
+  border-top: 1px solid var(--line);
+  margin-top: 26px;
+  padding-top: 24px;
+}
+.model-guide h3 {
+  font-size: 16px;
+  margin-bottom: 12px;
+}
+.model-guide a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  color: var(--accent);
+}
+.model-library .provider-logo {
+  flex-shrink: 0;
+}
+.model-library .connection-meta {
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .connection-list {
   display: flex;
   flex-direction: column;

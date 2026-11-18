@@ -1,4 +1,21 @@
 import { test, expect } from '@playwright/test';
+import { createRequire } from 'node:module';
+import { pathToFileURL } from 'node:url';
+import { resolve } from 'node:path';
+let vite: { close(): Promise<void> } | undefined;
+test.beforeAll(async () => {
+  const require = createRequire(new URL('../../apps/web/package.json', import.meta.url));
+  const { createServer } = await import(pathToFileURL(require.resolve('vite')).href);
+  const server = await createServer({
+    root: resolve('apps/web'),
+    server: { port: 5175, host: '127.0.0.1', strictPort: true },
+  });
+  vite = server;
+  await server.listen();
+});
+test.afterAll(async () => {
+  await vite?.close();
+});
 test('原型四种宽度无横向溢出，样例和证据可以阅读', async ({ page }) => {
   for (const width of [375, 768, 1024, 1440]) {
     await page.setViewportSize({ width, height: 900 });
@@ -19,14 +36,11 @@ test('原型四种宽度无横向溢出，样例和证据可以阅读', async ({
     await page.screenshot({ path: `test-results/studio-${width}.png`, fullPage: true });
   }
 });
-test('原型连接配置和创建阵容流程', async ({ page }) => {
+test('原型预置模型选择和创建阵容流程', async ({ page }) => {
   await page.goto('/preview/settings');
-  await page.getByLabel('连接名称').fill('测试连接');
-  await page.getByLabel('模型名称').fill('demo-model');
-  await page.getByLabel('API Key', { exact: true }).fill('preview-only-key');
-  await page.getByRole('button', { name: '保存连接', exact: true }).click();
-  await expect(page.getByRole('heading', { name: '测试连接' })).toBeVisible();
-  await page.getByLabel('默认主持人模型').selectOption({ label: '测试连接' });
+  await expect(page.getByRole('heading', { name: '样例模型', exact: true })).toBeVisible();
+  await expect(page.locator('input[type="password"]')).toHaveCount(0);
+  await expect(page.getByLabel('默认主持人模型')).toHaveValue('preview-model');
   await page.getByRole('link', { name: '讨论空间', exact: true }).click();
   await page.getByRole('button', { name: '开启一场圆桌' }).click();
   await page.getByLabel('想讨论什么？').fill('如何评估不同模型的讨论表现？');
