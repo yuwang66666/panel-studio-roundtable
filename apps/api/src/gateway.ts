@@ -2,6 +2,7 @@ import { z, type ZodType } from 'zod';
 import type { Repository, PrivateConnection } from './repository';
 import { AppError } from './errors';
 import { projectSpeechText, readModelStream } from './streaming';
+import { defaultGatewayOptions, type GatewayOptions } from './gateway-options';
 export type Purpose =
   'test' | 'cast' | 'intent' | 'opening' | 'probe' | 'utterance' | 'insights' | 'summary';
 export interface ModelRequest<T> {
@@ -117,17 +118,13 @@ export class ModelGateway {
   private connections = new Map<string, Semaphore>();
   private discussionSlots = new Map<string, Semaphore>();
   private callbackErrors = new WeakSet<AppError>();
+  private options: GatewayOptions;
   constructor(
     private repo: Repository,
-    private options = {
-      globalConcurrency: 4,
-      connectionConcurrency: 2,
-      timeout: 60000,
-      summaryTimeout: 90000,
-      retryDelay: 400,
-    },
+    options: Partial<GatewayOptions> = {},
   ) {
-    this.global = new Semaphore(options.globalConcurrency);
+    this.options = { ...defaultGatewayOptions, ...options };
+    this.global = new Semaphore(this.options.globalConcurrency);
   }
   async generate<T>(request: ModelRequest<T>): Promise<T> {
     for (let repair = 0; repair <= 1; repair++) {
@@ -164,7 +161,11 @@ export class ModelGateway {
     for (let retry = 0; retry <= 2; retry++) {
       const started = Date.now(),
         deadline = AbortSignal.timeout(
-          r.purpose === 'summary' ? this.options.summaryTimeout : this.options.timeout,
+          r.purpose === 'insights'
+            ? this.options.insightsTimeout
+            : r.purpose === 'summary'
+              ? this.options.summaryTimeout
+              : this.options.timeout,
         ),
         signal = r.signal ? AbortSignal.any([r.signal, deadline]) : deadline;
       let releaseConnection: (() => void) | undefined,
@@ -222,9 +223,11 @@ export class ModelGateway {
         attempted = true;
         const headers: Record<string, string> = { 'Content-Type': 'application/json' },
           tokens =
-            r.purpose === 'summary' || r.purpose === 'cast' || r.purpose === 'insights'
-              ? 4096
-              : 1200;
+            r.purpose === 'insights'
+              ? this.options.insightsMaxTokens
+              : r.purpose === 'summary' || r.purpose === 'cast'
+                ? 4096
+                : 1200;
         let path: string, body: unknown;
         if (c.protocol === 'anthropic') {
           path = '/messages';

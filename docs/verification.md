@@ -1,5 +1,13 @@
 # 阶段验收证据
 
+## T18 · 洞察独立期限和输出额度 · 2026-11-18
+
+- 用户要求改进洞察沿用普通60秒期限及4096输出token上限。新建统一网关配置，洞察默认180000毫秒、8192输出token；通过INSIGHTS_TIMEOUT_MS与INSIGHTS_MAX_TOKENS独立覆盖，省略采用默认值，非正整数配置拒绝且错误不回显输入值。
+- 三协议分别使用对应的max_tokens或max_output_tokens字段，讨论中洞察、最终洞察和修复共用洞察额度。普通调用和总结正文继续使用各自的参数；每次尝试的期限仍包含并发排队时间。
+- 第一步专项 `scripts/tool.ps1 exec vitest run tests/insights-limits.test.ts` 19/19通过：配置默认/覆盖/非法值、三协议实际HTTP请求字段、普通短期限超时但同延迟洞察成功、洞察期限仍可终止、取消有效及修复沿用额度。
+- 第二步完整 `scripts/tool.ps1 test` 103/103通过；`scripts/tool.ps1 build` 生产构建和前后端类型检查通过。测试采用本地HTTP服务，未将它们声称为真实模型收尾已成功。
+- 第三步当前被忽略的.env已写入两项新值，实际加载配置返回洞察180000/8192、普通60000、总结90000。开发后端已监听重启，API及前端同源代理健康检查均ok；README、PRD、环境模板与Prompt记录同步。
+
 ## T17 · 讨论区流式发言 · 2026-11-18
 
 - 第一步：新增SpeechDraft快照、speech.updated/speech.cleared事件及迁移002。`scripts/tool.ps1 exec vitest run tests/drafts.test.ts tests/repository.test.ts tests/contracts.test.ts` 14/14通过，覆盖原子回滚、跨场隔离、草稿恢复、取消和修复重置。

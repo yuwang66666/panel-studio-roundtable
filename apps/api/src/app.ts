@@ -35,7 +35,7 @@ export async function createApp(
     throw error;
   }
   if (options.recover !== false) repo.recover();
-  const gateway = new ModelGateway(repo, options.gatewayOptions || { ...config, retryDelay: 400 });
+  const gateway = new ModelGateway(repo, options.gatewayOptions || config);
   const discussions = new DiscussionService(repo, gateway);
   const app = Fastify({
     logger: options.logger ?? false,
