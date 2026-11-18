@@ -1,0 +1,6 @@
+{
+  "name": "@panel/api", "private": true, "type": "module",
+  "scripts": { "dev": "tsx watch src/index.ts", "start": "tsx src/index.ts", "seed": "tsx src/seed.ts" },
+  "dependencies": { "@panel/contracts": "workspace:*", "@panel/domain": "workspace:*", "better-sqlite3": "^12.6.2", "drizzle-orm": "^0.45.1", "fastify": "^5.7.4", "zod": "^3.25.76" },
+  "devDependencies": { "@types/better-sqlite3": "^7.6.13" }
+}
