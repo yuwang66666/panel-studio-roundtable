@@ -47,6 +47,7 @@ import {
   ChevronDown,
   ExternalLink,
   FileText,
+  Trash2,
 } from 'lucide-react';
 import {
   STATUS_LABEL,
@@ -174,13 +175,20 @@ function Dialog({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   useEffect(() => {
-    if (open && !ref.current?.open) ref.current?.showModal();
+    if (open && ref.current && !ref.current.open) {
+      ref.current.showModal();
+      ref.current.querySelector<HTMLElement>('[data-dialog-initial-focus]')?.focus();
+    }
     if (!open && ref.current?.open) ref.current.close();
   }, [open]);
   return (
     <dialog
       ref={ref}
-      onCancel={onClose}
+      aria-label={title}
+      onCancel={(e) => {
+        e.preventDefault();
+        onClose();
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
@@ -198,7 +206,10 @@ function Dialog({
 }
 function Home() {
   const [filter, setFilter] = useState('all'),
-    [open, setOpen] = useState(false);
+    [open, setOpen] = useState(false),
+    [deleteTarget, setDeleteTarget] = useState<Discussion | null>(null),
+    [deleteNotice, setDeleteNotice] = useState('');
+  const libraryHeading = useRef<HTMLHeadingElement>(null);
   const nav = useNavigate();
   const qc = useQueryClient();
   const list = useQuery({
@@ -232,6 +243,36 @@ function Home() {
       nav(`/discussions/${s.discussion.id}`);
     },
   });
+  const remove = useMutation({
+    mutationFn: (d: Discussion) =>
+      request<{ id: string; deleted: true }>(`/discussions/${d.id}`, 'DELETE', {
+        expectedVersion: d.version,
+      }),
+    onSuccess: async (_result, d) => {
+      await qc.cancelQueries({ queryKey: ['discussions'] });
+      qc.setQueryData<typeof list.data>(['discussions'], (current) =>
+        current ? { ...current, items: current.items.filter((item) => item.id !== d.id) } : current,
+      );
+      qc.removeQueries({ queryKey: ['snapshot', d.id] });
+      qc.removeQueries({ queryKey: ['usage', d.id] });
+      useLive.getState().remove(d.id);
+      setDeleteTarget(null);
+      setDeleteNotice(`已删除会话“${d.topic}”。`);
+      void qc.invalidateQueries({ queryKey: ['discussions'] });
+    },
+    onError: () => {
+      void qc.invalidateQueries({ queryKey: ['discussions'] });
+    },
+  });
+  useEffect(() => {
+    if (deleteNotice) libraryHeading.current?.focus();
+  }, [deleteNotice]);
+  const closeDelete = () => {
+    if (!remove.isPending) {
+      setDeleteTarget(null);
+      remove.reset();
+    }
+  };
   const items = list.data?.items || [],
     active = items.filter((d) => ['running', 'casting', 'summarizing'].includes(d.status));
   const shown = items.filter(
@@ -311,7 +352,7 @@ function Home() {
       </section>
       <section className="discussion-library">
         <div className="section-heading">
-          <h2>
+          <h2 ref={libraryHeading} tabIndex={-1}>
             讨论空间<span>{items.length}</span>
           </h2>
           <span className="subtle">每一个问题，都值得多看一面。</span>
@@ -333,6 +374,9 @@ function Home() {
             </button>
           ))}
         </div>
+        <p className="deletion-notice" role="status">
+          {deleteNotice}
+        </p>
         <ErrorNotice error={list.error} />
         {list.isPending ? (
           <Loading />
@@ -349,31 +393,51 @@ function Home() {
         ) : (
           <div className="discussion-grid">
             {shown.map((d, i) => (
-              <Link className="discussion-card" key={d.id} to={`/discussions/${d.id}`}>
-                <div className="card-top">
-                  <Badge status={d.status} sample={d.isSample} />
-                  <ArrowUpRight size={19} />
-                </div>
-                <h3>{d.topic}</h3>
-                <p>
-                  {d.isSample
-                    ? '查看一场完整的示例圆桌，了解观点如何回应与演变。'
-                    : d.preview?.slice(0, 90) || '阵容已就绪，等待不同观点相遇。'}
-                </p>
-                <div className="card-bottom">
-                  <div className="mini-avatars">
-                    {[1, 2, 3, 4].slice(0, d.expertCount).map((c) => (
-                      <span key={c} style={{ background: colors[c] + '24', color: colors[c] }}>
-                        {['研', '策', '实', '社'][c - 1]}
-                      </span>
-                    ))}
-                    <span className="expert-count">{d.expertCount} 位专家</span>
+              <article className="discussion-card" key={d.id}>
+                <Link className="discussion-card-link" to={`/discussions/${d.id}`}>
+                  <div className="card-top">
+                    <Badge status={d.status} sample={d.isSample} />
+                    <ArrowUpRight size={19} />
                   </div>
-                  <span>
-                    {d.isSample ? '样例 ' + String(i + 1).padStart(2, '0') : atTime(d.updatedAt)}
-                  </span>
-                </div>
-              </Link>
+                  <h3>{d.topic}</h3>
+                  <p>
+                    {d.isSample
+                      ? '查看一场完整的示例圆桌，了解观点如何回应与演变。'
+                      : d.preview?.slice(0, 90) || '阵容已就绪，等待不同观点相遇。'}
+                  </p>
+                  <div className="card-bottom">
+                    <div className="mini-avatars">
+                      {[1, 2, 3, 4].slice(0, d.expertCount).map((c) => (
+                        <span key={c} style={{ background: colors[c] + '24', color: colors[c] }}>
+                          {['研', '策', '实', '社'][c - 1]}
+                        </span>
+                      ))}
+                      <span className="expert-count">{d.expertCount} 位专家</span>
+                    </div>
+                    <span>
+                      {d.isSample ? '样例 ' + String(i + 1).padStart(2, '0') : atTime(d.updatedAt)}
+                    </span>
+                  </div>
+                </Link>
+                {['awaiting_confirmation', 'completed', 'failed', 'interrupted'].includes(
+                  d.status,
+                ) && (
+                  <div className="card-actions">
+                    <Button
+                      variant="ghost"
+                      className="delete-discussion"
+                      onClick={() => {
+                        remove.reset();
+                        setDeleteNotice('');
+                        setDeleteTarget(d);
+                      }}
+                    >
+                      <Trash2 size={15} aria-hidden="true" />
+                      删除会话
+                    </Button>
+                  </div>
+                )}
+              </article>
             ))}
           </div>
         )}
@@ -454,6 +518,39 @@ function Home() {
             </Button>
           </div>
         </form>
+      </Dialog>
+      <Dialog open={deleteTarget !== null} onClose={closeDelete} title="删除这场讨论？">
+        <p className="delete-topic">{deleteTarget?.topic}</p>
+        <p className="dialog-description">
+          将永久删除这场讨论及其发言、洞察和总结，删除后无法恢复。
+        </p>
+        <ErrorNotice error={remove.error} />
+        <div className="dialog-actions">
+          <Button
+            type="button"
+            variant="ghost"
+            data-dialog-initial-focus
+            disabled={remove.isPending}
+            onClick={closeDelete}
+          >
+            取消
+          </Button>
+          <Button
+            type="button"
+            variant="destructive"
+            disabled={remove.isPending || !deleteTarget}
+            onClick={() => {
+              if (deleteTarget && !remove.isPending) remove.mutate(deleteTarget);
+            }}
+          >
+            {remove.isPending ? (
+              <LoaderCircle size={16} className="spin" aria-hidden="true" />
+            ) : (
+              <Trash2 size={16} aria-hidden="true" />
+            )}
+            {remove.isPending ? '删除中…' : '确认删除'}
+          </Button>
+        </div>
       </Dialog>
     </main>
   );
@@ -630,17 +727,35 @@ function Settings() {
 }
 function DiscussionPage() {
   const { id } = useParams();
+  const qc = useQueryClient();
+  const deleted = useLive((state) => state.deleted[id!]);
   const query = useQuery({
     queryKey: ['snapshot', id],
     queryFn: () => request<DiscussionSnapshot>(`/discussions/${id}/snapshot`),
+    enabled: !deleted,
   });
   const live = useLive((state) => state.snapshots[id!]);
   useEffect(() => {
-    if (query.data) useLive.getState().initialize(query.data);
-  }, [query.data]);
+    if (deleted) {
+      qc.removeQueries({ queryKey: ['snapshot', id] });
+      qc.removeQueries({ queryKey: ['usage', id] });
+      void qc.invalidateQueries({ queryKey: ['discussions'] });
+    }
+  }, [deleted, id, qc]);
   useEffect(() => {
-    if (!isPreview && id && query.data) return subscribe(id);
-  }, [id, query.data?.discussion.id]);
+    if (query.data && !deleted) useLive.getState().initialize(query.data);
+  }, [query.data, deleted]);
+  useEffect(() => {
+    if (!isPreview && id && query.data && !deleted) return subscribe(id);
+  }, [id, query.data?.discussion.id, deleted]);
+  if (deleted)
+    return (
+      <main className="page-width empty">
+        <h2>这场讨论已被删除</h2>
+        <p>讨论记录已移除，可以返回讨论空间查看其他会话。</p>
+        <Link to="/">返回讨论空间</Link>
+      </main>
+    );
   if (query.isPending) return <Loading text="正在进入圆桌" />;
   if (query.error)
     return (

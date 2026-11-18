@@ -311,6 +311,9 @@ export class InsightsService implements InsightsPort {
       draft.close();
     }
   }
+  hasActive(id: string) {
+    return this.jobs.has(id) || this.finishes.has(id);
+  }
   async close() {
     for (const job of this.jobs.values()) job.controller.abort();
     await Promise.allSettled([...this.jobs.values()].map((j) => j.promise));

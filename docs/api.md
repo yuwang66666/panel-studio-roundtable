@@ -10,6 +10,10 @@ REST 统一 /api 前缀。错误返回 `{error:{code,message}}`，不包含上�
 
 创建和讨论控制命令要求 Idempotency-Key。start/bindings 同时校验 expectedVersion 和 castVersion；finish/retry 校验 expectedVersion。保存绑定后返回新版本。非法参数 400，不存在 404，版本/状态冲突 409，资源限制 429。
 
+DELETE `/discussions/:id` 接收 JSON `{expectedVersion:number}`，返回 `{id,deleted:true}`，无需 Idempotency-Key，重复删除仍返回200。待确认、已完成、失败和中断讨论可以删除；生成阵容、讨论、总结中或后台尚未退出的讨论返回409，版本过期同样返回409。删除在一个事务中清理发言、洞察、证据、角色、绑定、草稿、收尾任务、事件、调用记录及本场控制命令回执，共享模型配置和其他讨论保留。创建命令仅留下不含讨论正文的删除标记，旧创建幂等键重放返回410 `DISCUSSION_DELETED`，避免重建已删除的会话。删除也执行本地来源和JSON请求校验。
+
+删除后快照返回404；已连接的SSE客户端收到临时 `event: deleted`（data为 `{id}`）并关闭连接。该通知不占用事件序号，客户端清除本场缓存并显示已删除提示；断线后通过快照404识别删除。
+
 SSE event 使用 `panel`，id 使用讨论内 eventSeq；data 为共享 PublicEventSchema 定义的 JSON。重连优先使用 Last-Event-ID，初次连接使用 after。每 20 秒心跳，慢连接断开后按游标补发。公开事件仅包含状态、阵容、发言或洞察增量。浏览器使用快照初始化并按 seq 归并，不使用内部意愿作为聊天内容。
 
 快照新增 `draft: SpeechDraft | null`，包含 `turnId`、`discussionId`、`participantId`、`generation`、`kind`、`content`、`replyToMessageId`、`startedAt`。kind 为 expert/opening/probe/summary；content 为累计公开正文，允许空串表示等待首段或重新生成。草稿不属于 `messages`，没有 messageSeq。

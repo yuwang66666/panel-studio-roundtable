@@ -419,6 +419,72 @@
         }
       }
     },
+    "/discussions/{id}": {
+      "delete": {
+        "summary": "删除非执行中的讨论及关联记录；已删除时重复调用仍成功",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["id", "deleted"],
+                  "additionalProperties": false,
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "deleted": {
+                      "type": "boolean",
+                      "enum": [true]
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
     "/discussions/{id}/usage": {
       "get": {
         "summary": "查询调用和 token 用量",

@@ -164,6 +164,9 @@ export class DiscussionService {
   hasActive(id: string) {
     return this.active.has(id);
   }
+  hasPending(id: string) {
+    return this.active.has(id) || this.recoveryWaiters.has(id) || this.insights.hasActive(id);
+  }
   async idle(id: string) {
     await this.recoveryWaiters.get(id)?.promise;
     await this.active.get(id)?.promise;

@@ -127,6 +127,20 @@ export function openapi() {
       '/discussions/{id}/snapshot': {
         get: operation('读取一致快照与事件游标', ref('Snapshot'), undefined, 200, true),
       },
+      '/discussions/{id}': {
+        delete: operation(
+          '删除非执行中的讨论及关联记录；已删除时重复调用仍成功',
+          {
+            type: 'object',
+            required: ['id', 'deleted'],
+            additionalProperties: false,
+            properties: { id: { type: 'string' }, deleted: { type: 'boolean', enum: [true] } },
+          },
+          'VersionCommand',
+          200,
+          true,
+        ),
+      },
       '/discussions/{id}/usage': {
         get: operation(
           '查询调用和 token 用量',

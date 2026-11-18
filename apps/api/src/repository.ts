@@ -238,7 +238,10 @@ export class Repository {
         .get(scope, key) as any;
       if (receipt) {
         if (receipt.fingerprint !== fingerprint) throw conflict('同一幂等标识不能用于不同请求');
-        return { result: JSON.parse(receipt.result_json) as T, replayed: true };
+        const result = JSON.parse(receipt.result_json);
+        if (result?.deletedDiscussionId)
+          throw new AppError('DISCUSSION_DELETED', '该请求创建的讨论已删除，请重新创建讨论', 410);
+        return { result: result as T, replayed: true };
       }
       const result = fn();
       this.db
@@ -292,6 +295,40 @@ export class Repository {
     const r = this.db.prepare('SELECT data_json FROM discussions WHERE id=?').get(id) as any;
     if (!r) throw new AppError('NOT_FOUND', '讨论不存在', 404);
     return DiscussionSchema.parse(JSON.parse(r.data_json));
+  }
+  deleteDiscussion(id: string, expectedVersion: number) {
+    return this.transaction(() => {
+      if (!this.db.prepare('SELECT 1 FROM discussions WHERE id=?').get(id))
+        return { id, deleted: true as const };
+      const d = this.checkVersion(id, expectedVersion);
+      if (['casting', 'running', 'summarizing'].includes(d.status))
+        throw conflict('讨论仍在进行，请结束并等待收尾完成后再删除');
+      // Keep only a tombstone for the original create command, so a retry cannot recreate it.
+      this.db
+        .prepare(
+          "UPDATE command_receipts SET result_json=? WHERE scope='discussion:create' AND json_extract(result_json,'$.discussion.id')=?",
+        )
+        .run(JSON.stringify({ deletedDiscussionId: id }), id);
+      this.db
+        .prepare(
+          "DELETE FROM command_receipts WHERE scope IN (?,?,?,?) OR json_extract(result_json,'$.discussion.id')=?",
+        )
+        .run(`bindings:${id}`, `retry:${id}`, `start:${id}`, `finish:${id}`, id);
+      for (const table of [
+        'insight_evidence',
+        'insights',
+        'speech_drafts',
+        'closing_jobs',
+        'messages',
+        'agent_bindings',
+        'participants',
+        'discussion_events',
+        'model_runs',
+      ])
+        this.db.prepare(`DELETE FROM ${table} WHERE discussion_id=?`).run(id);
+      this.db.prepare('DELETE FROM discussions WHERE id=?').run(id);
+      return { id, deleted: true as const };
+    });
   }
   private persist(d: Discussion) {
     d.updatedAt = now();

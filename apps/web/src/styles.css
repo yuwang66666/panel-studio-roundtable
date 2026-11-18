@@ -461,12 +461,47 @@ svg {
   gap: 16px;
 }
 .discussion-card {
-  display: block;
-  padding: 23px 25px 18px;
+  display: flex;
+  flex-direction: column;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 12px;
   min-width: 0;
+}
+.discussion-card-link {
+  display: block;
+  padding: 23px 25px 18px;
+  flex: 1;
+  border-radius: 12px;
+}
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 15px 8px;
+}
+.delete-discussion {
+  min-height: 44px;
+  font-size: 12px;
+  gap: 7px;
+}
+.delete-discussion:hover:not(:disabled) {
+  color: #f5b0a7;
+  background: #382622;
+}
+.deletion-notice {
+  color: var(--accent);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+  margin-bottom: 16px;
+}
+.deletion-notice:empty {
+  margin: 0;
+}
+.delete-topic {
+  font-weight: 600;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  margin-bottom: 12px;
 }
 .discussion-card:hover {
   border-color: #63734e;
@@ -522,7 +557,7 @@ svg {
   line-height: 1.6;
   margin-bottom: 10px;
 }
-.discussion-card > p {
+.discussion-card-link > p {
   font-size: 12px;
   line-height: 1.8;
   color: #949ca9;
@@ -1698,7 +1733,7 @@ input[type='checkbox'] {
   .discussion-grid {
     grid-template-columns: 1fr;
   }
-  .discussion-card {
+  .discussion-card-link {
     padding: 21px;
   }
   .page-footer {

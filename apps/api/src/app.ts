@@ -51,7 +51,7 @@ export async function createApp(
     logController: new LogController({ disableRequestLogging: true }),
     bodyLimit: 65536,
   });
-  registerEvents(app, repo);
+  const closeEvents = registerEvents(app, repo);
   app.addHook('onRequest', async (req) => {
     const hostname = req.hostname;
     if (!['localhost', '127.0.0.1'].includes(hostname))
@@ -136,6 +136,15 @@ export async function createApp(
   app.get<{ Params: { id: string } }>('/api/discussions/:id/snapshot', async (req) =>
     repo.snapshot(req.params.id),
   );
+  app.delete<{ Params: { id: string } }>('/api/discussions/:id', async (req) => {
+    const body = VersionCommandSchema.parse(req.body),
+      id = req.params.id;
+    if (discussions.hasPending(id))
+      throw new AppError('CONFLICT', '讨论任务仍在处理，请稍后再删除', 409);
+    const result = repo.deleteDiscussion(id, body.expectedVersion);
+    closeEvents(id);
+    return result;
+  });
   app.put<{ Params: { id: string } }>('/api/discussions/:id/agent-bindings', async (req) => {
     const body = BindingsCommandSchema.parse(req.body),
       key = z.string().min(1).max(200).parse(req.headers['idempotency-key']);

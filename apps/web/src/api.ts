@@ -20,6 +20,15 @@ const previewConnections: ModelConnectionSummary[] = [
   },
 ];
 let defaultConnection: string | null = previewConnections[0].id;
+export class ApiError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = 'ApiError';
+  }
+}
 export async function request<T>(path: string, method = 'GET', body?: unknown): Promise<T> {
   if (isPreview) return previewRequest(path, method, body) as T;
   const response = await fetch(`/api${path}`, {
@@ -31,7 +40,7 @@ export async function request<T>(path: string, method = 'GET', body?: unknown): 
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await response.json();
-  if (!response.ok) throw new Error(data.error?.message || '请求失败，请重试');
+  if (!response.ok) throw new ApiError(data.error?.message || '请求失败，请重试', response.status);
   return data;
 }
 function previewRequest(path: string, method: string, body: any): unknown {
@@ -44,7 +53,7 @@ function previewRequest(path: string, method: string, body: any): unknown {
     throw Error('原型仅展示样例模型，真实模型请在项目 .env 中配置。');
   if (path.startsWith('/discussions?') || path === '/discussions') {
     if (method === 'POST') {
-      const s = structuredClone(samples[0]);
+      const s = makeSample(0);
       s.discussion = {
         ...s.discussion,
         id: crypto.randomUUID(),
@@ -68,7 +77,18 @@ function previewRequest(path: string, method: string, body: any): unknown {
       nextCursor: null,
     };
   }
-  const s = samples.find((s) => s.discussion.id === path.split('/')[2]);
+  const id = path.split('/')[2];
+  const s = samples.find((s) => s.discussion.id === id);
+  if (method === 'DELETE' && path === `/discussions/${id}`) {
+    if (s) {
+      if (['casting', 'running', 'summarizing'].includes(s.discussion.status))
+        throw Error('讨论正在进行，请等待结束后再删除。');
+      if (s.discussion.version !== body?.expectedVersion)
+        throw Error('讨论已更新，请取消后重新选择要删除的会话。');
+      samples.splice(samples.indexOf(s), 1);
+    }
+    return { id, deleted: true };
+  }
   if (!s) throw Error('讨论不存在');
   if (path.endsWith('/agent-bindings')) {
     s.bindings = body.bindings.map((b: any) => ({

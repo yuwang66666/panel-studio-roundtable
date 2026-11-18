@@ -3,7 +3,7 @@ import type { ServerResponse } from 'node:http';
 import { z } from 'zod';
 import type { Repository } from './repository';
 export function registerEvents(app: FastifyInstance, repo: Repository) {
-  const streams = new Set<ServerResponse>();
+  const streams = new Map<ServerResponse, string>();
   app.get<{ Params: { id: string } }>('/api/discussions/:id/events', async (req, reply) => {
     const id = req.params.id,
       snapshot = repo.snapshot(id),
@@ -16,7 +16,7 @@ export function registerEvents(app: FastifyInstance, repo: Repository) {
       .parse(req.headers['last-event-id'] ?? q.after ?? 0);
     reply.hijack();
     const raw = reply.raw;
-    streams.add(raw);
+    streams.set(raw, id);
     raw.writeHead(200, {
       'Content-Type': 'text/event-stream; charset=utf-8',
       'Cache-Control': 'no-cache, no-transform',
@@ -78,6 +78,10 @@ export function registerEvents(app: FastifyInstance, repo: Repository) {
     } else pump();
   });
   app.addHook('preClose', async () => {
-    for (const stream of streams) stream.end();
+    for (const stream of streams.keys()) stream.end();
   });
+  return (id: string) => {
+    for (const [stream, discussionId] of streams)
+      if (discussionId === id) stream.end(`event: deleted\ndata: ${JSON.stringify({ id })}\n\n`);
+  };
 }

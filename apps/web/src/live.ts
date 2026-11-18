@@ -1,11 +1,13 @@
 import { create } from 'zustand';
 import { PublicEventSchema, SnapshotSchema, type DiscussionSnapshot } from '@panel/contracts';
 import { projectEvent } from '../../../packages/domain/src/events';
-import { request } from './api';
+import { ApiError, request } from './api';
 type Network = 'connecting' | 'connected' | 'reconnecting';
 interface LiveState {
   snapshots: Record<string, DiscussionSnapshot>;
   network: Record<string, Network>;
+  deleted: Record<string, boolean>;
+  remove: (id: string) => void;
   initialize: (s: DiscussionSnapshot, force?: boolean) => void;
   state: (id: string, state: Network) => void;
   event: (id: string, data: unknown) => boolean;
@@ -13,6 +15,18 @@ interface LiveState {
 export const useLive = create<LiveState>((set, get) => ({
   snapshots: {},
   network: {},
+  deleted: {},
+  remove: (id) => {
+    subscriptions.get(id)?.close();
+    subscriptions.delete(id);
+    set((state) => {
+      const snapshots = { ...state.snapshots },
+        network = { ...state.network };
+      delete snapshots[id];
+      delete network[id];
+      return { snapshots, network, deleted: { ...state.deleted, [id]: true } };
+    });
+  },
   initialize: (s, force = false) =>
     set((state) => {
       const current = state.snapshots[s.discussion.id];
@@ -48,7 +62,18 @@ export function subscribe(id: string) {
     source = new EventSource(`/api/discussions/${id}/events?after=${cursor}`);
     useLive.getState().state(id, 'connecting');
     source.onopen = () => useLive.getState().state(id, 'connected');
-    source.onerror = () => useLive.getState().state(id, 'reconnecting');
+    source.onerror = () => {
+      if (closed) return;
+      useLive.getState().state(id, 'reconnecting');
+      if (source?.readyState === EventSource.CLOSED) void resync();
+    };
+    source.addEventListener('deleted', (event) => {
+      try {
+        if (JSON.parse((event as MessageEvent).data).id === id) useLive.getState().remove(id);
+      } catch {
+        void resync();
+      }
+    });
     source.addEventListener('reset', () => {
       void resync();
     });
@@ -68,8 +93,10 @@ export function subscribe(id: string) {
     try {
       const snapshot = await request<DiscussionSnapshot>(`/discussions/${id}/snapshot`);
       if (!closed) useLive.getState().initialize(snapshot, true);
-    } catch {
-      if (!closed) useLive.getState().state(id, 'reconnecting');
+    } catch (error) {
+      if (!closed && error instanceof ApiError && error.status === 404)
+        useLive.getState().remove(id);
+      else if (!closed) useLive.getState().state(id, 'reconnecting');
     } finally {
       resyncing = false;
       if (!closed) open();

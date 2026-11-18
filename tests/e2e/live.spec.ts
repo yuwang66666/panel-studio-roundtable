@@ -321,3 +321,83 @@ test('本地整理与备用模型来源明确，手机可定位原始发言', as
   await expect(page.locator('.summary-provenance')).toContainText('备用模型完成：备用验证模型');
   await expect(page.locator('.local-summary-message')).toHaveCount(0);
 });
+
+test('历史讨论确认删除、失败重试、刷新和跨页清理可用', async ({ page, context }) => {
+  const sample = backend.repo.snapshot('sample-5');
+  const preserved = backend.repo.snapshot('sample-1');
+  const casting = backend.repo.createDiscussion('正在准备中的讨论不可删除', 4, 'env:CHAT');
+  const watcher = await context.newPage();
+  await watcher.goto('/discussions/sample-5');
+  await expect(watcher.locator('.summary-title')).toBeVisible();
+  await page.goto('/discussions/sample-5');
+  await expect(page.locator('.summary-title')).toBeVisible();
+  await page.getByRole('link', { name: '讨论空间', exact: true }).click();
+  const card = page.locator('.discussion-card').filter({
+    has: page.getByRole('heading', { name: sample.discussion.topic, exact: true }),
+  });
+  const activeCard = page.locator('.discussion-card').filter({
+    has: page.getByRole('heading', { name: casting.discussion.topic, exact: true }),
+  });
+  await expect(activeCard).toBeVisible();
+  await expect(activeCard.getByRole('button', { name: '删除会话' })).toHaveCount(0);
+  const dialog = page.getByRole('dialog', { name: '删除这场讨论？', exact: true });
+  for (const width of [375, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await card.getByRole('button', { name: '删除会话' }).click();
+    await expect(page).toHaveURL(/\/$/);
+    await expect(dialog).toContainText(sample.discussion.topic);
+    await expect(dialog).toContainText('无法恢复');
+    await expect(dialog.getByRole('button', { name: '取消', exact: true })).toBeFocused();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.screenshot({
+      path: `test-results/live/delete-confirm-${width}.png`,
+      fullPage: true,
+    });
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await expect(card.getByRole('button', { name: '删除会话' })).toBeFocused();
+    expect(backend.repo.snapshot('sample-5')).toEqual(sample);
+  }
+  let deletes = 0;
+  let release!: () => void;
+  const gate = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await page.route('**/api/discussions/sample-5', async (route) => {
+    if (route.request().method() !== 'DELETE') return route.continue();
+    deletes++;
+    if (deletes === 1)
+      return route.fulfill({ status: 503, json: { error: { message: '模拟删除失败，请重试' } } });
+    await gate;
+    return route.continue();
+  });
+  try {
+    await card.getByRole('button', { name: '删除会话' }).click();
+    await dialog.getByRole('button', { name: '确认删除', exact: true }).click();
+    await expect(dialog.getByRole('alert')).toContainText('模拟删除失败');
+    await expect(card).toBeVisible();
+    expect(backend.repo.snapshot('sample-5')).toEqual(sample);
+    await dialog.getByRole('button', { name: '确认删除', exact: true }).click();
+    await expect(dialog.getByRole('button', { name: '删除中' })).toBeDisabled();
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeVisible();
+    release();
+    await expect(dialog).not.toBeVisible();
+    await expect(card).toHaveCount(0);
+    await expect(page.getByRole('status')).toContainText('已删除');
+    expect(deletes).toBe(2);
+    await expect(watcher.getByText(/讨论不存在|已被删除/)).toBeVisible();
+    expect((await page.request.get('/api/discussions/sample-5/snapshot')).status()).toBe(404);
+    expect(backend.repo.snapshot('sample-1')).toEqual(preserved);
+    await page.reload();
+    await expect(page.locator('.discussion-card').first()).toBeVisible();
+    await expect(card).toHaveCount(0);
+    await page.goto('/discussions/sample-5');
+    await expect(page.getByRole('alert')).toContainText(/讨论不存在|已被删除/);
+  } finally {
+    release();
+    await watcher.close();
+  }
+});
