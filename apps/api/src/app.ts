@@ -1,13 +1,15 @@
 import Fastify from 'fastify';
 import { z } from 'zod';
-import { ConnectionInputSchema,ConnectionPatchSchema,SettingsSchema } from '@panel/contracts';
+import { ConnectionInputSchema,ConnectionPatchSchema,SettingsSchema,CreateDiscussionSchema,BindingsCommandSchema,VersionCommandSchema,StatusSchema } from '@panel/contracts';
 import { Repository } from './repository';
 import { ModelGateway } from './gateway';
 import { config } from './config';
 import { AppError,safeError } from './errors';
+import { DiscussionService } from './discussions';
 export async function createApp(options:{dataDir?:string;logger?:boolean;recover?:boolean;gatewayOptions?:ConstructorParameters<typeof ModelGateway>[1]}={}){
  const repo=new Repository(options.dataDir||config.dataDir);if(options.recover!==false)repo.recover();
  const gateway=new ModelGateway(repo,options.gatewayOptions||{...config,retryDelay:400});
+ const discussions=new DiscussionService(repo,gateway);
  const app=Fastify({logger:options.logger??false,disableRequestLogging:true,bodyLimit:65536});
  app.addHook('onRequest',async(req)=>{
    const hostname=req.hostname;if(!['localhost','127.0.0.1'].includes(hostname))throw new AppError('HOST_REJECTED','仅允许本地访问',403);
@@ -23,6 +25,18 @@ export async function createApp(options:{dataDir?:string;logger?:boolean;recover
  app.post<{Params:{id:string}}>('/api/model-connections/:id/test',async(req)=>{const c=repo.connection(req.params.id);if(!c.active)throw new AppError('DISABLED','请先启用连接',409);try{await gateway.generate({connection:c,purpose:'test',input:{},schema:z.object({ok:z.literal(true)}).strict()});repo.markTest(c.id,c.version,true);return {ok:true,message:'连接验证通过，可用于圆桌讨论。'};}catch(e){repo.markTest(c.id,c.version,false);throw e;}});
  app.get('/api/settings',async()=>repo.settings());
  app.patch('/api/settings',async(req)=>repo.saveSettings(SettingsSchema.parse(req.body).defaultModeratorConnectionId));
- app.addHook('onClose',async()=>{repo.close();});
- return {app,repo,gateway};
+ app.post('/api/discussions',async(req,reply)=>{
+   const body=CreateDiscussionSchema.parse(req.body),key=z.string().min(1).max(200).parse(req.headers['idempotency-key']);
+   const {result,replayed}=repo.command('discussion:create',key,body,()=>{const host=body.moderatorConnectionId||repo.settings().defaultModeratorConnectionId;if(!host)throw new AppError('NO_MODERATOR','请先配置默认主持人模型');return repo.createDiscussion(body.topic,body.expertCount,host);});
+   if(!replayed)discussions.cast(result.discussion.id);return reply.code(202).send(result);
+ });
+ app.get('/api/discussions',async(req)=>{const q=z.object({status:StatusSchema.optional(),cursor:z.string().optional(),limit:z.coerce.number().int().min(1).max(100).default(50)}).parse(req.query);return repo.list(q.status,q.cursor,q.limit);});
+ app.get<{Params:{id:string}}>('/api/discussions/:id/snapshot',async(req)=>repo.snapshot(req.params.id));
+ app.put<{Params:{id:string}}>('/api/discussions/:id/agent-bindings',async(req)=>{const body=BindingsCommandSchema.parse(req.body),key=z.string().min(1).max(200).parse(req.headers['idempotency-key']);return repo.command(`bindings:${req.params.id}`,key,body,()=>repo.bind(req.params.id,body.expectedVersion,body.castVersion,body.bindings)).result;});
+ app.post<{Params:{id:string}}>('/api/discussions/:id/retry',async(req,reply)=>{const body=VersionCommandSchema.parse(req.body),key=z.string().min(1).max(200).parse(req.headers['idempotency-key']),id=req.params.id;
+   const {result,replayed}=repo.command(`retry:${id}`,key,body,()=>{const d=repo.checkVersion(id,body.expectedVersion);if(d.status!=='failed'||d.failureStage!=='cast')throw new AppError('CONFLICT','当前阶段不能重新生成阵容',409);repo.refreshCastConnection(id);return repo.transition(id,'casting',{expectedVersion:body.expectedVersion,bumpGeneration:true});});
+   if(!replayed)discussions.cast(id);return reply.code(202).send(result);
+ });
+ app.addHook('onClose',async()=>{await discussions.close();repo.close();});
+ return {app,repo,gateway,discussions};
 }

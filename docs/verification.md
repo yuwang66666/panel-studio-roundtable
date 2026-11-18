@@ -39,3 +39,9 @@
 - 正式同源代理的 model-connections/settings 均 HTTP 200。
 - 首次检查修复了测试根目录缺少 zod、Chat Completions 分支括号错误，并重启了编译失败后未自动恢复的开发服务。
 - DeepSeek/Claude/Qwen/GPT/Kimi 的真实账户连接均尚未提供，未声称真实供应商验证完成。
+
+## T06 · 2026-11-18
+
+- 21/21 测试通过，typecheck 通过。阵容默认四专家一主持，连接分配完整，重复创建不产生重复调用。
+- 无效阵容修复一次后记录 cast 失败；更新连接后重试使用当前版本。
+- 类型检查发现测试 key 被推断为 UUID 模板类型，显式标为 string 后通过。

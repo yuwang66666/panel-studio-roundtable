@@ -80,6 +80,7 @@ export class Repository {
   }
   eventsAfter(id:string,seq:number,limit=100):PublicEvent[]{return this.db.prepare('SELECT data_json FROM discussion_events WHERE discussion_id=? AND event_seq>? ORDER BY event_seq LIMIT ?').all(id,seq,limit).map((r:any)=>PublicEventSchema.parse(JSON.parse(r.data_json)));}
   hostConnection(id:string){const s=this.snapshot(id),host=s.participants.find(p=>p.role==='moderator'),binding=s.bindings.find(b=>b.participantId===host?.id);if(binding)return this.connection(binding.connectionId,binding.connectionVersion);const r=this.db.prepare('SELECT host_connection_id,host_version FROM discussions WHERE id=?').get(id) as any;return this.connection(r.host_connection_id,r.host_version);}
+  refreshCastConnection(id:string){const r=this.db.prepare('SELECT host_connection_id FROM discussions WHERE id=?').get(id) as any;const c=this.connection(r.host_connection_id);if(!c.active)throw conflict('原主持人连接已停用，请启用或更新连接');this.db.prepare('UPDATE discussions SET host_version=? WHERE id=?').run(c.version,id);}
   actorConnection(id:string,participantId:string){const b=this.snapshot(id).bindings.find(b=>b.participantId===participantId);if(!b)throw conflict('专家尚未分配模型');return this.connection(b.connectionId,b.connectionVersion);}
   saveCast(id:string,generation:number,participants:Participant[]){return this.transaction(()=>{
     const d=this.guard(id,generation,['casting']);const host=this.hostConnection(id);
