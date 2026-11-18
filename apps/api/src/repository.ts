@@ -28,6 +28,7 @@ import {
 } from '@panel/contracts';
 import { assertTransition, callBudget } from '@panel/domain';
 import { buildParticipantFocus } from '../../../packages/domain/src/participant-focus';
+import { extractSummaryProse } from '../../../packages/domain/src/summary-prose';
 import { connections } from './schema';
 import { AppError, conflict } from './errors';
 import type { ModelCatalog } from './model-catalog';
@@ -897,6 +898,8 @@ export class Repository {
         throw conflict('正式发言与当前流式发言不匹配');
       if (!p || (input.kind === 'expert') !== (p.role === 'expert'))
         throw conflict('发言角色不匹配');
+      const content = input.kind === 'summary' ? extractSummaryProse(input.content) : input.content;
+      if (!content) throw new AppError('INVALID_OUTPUT', '总结正文必须为可阅读的自然语言', 502);
       if (input.kind === 'summary') {
         if (!input.summaryMeta) throw conflict('总结必须声明来源及覆盖范围');
         const meta = SummaryMetaSchema.parse(input.summaryMeta);
@@ -932,6 +935,7 @@ export class Repository {
         throw conflict('回应目标不属于当前讨论');
       const message: Message = {
         ...input,
+        content,
         id: randomUUID(),
         discussionId: id,
         messageSeq: (s.messages.at(-1)?.messageSeq || 0) + 1,

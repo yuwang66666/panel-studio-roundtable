@@ -1,8 +1,51 @@
 import { describe, expect, it } from 'vitest';
 import { buildLocalSummary } from '../packages/domain/src/local-summary';
 import { makeSample } from '../packages/domain/src/samples';
+import { extractSummaryProse } from '../packages/domain/src/summary-prose';
 
 describe('本地整理摘要', () => {
+  it('keeps structural source records out of the summary while preserving evidence references', () => {
+    const s = makeSample(0);
+    const structured = JSON.stringify({ reasoning: 'PRIVATE_SOURCE_FIELD', data: ['RAW_JSON'] });
+    s.discussion.topic = structured;
+    s.participants[1].name = structured;
+    s.participants[1].title = structured;
+    s.messages[1].content = structured;
+    s.insights[0].text = structured;
+    const summary = buildLocalSummary(s);
+    expect(summary).toContain('该记录包含结构化内容，请查看原始记录。');
+    expect(summary).toContain('（发言 #2）');
+    expect(summary).toContain('依据：发言 #2、发言 #4、发言 #5');
+    expect(summary).not.toContain('PRIVATE_SOURCE_FIELD');
+    expect(summary).not.toContain('RAW_JSON');
+    expect(extractSummaryProse(summary)).toBe(summary);
+  });
+
+  it('extracts a known public prose wrapper without displaying its JSON syntax', () => {
+    const s = makeSample(0);
+    s.messages[1].content = JSON.stringify({ content: '应先明确试点范围，再评估实际效果。' });
+    const summary = buildLocalSummary(s);
+    expect(summary).toContain('“应先明确试点范围，再评估实际效果。”（发言 #2）');
+    expect(summary).not.toContain('"content"');
+    expect(extractSummaryProse(summary)).toBe(summary);
+  });
+
+  it('retains a long local summary covering all saved statements beyond the model output limit', () => {
+    const s = makeSample(0);
+    s.messages = Array.from({ length: 16 }, (_, index) => ({
+      ...s.messages[1],
+      id: `long-${index}`,
+      turnId: `long-turn-${index}`,
+      messageSeq: index + 1,
+      content: '完整观点'.repeat(100),
+    }));
+    s.insights = [];
+    const summary = buildLocalSummary(s);
+    expect(summary.length).toBeGreaterThan(6000);
+    expect(summary).toContain('（发言 #16）');
+    expect(extractSummaryProse(summary)).toBe(summary);
+  });
+
   it('quotes every saved expert statement with its real sequence and retains verified evidence', () => {
     const s = makeSample(0);
     const summary = buildLocalSummary(s);

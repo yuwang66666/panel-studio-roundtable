@@ -1,8 +1,11 @@
 import type { DiscussionSnapshot, Insight, Message } from '@panel/contracts';
 import { validateInsightEvidence } from './insights';
+import { extractSummaryProse } from './summary-prose';
 
 function excerpt(value: string, limit: number) {
-  const text = value.replace(/\s+/g, ' ').trim();
+  const prose = extractSummaryProse(value);
+  if (!prose) return '该记录包含结构化内容，请查看原始记录。';
+  const text = prose.replace(/\s+/g, ' ').trim();
   return text.length > limit ? `${text.slice(0, limit)}…（节选）` : text;
 }
 
@@ -55,14 +58,14 @@ export function buildLocalSummary(s: DiscussionSnapshot): string {
   if (hostMessages.length) {
     lines.push('', '主持人问题与引导');
     for (const m of hostMessages)
-      lines.push(`${actors.get(m.participantId)!.name}：${cite(m, 180)}`);
+      lines.push(`${excerpt(actors.get(m.participantId)!.name, 80)}：${cite(m, 180)}`);
   }
   lines.push('', '专家观点摘录');
   for (const participant of participants.filter((p) => p.role === 'expert')) {
     const spoken = messages.filter(
       (m) => m.participantId === participant.id && m.kind === 'expert',
     );
-    lines.push(`${participant.name}（${participant.title}）`);
+    lines.push(`${excerpt(participant.name, 80)}（${excerpt(participant.title, 120)}）`);
     if (!spoken.length) lines.push('尚未发言，不据此推断其立场或是否支持其他观点。');
     else for (const m of spoken) lines.push(cite(m, 400));
   }
@@ -79,7 +82,9 @@ export function buildLocalSummary(s: DiscussionSnapshot): string {
         .sort((a, b) => a - b)
         .map((seq) => `发言 #${seq}`)
         .join('、');
-      const supporters = insight.participantIds.map((id) => actors.get(id)!.name).join('、');
+      const supporters = insight.participantIds
+        .map((id) => excerpt(actors.get(id)!.name, 80))
+        .join('、');
       const scope =
         kind === 'consensus'
           ? `${insight.scope === 'all' ? '全体共识' : '局部共识'}；明确支持者：${supporters}。`

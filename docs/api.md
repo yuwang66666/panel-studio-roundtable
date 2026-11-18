@@ -36,3 +36,7 @@ SSE event 使用 `panel`，id 使用讨论内 eventSeq；data 为共享 PublicEv
 新总结消息携带可选的 `summaryMeta`（旧历史消息可以缺省）。字段包括 `source: model|local`、`throughMessageSeq`、`insightsThroughMessageSeq`、`model`、`provider`、`connectionId`、`connectionVersion`、`fallbackUsed` 和 `reason`。本地来源的模型及连接字段均为null，reason为models_unavailable/budget_exhausted/deadline_exceeded；模型来源使用实际执行总结的本场冻结连接。总结覆盖序号必须等于最后一条正式讨论发言，洞察覆盖序号必须等于已保存的真实进度。
 
 `summary.ready`沿用现有事件，携带包含summaryMeta的正式消息；同一事务清除草稿和内部收尾任务并进入completed。模型故障自动进入备用或本地整理，正常情况下不再要求用户反复点击retry。重启时已有收尾任务自动恢复；内部尝试队列、失败连接与计数不进入公开快照。取消、过期或存储错误仍保留既有错误处理，避免错误提交。
+
+总结正文不改变REST或SSE的JSON传输格式。模型响应仍为严格外层对象，但新提交的`kind=summary`消息，其`content`必须为通过完整校验的规范自然语言；后端可剥离有界的单字段`content`/`summary`或JSON字符串包装，未知对象、数组、结构化片段及额外隐藏字段不能作为正文保存。无效输出沿用收尾尝试预算，不增加无限修复路径。总结的`speech.updated.payload.draft.content`只含安全正文投影，不完整或模糊结构部分可暂缓为空，普通自然语言仍按累计文本更新。
+
+历史快照保留原存量消息与`summaryMeta`，不因显示格式问题重写数据库。客户端对历史总结安全提取正文；无法提取时仅在阅读层构建明确标识的本地整理，范围限于该总结之前的同场正式发言，并说明原记录未修改。显示来源不沿用原模型成功标识，证据链接使用实际整理范围；缺省`summaryMeta`的旧记录同样适用。本地摘录中结构化源文本显示可追溯提示而非序列化原文，原始发言仍可通过引用定位。

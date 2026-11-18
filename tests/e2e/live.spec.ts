@@ -357,6 +357,121 @@ test('本地整理与备用模型来源明确，手机可定位原始发言', as
   await expect(page.locator('.local-summary-message')).toHaveCount(0);
 });
 
+test('历史总结仅展示自然语言，异常格式明确转为本地整理且保留证据', async ({ page }) => {
+  const stored = backend.repo.snapshot('sample-1');
+  const s = makeSample(0);
+  const summary = s.messages.find((m) => m.kind === 'summary')!;
+  summary.content = JSON.stringify({
+    content: JSON.stringify({ summary: '本场讨论认可先明确适用条件。\n\n各方仍需验证实施成本。' }),
+  });
+  await page.route('**/api/discussions/sample-1/snapshot', (route) => route.fulfill({ json: s }));
+  await page.goto('/discussions/sample-1');
+  await expect(page.locator('.summary-message .message-content')).toHaveText(
+    '本场讨论认可先明确适用条件。各方仍需验证实施成本。',
+  );
+  await expect(page.locator('.summary-format-note')).toHaveCount(0);
+  await expect(page.locator('.summary-title')).toHaveText('本场圆桌总结');
+
+  summary.content = JSON.stringify({
+    reasoning: 'PRIVATE_SUMMARY_REASONING',
+    result: { conclusion: 'UNKNOWN_SUMMARY_STRUCTURE' },
+  });
+  summary.summaryMeta = {
+    source: 'model',
+    throughMessageSeq: 5,
+    insightsThroughMessageSeq: 5,
+    model: '历史模型',
+    provider: 'gpt',
+    connectionId: 'env:GPT',
+    connectionVersion: 1,
+    fallbackUsed: false,
+    reason: null,
+  };
+  s.messages.push({
+    ...s.messages[1],
+    id: 'sample-1-later',
+    turnId: 'sample-1-later-turn',
+    messageSeq: 7,
+    content: '旧总结之后的发言不应进入旧摘要整理。',
+  });
+  s.discussion.insightsThrough = 7;
+  for (const width of [375, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto('/discussions/sample-1');
+    await expect(page.locator('.summary-title')).toHaveText('本地整理摘要');
+    await expect(page.locator('.summary-format-note')).toContainText('原总结格式异常');
+    await expect(page.locator('.summary-format-note')).toContainText('原记录未修改');
+    await expect(page.locator('.local-summary-message .message-meta strong')).toHaveText(
+      '本地整理',
+    );
+    const rendered = await page.locator('.summary-message').innerText();
+    for (const raw of [
+      'PRIVATE_SUMMARY_REASONING',
+      'UNKNOWN_SUMMARY_STRUCTURE',
+      'reasoning',
+      '历史模型',
+      '旧总结之后的发言不应进入旧摘要整理',
+    ])
+      expect(rendered).not.toContain(raw);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+      true,
+    );
+    await page.locator('.summary-title').scrollIntoViewIfNeeded();
+    await page.screenshot({ path: `test-results/live/summary-prose-${width}.png`, fullPage: true });
+  }
+  await page.setViewportSize({ width: 375, height: 900 });
+  await page.getByRole('button', { name: '查看整理来源发言 2', exact: true }).first().click();
+  await expect(page.locator('#sample-1-m2')).toBeInViewport();
+  delete summary.summaryMeta;
+  await page.reload();
+  await expect(page.locator('.summary-title')).toHaveText('本地整理摘要');
+  await expect(page.locator('.summary-format-note')).toBeVisible();
+  await expect(
+    page.getByRole('button', { name: '查看整理来源发言 2', exact: true }).first(),
+  ).toBeAttached();
+  expect(backend.repo.snapshot('sample-1')).toEqual(stored);
+});
+
+test('总结草稿阻止结构化原文，刷新后仍展示安全正文', async ({ page }) => {
+  const s = makeSample(1);
+  s.messages = s.messages.filter((m) => m.kind !== 'summary');
+  s.discussion.status = 'summarizing';
+  s.draft = {
+    turnId: 'safe-summary-draft',
+    discussionId: s.discussion.id,
+    participantId: s.participants[0].id,
+    generation: s.discussion.generation,
+    kind: 'summary',
+    content: '{"reasoning":"PRIVATE_STREAM_REASONING',
+    replyToMessageId: null,
+    startedAt: s.discussion.updatedAt,
+  };
+  await page.route('**/api/discussions/sample-2/snapshot', (route) => route.fulfill({ json: s }));
+  await page.setViewportSize({ width: 375, height: 900 });
+  await page.goto('/discussions/sample-2');
+  await expect(page.locator('.streaming-summary-title')).toHaveText('本场圆桌总结');
+  await expect(page.locator('.streaming-placeholder')).toBeVisible();
+  expect(await page.locator('body').innerText()).not.toContain('PRIVATE_STREAM_REASONING');
+  s.draft.content = '{"content":"本场讨论需要先明确边界';
+  await page.reload();
+  await expect(page.locator('.streaming-placeholder')).toBeVisible();
+  s.draft.content = JSON.stringify({ content: '本场讨论需要先明确边界，再验证成本。' });
+  await page.reload();
+  await expect(page.locator('.streaming-message .message-content')).toHaveText(
+    '本场讨论需要先明确边界，再验证成本。',
+  );
+  s.draft.content = '本场讨论已形成有条件的共识。';
+  await page.reload();
+  await expect(page.locator('.streaming-message .message-content')).toHaveText(
+    '本场讨论已形成有条件的共识。',
+  );
+  s.draft.content += '\n\n{"reasoning":"PRIVATE_STREAM_REASONING"}';
+  await page.reload();
+  const rendered = await page.locator('.streaming-message .message-content').innerText();
+  expect(rendered).toContain('本场讨论已形成有条件的共识。');
+  expect(rendered).not.toMatch(/reasoning|PRIVATE_STREAM_REASONING|[{}]/);
+});
+
 test('历史讨论确认删除、失败重试、刷新和跨页清理可用', async ({ page, context }) => {
   const sample = backend.repo.snapshot('sample-5');
   const preserved = backend.repo.snapshot('sample-1');

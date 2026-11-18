@@ -61,6 +61,11 @@ import {
 import { Button } from './components/ui/button';
 import { request, isPreview } from './api';
 import { useLive, subscribe } from './live';
+import { buildLocalSummary } from '../../../packages/domain/src/local-summary';
+import {
+  extractSummaryProse,
+  projectSummaryProse,
+} from '../../../packages/domain/src/summary-prose';
 import './styles.css';
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
@@ -944,6 +949,11 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
       ? s.draft
       : null;
   const draftParticipant = draft && s.participants.find((p) => p.id === draft.participantId);
+  const draftContent = draft
+    ? draft.kind === 'summary'
+      ? projectSummaryProse(draft.content)
+      : draft.content
+    : '';
   const transcript = useRef<HTMLDivElement>(null),
     atBottom = useRef(true),
     lastCount = useRef(0),
@@ -989,7 +999,7 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
       lastDraft.current = '';
       setUnread(0);
     }
-    const draftRevision = draft ? `${draft.turnId}:${draft.content}` : '';
+    const draftRevision = draft ? `${draft.turnId}:${draftContent}` : '';
     if (atBottom.current) {
       transcript.current?.scrollTo({ top: transcript.current.scrollHeight, behavior: 'instant' });
       setStreamUnread(false);
@@ -1002,7 +1012,7 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
     lastDiscussion.current = d.id;
     lastCount.current = s.messages.length;
     lastDraft.current = draftRevision;
-  }, [d.id, s.messages.length, draft?.turnId, draft?.content, tab]);
+  }, [d.id, s.messages.length, draft?.turnId, draftContent, tab]);
   const locate = (id: string) => {
     atBottom.current = false;
     setTab('transcript');
@@ -1151,10 +1161,33 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
               const p = participant(m.participantId);
               if (!p) return null;
               const summaryMeta = m.kind === 'summary' ? m.summaryMeta : undefined;
-              const localSummary = summaryMeta?.source === 'local';
+              const prose = m.kind === 'summary' ? extractSummaryProse(m.content) : m.content;
+              const formatFallback = m.kind === 'summary' && prose === null;
+              const priorMessages = formatFallback
+                ? s.messages.filter(
+                    (message) =>
+                      message.discussionId === s.discussion.id &&
+                      message.kind !== 'summary' &&
+                      message.messageSeq < m.messageSeq,
+                  )
+                : [];
+              const summaryThrough = formatFallback
+                ? Math.max(0, ...priorMessages.map((message) => message.messageSeq))
+                : (summaryMeta?.throughMessageSeq ?? Math.max(0, m.messageSeq - 1));
+              const insightsThrough = formatFallback
+                ? Math.min(s.discussion.insightsThrough, summaryThrough)
+                : (summaryMeta?.insightsThroughMessageSeq ?? 0);
+              const localSummary = summaryMeta?.source === 'local' || formatFallback;
+              const summaryContent = formatFallback
+                ? buildLocalSummary({
+                    ...s,
+                    messages: priorMessages,
+                    discussion: { ...s.discussion, insightsThrough },
+                  })
+                : prose || '';
               const displayContent = localSummary
-                ? m.content.replace(/^本地整理摘要\s*\n/, '').trimStart()
-                : m.content;
+                ? summaryContent.replace(/^本地整理摘要\s*\n/, '').trimStart()
+                : summaryContent;
               return (
                 <article
                   id={m.id}
@@ -1207,16 +1240,21 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
                         {localSummary ? '本地整理摘要' : '本场圆桌总结'}
                       </h3>
                     )}
-                    {summaryMeta && (
+                    {(summaryMeta || formatFallback) && (
                       <div className="summary-provenance">
+                        {formatFallback && (
+                          <p className="summary-format-note">
+                            原总结格式异常，以下内容由本地根据已保存记录重新整理；原记录未修改。
+                          </p>
+                        )}
                         <p>
                           {localSummary
                             ? '根据已保存发言与已核验洞察整理。发言序号可点击查看原文。'
-                            : `${summaryMeta.fallbackUsed ? '备用模型完成' : '总结模型'}：${summaryMeta.model || '本场主持人模型'}`}
+                            : `${summaryMeta?.fallbackUsed ? '备用模型完成' : '总结模型'}：${summaryMeta?.model || '本场主持人模型'}`}
                         </p>
-                        {summaryMeta.insightsThroughMessageSeq < summaryMeta.throughMessageSeq && (
+                        {insightsThrough < summaryThrough && (
                           <p className="summary-coverage-note">
-                            洞察仅覆盖前 {summaryMeta.insightsThroughMessageSeq} 条发言；
+                            洞察仅覆盖前 {insightsThrough} 条发言；
                             {localSummary
                               ? '后续观点见下方发言摘录。'
                               : '本总结已参考全部已保存发言。'}
@@ -1240,7 +1278,7 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
                                   (message) =>
                                     message.kind !== 'summary' &&
                                     message.messageSeq === Number(match[1]) &&
-                                    message.messageSeq <= summaryMeta!.throughMessageSeq,
+                                    message.messageSeq <= summaryThrough,
                                 );
                               return original ? (
                                 <button
@@ -1305,8 +1343,8 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
                     </h3>
                   )}
                   <div className="message-content">
-                    {draft.content ? (
-                      draft.content.split('\n').map((line, i, lines) => (
+                    {draftContent ? (
+                      draftContent.split('\n').map((line, i, lines) => (
                         <p key={i}>
                           {line || <br />}
                           {i === lines.length - 1 && (

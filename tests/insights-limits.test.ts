@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod';
+import { ProseOutputSchema } from '../packages/contracts/src/index';
 import { ModelGateway, type Purpose } from '../apps/api/src/gateway';
 import {
   defaultGatewayOptions,
@@ -10,11 +11,12 @@ import type { PrivateConnection, Repository } from '../apps/api/src/repository';
 import { startProvider, type Responder } from './fixtures/provider';
 
 const schema = z.object({ ok: z.literal(true) }).strict();
+const summaryOutput = { content: '总结期限内已完成自然语言整理。' };
 const protocols = ['openai-chat', 'openai-responses', 'anthropic'] as const;
 const delay = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 async function setup(
   protocol: PrivateConnection['protocol'] = 'openai-chat',
-  responder: Responder = () => ({ ok: true }),
+  responder: Responder = ({ purpose }) => (purpose === 'summary' ? summaryOutput : { ok: true }),
   options: Partial<GatewayOptions> = {},
 ) {
   const provider = await startProvider(responder);
@@ -37,7 +39,13 @@ async function setup(
     provider,
     runs,
     request: (purpose: Purpose, signal?: AbortSignal) =>
-      gateway.generate({ connection, purpose, input: {}, schema, signal }),
+      gateway.generate<unknown>({
+        connection,
+        purpose,
+        input: {},
+        schema: purpose === 'summary' ? ProseOutputSchema : schema,
+        signal,
+      }),
     close: provider.close,
   };
 }
@@ -109,16 +117,16 @@ describe('洞察独立超时与输出额度', () => {
   it('allows slow insights and summaries while an equal ordinary response times out', async () => {
     const s = await setup(
       'openai-chat',
-      async () => {
+      async ({ purpose }) => {
         await delay(200);
-        return { ok: true };
+        return purpose === 'summary' ? summaryOutput : { ok: true };
       },
       { timeout: 70, insightsTimeout: 1500, summaryTimeout: 1500 },
     );
     try {
       await expect(s.request('opening')).rejects.toMatchObject({ code: 'TIMEOUT' });
       await expect(s.request('insights')).resolves.toEqual({ ok: true });
-      await expect(s.request('summary')).resolves.toEqual({ ok: true });
+      await expect(s.request('summary')).resolves.toEqual(summaryOutput);
       expect(s.runs.map((run) => [run.purpose, run.errorCode])).toEqual([
         ['opening', 'TIMEOUT'],
         ['insights', null],

@@ -1,4 +1,9 @@
 import { z, type ZodType } from 'zod';
+import { ProseOutputSchema } from '@panel/contracts';
+import {
+  extractSummaryProse,
+  projectSummaryProse,
+} from '../../../packages/domain/src/summary-prose';
 import type { Repository, PrivateConnection } from './repository';
 import { AppError } from './errors';
 import { projectSpeechText, readModelStream } from './streaming';
@@ -35,7 +40,7 @@ const instructions: Record<Purpose, string> = {
   insights:
     '根据公开发言更新整组洞察，保留仍有效的已有洞察，修订时复用 id。返回 {"insights":[{"id":"稳定短ID","kind":"consensus|divergence|open_question","status":"emerging|stable|revised|resolved","scope":"local|all或null","text":"忠于发言的简短洞察","participantIds":["专家ID"],"evidence":[{"messageId":"已提供的消息ID","relation":"supports|opposes|qualifies"}]}]}。共识至少两位不同专家明确支持，scope=all 必须全部专家明确支持，沉默不是赞成。participantIds 必须与支持证据中的专家匹配。其余 kind 的 scope 为 null。只引用已给出的真实 ID，不引用总结，洞察最多20条，没有足够证据时数组为空。不要把自己的推断写成专家已达成的共识。',
   summary:
-    '主持人根据全部最终公开发言和已有核验洞察，以中文自然语言总结主题、共识及其范围、剩余分歧、待验证问题。返回 {"content":"以空行分段的总结正文"}。若insightsComplete=false，说明洞察尚未覆盖全部发言，后续观点依据完整发言整理，不把未核验的推断写成共识。忠于证据，不把局部共识写成全体共识，不添加新的事实。',
+    '主持人根据全部最终公开发言和已有核验洞察，以中文自然语言总结主题、共识及其范围、剩余分歧、待验证问题。返回 {"content":"以空行分段的总结正文"}。只有外层使用JSON，content必须直接是供读者阅读的自然语言段落，可含标题和文字列表；不得再次嵌入JSON对象、数组、序列化字符串、键值数据或代码围栏，不得包含推理字段。若insightsComplete=false，说明洞察尚未覆盖全部发言，后续观点依据完整发言整理，不把未核验的推断写成共识。忠于证据，不把局部共识写成全体共识，不添加新的事实。',
 };
 const purposeLabels: Record<Purpose, string> = {
   test: '模型连接测试',
@@ -193,6 +198,7 @@ export class ModelGateway {
         errorCode: string | null = null;
       let lastText = '';
       const publish = (text: string, reset = false) => {
+        if (r.purpose === 'summary') text = projectSummaryProse(text);
         if (!r.onText || (!reset && text === lastText)) return;
         try {
           r.onText(text);
@@ -359,11 +365,21 @@ export class ModelGateway {
               .replace(/\s*```$/, ''),
           );
           parsed = r.schema.parse(data);
+          if (r.purpose === 'summary') {
+            const output = ProseOutputSchema.parse(parsed);
+            const content = extractSummaryProse(output.content);
+            if (!content) throw new AppError('INVALID_OUTPUT', '总结正文必须为自然语言', 502);
+            parsed = r.schema.parse({ content });
+          }
           r.validate?.(parsed);
         } catch {
           throw new AppError('INVALID_OUTPUT', '模型输出未通过格式或业务校验', 502);
         }
-        publish(projectSpeechText(text, r.purpose));
+        publish(
+          r.purpose === 'summary'
+            ? ProseOutputSchema.parse(parsed).content
+            : projectSpeechText(text, r.purpose),
+        );
         if (signal.aborted)
           throw new AppError(
             r.signal?.aborted ? 'CANCELLED' : 'TIMEOUT',
