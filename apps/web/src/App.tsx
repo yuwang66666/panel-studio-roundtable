@@ -149,20 +149,22 @@ export default function App() {
         {isPreview && (
           <div className="preview-banner">界面原型 · 使用明确标识的静态样例，不调用真实模型</div>
         )}
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/discussions/:id" element={<DiscussionPage />} />
-          <Route
-            path="*"
-            element={
-              <div className="empty">
-                <h2>页面不存在</h2>
-                <Link to="/">返回讨论空间</Link>
-              </div>
-            }
-          />
-        </Routes>
+        <div className="app-workspace">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/discussions/:id" element={<DiscussionPage />} />
+            <Route
+              path="*"
+              element={
+                <div className="empty">
+                  <h2>页面不存在</h2>
+                  <Link to="/">返回讨论空间</Link>
+                </div>
+              }
+            />
+          </Routes>
+        </div>
       </BrowserRouter>
     </QueryClientProvider>
   );
@@ -290,72 +292,74 @@ function Home() {
           : d.status === 'completed' && !d.isSample),
   );
   return (
-    <main className="home page-width">
-      <section className="hero">
-        <div>
-          <div className="eyebrow">
-            <span className="little-line" />
-            多元视角，共同探索
+    <main className="home page-width workspace-page">
+      <div className="home-overview" role="region" aria-label="创建讨论与工作空间概览" tabIndex={0}>
+        <section className="hero">
+          <div>
+            <div className="eyebrow">
+              <span className="little-line" />
+              多元视角，共同探索
+            </div>
+            <h1>
+              让观点交锋，
+              <br />
+              <span>让答案浮现。</span>
+            </h1>
+            <p>
+              邀请不同领域的 AI 专家，围绕一个值得讨论的问题，
+              <br className="desktop-break" />
+              在交流中找到共识，也看见分歧。
+            </p>
+            <Button onClick={() => setOpen(true)}>
+              <Plus size={18} />
+              开启一场圆桌
+              <ArrowUpRight size={17} />
+            </Button>
           </div>
-          <h1>
-            让观点交锋，
-            <br />
-            <span>让答案浮现。</span>
-          </h1>
-          <p>
-            邀请不同领域的 AI 专家，围绕一个值得讨论的问题，
-            <br className="desktop-break" />
-            在交流中找到共识，也看见分歧。
-          </p>
-          <Button onClick={() => setOpen(true)}>
-            <Plus size={18} />
-            开启一场圆桌
-            <ArrowUpRight size={17} />
-          </Button>
-        </div>
-        <div className="hero-art" aria-hidden="true">
-          <div className="orbit-ring orbit-inner" />
-          <div className="orbit-ring orbit-outer" />
-          <div className="orbit-center">
-            <Orbit size={44} />
-            <span>不同视角，同一张桌</span>
+          <div className="hero-art" aria-hidden="true">
+            <div className="orbit-ring orbit-inner" />
+            <div className="orbit-ring orbit-outer" />
+            <div className="orbit-center">
+              <Orbit size={44} />
+              <span>不同视角，同一张桌</span>
+            </div>
+            <span className="orbit-node node-1">研究</span>
+            <span className="orbit-node node-2">实践</span>
+            <span className="orbit-node node-3">政策</span>
+            <span className="orbit-node node-4">社会</span>
+            <div className="orbit-caption">A SPACE FOR BETTER QUESTIONS</div>
           </div>
-          <span className="orbit-node node-1">研究</span>
-          <span className="orbit-node node-2">实践</span>
-          <span className="orbit-node node-3">政策</span>
-          <span className="orbit-node node-4">社会</span>
-          <div className="orbit-caption">A SPACE FOR BETTER QUESTIONS</div>
-        </div>
-      </section>
-      <section className="metrics" aria-label="工作空间概览">
-        <div>
-          <Radio size={18} />
-          <strong>{active.length.toString().padStart(2, '0')}</strong>
-          <span>正在进行</span>
-        </div>
-        <div>
-          <MessageSquare size={18} />
-          <strong>
-            {items
-              .filter((d) => !d.isSample)
-              .length.toString()
-              .padStart(2, '0')}
-          </strong>
-          <span>我的讨论</span>
-        </div>
-        <div>
-          <PlugZap size={18} />
-          <strong>
-            {(connections.data?.filter((c) => c.active).length || 0).toString().padStart(2, '0')}
-          </strong>
-          <span>可用模型</span>
-          <Link to="/settings">
-            管理
-            <ArrowUpRight size={14} />
-          </Link>
-        </div>
-      </section>
-      <section className="discussion-library">
+        </section>
+        <section className="metrics" aria-label="工作空间概览">
+          <div>
+            <Radio size={18} />
+            <strong>{active.length.toString().padStart(2, '0')}</strong>
+            <span>正在进行</span>
+          </div>
+          <div>
+            <MessageSquare size={18} />
+            <strong>
+              {items
+                .filter((d) => !d.isSample)
+                .length.toString()
+                .padStart(2, '0')}
+            </strong>
+            <span>我的讨论</span>
+          </div>
+          <div>
+            <PlugZap size={18} />
+            <strong>
+              {(connections.data?.filter((c) => c.active).length || 0).toString().padStart(2, '0')}
+            </strong>
+            <span>可用模型</span>
+            <Link to="/settings">
+              管理
+              <ArrowUpRight size={14} />
+            </Link>
+          </div>
+        </section>
+      </div>
+      <section className="discussion-library" aria-label="讨论列表" tabIndex={0}>
         <div className="section-heading">
           <h2 ref={libraryHeading} tabIndex={-1}>
             讨论空间<span>{items.length}</span>
@@ -594,14 +598,14 @@ function Settings() {
       .includes(search.trim().toLowerCase()),
   );
   return (
-    <main className="page-width settings-page">
+    <main className="page-width settings-page workspace-page">
       <div className="page-title">
         <div className="eyebrow">让不同的能力在圆桌相遇</div>
         <h1>模型设置</h1>
         <p>模型已提前配置，选择默认主持人，并在每场讨论中为专家分配模型。</p>
       </div>
       <div className="settings-layout model-library">
-        <section aria-label="可用模型列表">
+        <section className="models-scroll" aria-label="可用模型列表" tabIndex={0}>
           <div className="section-heading">
             <h2>
               可用模型<span>{models.length}</span>
@@ -697,7 +701,7 @@ function Settings() {
             </>
           )}
         </section>
-        <aside className="configuration-panel model-preferences">
+        <aside className="configuration-panel model-preferences" aria-label="模型偏好" tabIndex={0}>
           <div className="section-heading">
             <h2>默认主持人</h2>
           </div>
@@ -822,100 +826,106 @@ function Cast({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ['snapshot', d.id] }),
   });
   return (
-    <main className="page-width cast-page">
-      <Link className="back-link" to="/">
-        <ChevronLeft size={16} />
-        返回讨论空间
-      </Link>
-      <div className="page-title">
-        <div className="eyebrow">让不同的视角入席</div>
-        <h1>本场讨论阵容</h1>
-        <p className="cast-topic">{d.topic}</p>
-      </div>
-      {d.status === 'casting' ? (
-        <Loading text="正在寻找互补的专业视角，生成主持人与专家…" />
-      ) : d.status === 'failed' ? (
-        <div className="empty">
-          <ErrorNotice error={d.error} />
-          <Button onClick={() => retry.mutate()} disabled={retry.isPending}>
-            <RefreshCw size={16} />
-            重新生成阵容
-          </Button>
-          <ErrorNotice error={retry.error} />
+    <main className="page-width cast-page workspace-page">
+      <div className="cast-heading" role="region" aria-label="讨论话题" tabIndex={0}>
+        <Link className="back-link" to="/">
+          <ChevronLeft size={16} />
+          返回讨论空间
+        </Link>
+        <div className="page-title">
+          <div className="eyebrow">让不同的视角入席</div>
+          <h1>本场讨论阵容</h1>
+          <p className="cast-topic">{d.topic}</p>
         </div>
-      ) : (
-        <>
-          <div className="cast-grid">
-            {s.participants.map((p) => (
-              <article
-                className={`cast-card ${p.role === 'moderator' ? 'host-card' : ''}`}
-                key={p.id}
-              >
-                <div className="cast-identity">
-                  <Avatar p={p} />
-                  <div>
-                    <span className="role-label">
-                      {p.role === 'moderator' ? '本场主持人' : p.title}
-                    </span>
-                    <h2>{p.name}</h2>
-                    <span>{p.occupation}</span>
+      </div>
+      <div className="cast-content" role="region" aria-label="阵容列表" tabIndex={0}>
+        {d.status === 'casting' ? (
+          <Loading text="正在寻找互补的专业视角，生成主持人与专家…" />
+        ) : d.status === 'failed' ? (
+          <div className="empty">
+            <ErrorNotice error={d.error} />
+            <Button onClick={() => retry.mutate()} disabled={retry.isPending}>
+              <RefreshCw size={16} />
+              重新生成阵容
+            </Button>
+            <ErrorNotice error={retry.error} />
+          </div>
+        ) : (
+          <>
+            <div className="cast-grid">
+              {s.participants.map((p) => (
+                <article
+                  className={`cast-card ${p.role === 'moderator' ? 'host-card' : ''}`}
+                  key={p.id}
+                >
+                  <div className="cast-identity">
+                    <Avatar p={p} />
+                    <div>
+                      <span className="role-label">
+                        {p.role === 'moderator' ? '本场主持人' : p.title}
+                      </span>
+                      <h2>{p.name}</h2>
+                      <span>{p.occupation}</span>
+                    </div>
                   </div>
-                </div>
-                <p>{p.stance}</p>
-                <div className="specialties">
-                  {p.specialty.map((t) => (
-                    <span key={t}>{t}</span>
-                  ))}
-                </div>
-                <label className="field">
-                  {p.role === 'moderator' ? '主持人模型 · 同时负责洞察与总结' : '专家模型'}
-                  <select
-                    aria-label={`${p.name}的模型`}
-                    value={
-                      bindings[p.id] ||
-                      s.bindings.find((b) => b.participantId === p.id)?.connectionId ||
-                      list.data?.find((c) => c.active)?.id ||
-                      ''
-                    }
-                    onChange={(e) => setBindings((b) => ({ ...b, [p.id]: e.target.value }))}
-                  >
-                    <option value="">选择模型</option>
-                    {list.data
-                      ?.filter((c) => c.active)
-                      .map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name} · {c.model}
-                        </option>
-                      ))}
-                  </select>
-                </label>
-              </article>
-            ))}
-          </div>
-          <ErrorNotice error={save.error || list.error} />
-          <div className="cast-actions">
-            <p>
-              <UsersRound size={17} />
-              {d.expertCount} 位专家 + 1 位主持人<span>确认后，专家将根据现场讨论自主参与。</span>
-            </p>
-            <div>
-              <Button
-                variant="outline"
-                disabled={save.isPending || !list.data?.some((c) => c.active)}
-                onClick={() => save.mutate(false)}
-              >
-                保存分配
-              </Button>
-              <Button
-                disabled={save.isPending || !list.data?.some((c) => c.active)}
-                onClick={() => save.mutate(true)}
-              >
-                {save.isPending ? <LoaderCircle className="spin" size={16} /> : <Radio size={16} />}
-                确认阵容，开始讨论
-              </Button>
+                  <p>{p.stance}</p>
+                  <div className="specialties">
+                    {p.specialty.map((t) => (
+                      <span key={t}>{t}</span>
+                    ))}
+                  </div>
+                  <label className="field">
+                    {p.role === 'moderator' ? '主持人模型 · 同时负责洞察与总结' : '专家模型'}
+                    <select
+                      aria-label={`${p.name}的模型`}
+                      value={
+                        bindings[p.id] ||
+                        s.bindings.find((b) => b.participantId === p.id)?.connectionId ||
+                        list.data?.find((c) => c.active)?.id ||
+                        ''
+                      }
+                      onChange={(e) => setBindings((b) => ({ ...b, [p.id]: e.target.value }))}
+                    >
+                      <option value="">选择模型</option>
+                      {list.data
+                        ?.filter((c) => c.active)
+                        .map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name} · {c.model}
+                          </option>
+                        ))}
+                    </select>
+                  </label>
+                </article>
+              ))}
             </div>
+            <ErrorNotice error={save.error || list.error} />
+          </>
+        )}
+      </div>
+      {d.status !== 'casting' && d.status !== 'failed' && (
+        <div className="cast-actions">
+          <p>
+            <UsersRound size={17} />
+            {d.expertCount} 位专家 + 1 位主持人<span>确认后，专家将根据现场讨论自主参与。</span>
+          </p>
+          <div>
+            <Button
+              variant="outline"
+              disabled={save.isPending || !list.data?.some((c) => c.active)}
+              onClick={() => save.mutate(false)}
+            >
+              保存分配
+            </Button>
+            <Button
+              disabled={save.isPending || !list.data?.some((c) => c.active)}
+              onClick={() => save.mutate(true)}
+            >
+              {save.isPending ? <LoaderCircle className="spin" size={16} /> : <Radio size={16} />}
+              确认阵容，开始讨论
+            </Button>
           </div>
-        </>
+        </div>
       )}
     </main>
   );
@@ -1071,8 +1081,29 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
           <button
             key={String(v)}
             role="tab"
+            id={`studio-tab-${v}`}
+            aria-controls={`studio-panel-${v}`}
             aria-selected={tab === v}
+            tabIndex={tab === v ? 0 : -1}
             onClick={() => setTab(String(v))}
+            onKeyDown={(event) => {
+              const tabs = ['transcript', 'experts', 'insights'];
+              const index = tabs.indexOf(String(v));
+              const next =
+                event.key === 'ArrowRight'
+                  ? (index + 1) % tabs.length
+                  : event.key === 'ArrowLeft'
+                    ? (index + tabs.length - 1) % tabs.length
+                    : event.key === 'Home'
+                      ? 0
+                      : event.key === 'End'
+                        ? tabs.length - 1
+                        : -1;
+              if (next < 0) return;
+              event.preventDefault();
+              setTab(tabs[next]);
+              document.getElementById(`studio-tab-${tabs[next]}`)?.focus();
+            }}
           >
             {typeof Icon !== 'string' && <Icon size={16} />}
             <span>{String(l)}</span>
@@ -1080,7 +1111,12 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
         ))}
       </div>
       <div className={`studio-grid tab-${tab}`}>
-        <aside className="studio-panel experts-panel">
+        <aside
+          className="studio-panel experts-panel"
+          id="studio-panel-experts"
+          role="tabpanel"
+          aria-labelledby="studio-tab-experts"
+        >
           <div className="panel-title">
             <h2>
               <UsersRound size={16} />
@@ -1136,7 +1172,12 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
             ))}
           </div>
         </aside>
-        <section className="studio-panel transcript-panel">
+        <section
+          className="studio-panel transcript-panel"
+          id="studio-panel-transcript"
+          role="tabpanel"
+          aria-labelledby="studio-tab-transcript"
+        >
           <div className="panel-title">
             <h2>
               <Radio size={16} />
@@ -1401,7 +1442,12 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
             </span>
           </footer>
         </section>
-        <aside className="studio-panel insights-panel">
+        <aside
+          className="studio-panel insights-panel"
+          id="studio-panel-insights"
+          role="tabpanel"
+          aria-labelledby="studio-tab-insights"
+        >
           <div className="panel-title">
             <h2>
               <Layers3 size={16} />

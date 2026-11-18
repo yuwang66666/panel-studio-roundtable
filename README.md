@@ -63,6 +63,8 @@ MODEL_DEEPSEEK_STRUCTURED_OUTPUT=false
 
 含 `#` 或空格的值加引号；此配置不支持 `${变量名}` 插值。`.env` 只由后端读取，不会作为前端配置打包，也不应使用 `VITE_` 前缀保存密钥。`.env` 中的密钥是明文；后端同步连接版本后，历史凭据使用 AES-256-GCM 加密保存在 `.data/panel.sqlite`，主密钥位于 `.data/master.key`。备份历史数据库时需同时保留主密钥。`.env`、数据库及密钥文件均已被 Git 忽略，`.env.example` 只保存空白模板。
 
+Vite 文件服务仅允许前端目录、共享契约与领域源码及依赖目录，不开放整个工作区。开发服务和构建预览均拒绝浏览器读取 `.env`、数据库、主密钥、后端源码及其他私有文件；路径编码、`/@fs/`、资源查询参数和指向私有文件的链接不能绕过此边界。后端 API 继续通过同源 `/api` 代理访问。
+
 后端启动时以环境模型清单为准：相同配置不会重复创建连接版本；配置或密钥改变后生成新版本，并清除该版本的旧测试状态；从清单移除的模型以及旧网页创建的连接停用，历史版本仍保留。讨论启动时冻结模型版本，历史发言与绑定不被改写。修改 `.env` 后需要重启后端，重启会中断运行中的讨论，已保存内容可继续查看和请求总结。
 
 ## 开始真实讨论
@@ -104,6 +106,10 @@ MODEL_DEEPSEEK_STRUCTURED_OUTPUT=false
 
 ## 样例与验收状态
 
+首页、模型设置、阵容确认和演播厅均固定在视口内，内容在各自容器滚动，不依赖整页滚动。首页讨论列表、设置页模型列表与偏好区、阵容列表，以及演播厅专家席／现场／洞察各自保持滚动位置；短视口下标题和操作区也可在自身容器内滚动。
+
+演播厅在宽度不超过 1100px 时使用“现场／专家／洞察”页签，支持左右方向键切换及 Home／End 定位；更宽时显示三栏。1500px 及以上屏幕扩大两侧区域，消息卡片最大宽度为 56rem，避免正文随超宽屏无限拉长。布局验收覆盖 375、768、1024、1440、2560px，另检查 375×568 短视口、键盘操作和减少动态效果。
+
 `pnpm seed` 幂等初始化 5 场历史样例，每场都有阵容、发言、证据洞察和总结。所有样例均明确标识为预置内容。
 
 自动验收已覆盖三种协议的本地 HTTP 模型测试服务、混合协议讨论、两场并行隔离、异常恢复及真实 Edge 浏览器操作。**已配置的5个模型目前均通过最小连接测试。Claude曾对圆桌角色指令返回自然语言拒绝，角色兼容性和真实讨论完整闭环及质量、计费仍待验收。** 连接测试采用中性短请求并严格校验JSON，仅证明当前配置能完成最小JSON调用。详见 [供应商验证表](docs/provider-validation.md)。`/preview` 路径仅用于静态界面原型验证，不调用模型。
@@ -115,14 +121,15 @@ pnpm test                 # 单元、接口、SQLite、模型协议、SSE和隔�
 pnpm build                # 前端生产构建 + 前后端类型检查
 pnpm test:e2e             # 四种宽度的原型与交互检查
 pnpm test:e2e:live        # 隔离数据库中的真实前后端浏览器流程
+pnpm test:e2e:layout      # 五种宽度与短视口的容器滚动、页签、操作可达性检查
 pnpm verify:clean         # 将源文件复制到独立目录，重新安装、构建、初始化并启动验证
 pnpm docs:api             # 从共享 Zod 契约重新生成 OpenAPI
 pnpm format:check         # 源文件格式检查
 ```
 
-本机也可使用 `.\scripts\tool.ps1 test` 等对应入口。E2E 默认使用本机 Microsoft Edge；其他环境可安装 Playwright Chromium，并将两份 Playwright 配置的 `channel` 改为已安装浏览器。正式 E2E 采用独立端口 5174和隔离.env中的测试模型，原型 E2E 使用独立端口5175；均不使用工作空间中的实际模型连接。独立安装检查使用后端端口3003和公开空白.env模板，清除继承的模型环境变量，不复制本地凭据。
+本机也可使用 `.\scripts\tool.ps1 test` 等对应入口。E2E 默认使用本机 Microsoft Edge；其他环境可安装 Playwright Chromium，并将三份 Playwright 配置的 `channel` 改为已安装浏览器。正式 E2E 采用独立端口 5174和隔离.env中的测试模型，原型 E2E 使用独立端口5175，布局 E2E 使用独立端口5176、临时数据库和本地模型测试服务；均不使用工作空间中的实际模型连接。独立安装检查使用后端端口3003和公开空白.env模板，清除继承的模型环境变量，不复制本地凭据。
 
-正式流程与原型的测试产物分别保存于 `test-results/live` 和 `test-results/prototype`，依次运行不会互相清除截图。流式截图为 `test-results/live/streaming-desktop.png` 与 `streaming-mobile.png`。
+正式流程、原型和布局测试产物分别保存于 `test-results/live`、`test-results/prototype` 和 `test-results/layout`，依次运行不会互相清除截图。流式截图为 `test-results/live/streaming-desktop.png` 与 `streaming-mobile.png`；布局截图按页面与宽度命名，例如 `test-results/layout/studio-2560.png`。
 
 ## 架构与接口
 

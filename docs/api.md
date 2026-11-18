@@ -33,6 +33,8 @@ SSE event 使用 `panel`，id 使用讨论内 eventSeq；data 为共享 PublicEv
 
 所有公开对象采用严格 Zod 白名单。具体字段与枚举以 packages/contracts 为可执行来源。后端监听 127.0.0.1，写接口校验 Origin 及 JSON 内容类型；没有 Origin 的本地 CLI 需显式发送 X-Panel-Client: local。
 
+文件访问不属于公开API：Vite开发服务和构建预览在文件路由检查发现敏感路径或白名单外目标时返回403，不返回文件内容，模块加载也拒绝读取白名单外的实际文件。保护范围包括环境配置、数据库与伴随文件、密钥、后端源码及工作区私有目录；普通路径、`/@fs/`、编码路径、资源查询参数及文件链接均经过文件边界检查。公开前端路由、客户端依赖和同源`/api`代理保持可用。
+
 新总结消息携带可选的 `summaryMeta`（旧历史消息可以缺省）。字段包括 `source: model|local`、`throughMessageSeq`、`insightsThroughMessageSeq`、`model`、`provider`、`connectionId`、`connectionVersion`、`fallbackUsed` 和 `reason`。本地来源的模型及连接字段均为null，reason为models_unavailable/budget_exhausted/deadline_exceeded；模型来源使用实际执行总结的本场冻结连接。总结覆盖序号必须等于最后一条正式讨论发言，洞察覆盖序号必须等于已保存的真实进度。
 
 `summary.ready`沿用现有事件，携带包含summaryMeta的正式消息；同一事务清除草稿和内部收尾任务并进入completed。模型故障自动进入备用或本地整理，正常情况下不再要求用户反复点击retry。重启时已有收尾任务自动恢复；内部尝试队列、失败连接与计数不进入公开快照。取消、过期或存储错误仍保留既有错误处理，避免错误提交。
