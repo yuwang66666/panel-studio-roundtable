@@ -14,6 +14,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "seed": "pnpm --filter @panel/api seed",
+    "db:init": "pnpm --filter @panel/api db:init",
+    "docs:samples": "tsx scripts/export-samples.ts && prettier --write docs/samples.md",
     "test:e2e:live": "playwright test --config playwright.live.config.ts",
     "test:e2e:layout": "playwright test --config playwright.layout.config.ts",
     "format": "prettier --write apps packages tests scripts docs *.json *.ts *.yaml README.md",
