@@ -1238,6 +1238,60 @@
               "additionalProperties": false
             }
           },
+          "draft": {
+            "type": "object",
+            "properties": {
+              "turnId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "participantId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "generation": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "kind": {
+                "type": "string",
+                "enum": ["opening", "probe", "expert", "summary"]
+              },
+              "content": {
+                "type": "string",
+                "maxLength": 6000
+              },
+              "replyToMessageId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100,
+                "nullable": true
+              },
+              "startedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "turnId",
+              "discussionId",
+              "participantId",
+              "generation",
+              "kind",
+              "content",
+              "replyToMessageId",
+              "startedAt"
+            ],
+            "additionalProperties": false,
+            "nullable": true,
+            "default": null
+          },
           "insights": {
             "type": "array",
             "items": {
@@ -1434,6 +1488,133 @@
       },
       "PublicEvent": {
         "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "seq": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "schemaVersion": {
+                "type": "number",
+                "enum": [1]
+              },
+              "occurredAt": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["speech.updated"]
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "draft": {
+                    "type": "object",
+                    "properties": {
+                      "turnId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "discussionId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "participantId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "generation": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": ["opening", "probe", "expert", "summary"]
+                      },
+                      "content": {
+                        "type": "string",
+                        "maxLength": 6000
+                      },
+                      "replyToMessageId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "nullable": true
+                      },
+                      "startedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "turnId",
+                      "discussionId",
+                      "participantId",
+                      "generation",
+                      "kind",
+                      "content",
+                      "replyToMessageId",
+                      "startedAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["draft"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["discussionId", "seq", "schemaVersion", "occurredAt", "type", "payload"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "seq": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "schemaVersion": {
+                "type": "number",
+                "enum": [1]
+              },
+              "occurredAt": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["speech.cleared"]
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "turnId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "required": ["turnId"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["discussionId", "seq", "schemaVersion", "occurredAt", "type", "payload"],
+            "additionalProperties": false
+          },
           {
             "type": "object",
             "properties": {

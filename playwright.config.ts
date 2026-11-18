@@ -2,6 +2,7 @@ import { defineConfig } from '@playwright/test';
 export default defineConfig({
   testDir: 'tests/e2e',
   testMatch: 'prototype.spec.ts',
+  outputDir: 'test-results/prototype',
   fullyParallel: false,
   workers: 1,
   timeout: 30000,

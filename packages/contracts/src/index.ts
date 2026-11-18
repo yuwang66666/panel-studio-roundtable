@@ -91,6 +91,19 @@ export const MessageSchema = z
   })
   .strict();
 export type Message = z.infer<typeof MessageSchema>;
+export const SpeechDraftSchema = z
+  .object({
+    turnId: id,
+    discussionId: id,
+    participantId: id,
+    generation: z.number().int().nonnegative(),
+    kind: MessageSchema.shape.kind,
+    content: z.string().max(6000),
+    replyToMessageId: id.nullable(),
+    startedAt: timestamp,
+  })
+  .strict();
+export type SpeechDraft = z.infer<typeof SpeechDraftSchema>;
 export const InsightSchema = z
   .object({
     id,
@@ -135,6 +148,7 @@ export const SnapshotSchema = z
     participants: z.array(ParticipantSchema),
     bindings: z.array(BindingSchema),
     messages: z.array(MessageSchema),
+    draft: SpeechDraftSchema.nullable().default(null),
     insights: z.array(InsightSchema),
     lastEventSeq: z.number().int().nonnegative(),
   })
@@ -147,6 +161,20 @@ const envelope = {
   occurredAt: timestamp,
 };
 export const PublicEventSchema = z.discriminatedUnion('type', [
+  z
+    .object({
+      ...envelope,
+      type: z.literal('speech.updated'),
+      payload: z.object({ draft: SpeechDraftSchema }).strict(),
+    })
+    .strict(),
+  z
+    .object({
+      ...envelope,
+      type: z.literal('speech.cleared'),
+      payload: z.object({ turnId: id }).strict(),
+    })
+    .strict(),
   z
     .object({
       ...envelope,

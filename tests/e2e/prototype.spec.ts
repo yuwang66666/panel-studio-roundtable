@@ -33,7 +33,7 @@ test('原型四种宽度无横向溢出，样例和证据可以阅读', async ({
     if (width <= 1100) await page.getByRole('tab', { name: '洞察' }).click();
     await page.getByRole('button', { name: '查看证据发言 2' }).first().click();
     await expect(page.locator('#sample-1-m2')).toBeInViewport();
-    await page.screenshot({ path: `test-results/studio-${width}.png`, fullPage: true });
+    await page.screenshot({ path: `test-results/prototype/studio-${width}.png`, fullPage: true });
   }
 });
 test('原型预置模型选择和创建阵容流程', async ({ page }) => {

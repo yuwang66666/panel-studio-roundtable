@@ -1,4 +1,11 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type FormEvent,
+  type ReactNode,
+} from 'react';
 import {
   BrowserRouter,
   NavLink,
@@ -798,10 +805,21 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
     qc = useQueryClient(),
     [tab, setTab] = useState('transcript'),
     [unread, setUnread] = useState(0),
+    [streamUnread, setStreamUnread] = useState(false),
     [confirm, setConfirm] = useState(false);
+  const draft =
+    s.draft &&
+    s.draft.generation === d.generation &&
+    (s.draft.kind === 'summary' ? d.status === 'summarizing' : d.status === 'running') &&
+    !s.messages.some((m) => m.turnId === s.draft!.turnId)
+      ? s.draft
+      : null;
+  const draftParticipant = draft && s.participants.find((p) => p.id === draft.participantId);
   const transcript = useRef<HTMLDivElement>(null),
     atBottom = useRef(true),
-    lastCount = useRef(0);
+    lastCount = useRef(0),
+    lastDraft = useRef(''),
+    lastDiscussion = useRef(d.id);
   const usage = useQuery({
     queryKey: ['usage', d.id, d.status],
     queryFn: () =>
@@ -824,18 +842,40 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
     },
   });
   const scrollBottom = () => {
-    transcript.current?.scrollTo({ top: transcript.current.scrollHeight, behavior: 'smooth' });
+    transcript.current?.scrollTo({
+      top: transcript.current.scrollHeight,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        ? 'instant'
+        : 'smooth',
+    });
     setUnread(0);
+    setStreamUnread(false);
     atBottom.current = true;
   };
-  useEffect(() => {
-    if (s.messages.length > lastCount.current) {
-      if (atBottom.current) transcript.current?.scrollTo({ top: transcript.current.scrollHeight });
-      else setUnread((v) => v + s.messages.length - lastCount.current);
+  useLayoutEffect(() => {
+    const newDiscussion = lastDiscussion.current !== d.id;
+    if (newDiscussion) {
+      atBottom.current = true;
+      lastCount.current = 0;
+      lastDraft.current = '';
+      setUnread(0);
     }
+    const draftRevision = draft ? `${draft.turnId}:${draft.content}` : '';
+    if (atBottom.current) {
+      transcript.current?.scrollTo({ top: transcript.current.scrollHeight, behavior: 'instant' });
+      setStreamUnread(false);
+    } else {
+      if (s.messages.length > lastCount.current)
+        setUnread((v) => v + s.messages.length - lastCount.current);
+      if (!draft) setStreamUnread(false);
+      else if (draftRevision !== lastDraft.current) setStreamUnread(true);
+    }
+    lastDiscussion.current = d.id;
     lastCount.current = s.messages.length;
-  }, [s.messages.length]);
+    lastDraft.current = draftRevision;
+  }, [d.id, s.messages.length, draft?.turnId, draft?.content, tab]);
   const locate = (id: string) => {
+    atBottom.current = false;
     setTab('transcript');
     requestAnimationFrame(() => {
       const el = document.getElementById(id);
@@ -959,10 +999,13 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
             onScroll={() => {
               const el = transcript.current!;
               atBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 90;
-              if (atBottom.current) setUnread(0);
+              if (atBottom.current) {
+                setUnread(0);
+                setStreamUnread(false);
+              }
             }}
           >
-            {!s.messages.length && <Loading text="主持人正在准备开场…" />}
+            {!s.messages.length && !draft && <Loading text="主持人正在准备开场…" />}
             {s.messages.map((m) => {
               const p = participant(m.participantId);
               if (!p) return null;
@@ -1013,6 +1056,67 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
                 </article>
               );
             })}
+            {draft && draftParticipant && (
+              <article
+                className={`streaming-message ${draft.kind === 'summary' ? 'summary-message' : ''}`}
+                data-turn-id={draft.turnId}
+                aria-label={`${draftParticipant.name}正在生成发言`}
+                aria-busy="true"
+              >
+                <Avatar p={draftParticipant} small />
+                <div className="message-body">
+                  <div className="message-meta">
+                    <strong style={{ color: colors[draftParticipant.colorKey] }}>
+                      {draftParticipant.name}
+                    </strong>
+                    <span>
+                      {draftParticipant.role === 'moderator' ? '主持人' : draftParticipant.title}
+                    </span>
+                    <span className="streaming-status" role="status">
+                      <LoaderCircle className="spin" size={12} aria-hidden="true" />
+                      正在生成
+                    </span>
+                  </div>
+                  {draft.replyToMessageId && (
+                    <button
+                      className="reply-reference"
+                      onClick={() => locate(draft.replyToMessageId!)}
+                    >
+                      <GitBranch size={13} />
+                      回应{' '}
+                      {participant(
+                        s.messages.find((m) => m.id === draft.replyToMessageId)?.participantId ||
+                          '',
+                      )?.name || '先前观点'}
+                      <ArrowUpRight size={12} />
+                    </button>
+                  )}
+                  {draft.kind === 'summary' && (
+                    <h3 className="streaming-summary-title">
+                      <Sparkles size={17} />
+                      本场圆桌总结
+                    </h3>
+                  )}
+                  <div className="message-content">
+                    {draft.content ? (
+                      draft.content.split('\n').map((line, i, lines) => (
+                        <p key={i}>
+                          {line || <br />}
+                          {i === lines.length - 1 && (
+                            <span className="streaming-cursor" aria-hidden="true" />
+                          )}
+                        </p>
+                      ))
+                    ) : (
+                      <p className="streaming-placeholder">
+                        正在组织发言…
+                        <span className="streaming-cursor" aria-hidden="true" />
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </article>
+            )}
             {['completed', 'summarizing', 'failed', 'interrupted'].includes(d.status) && (
               <div className="transcript-end">
                 <span />
@@ -1030,9 +1134,9 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
               </div>
             )}
           </div>
-          {unread > 0 && (
+          {(unread > 0 || streamUnread) && (
             <button className="new-messages" onClick={scrollBottom}>
-              {unread} 条新发言
+              {unread > 0 ? `${unread} 条新发言` : '发言更新中'}
               <ChevronDown size={16} />
             </button>
           )}

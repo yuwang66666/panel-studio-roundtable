@@ -10,6 +10,16 @@ export type Responder = (
   task: { purpose: string; input: any },
   call: RecordedCall,
 ) => unknown | Promise<unknown>;
+export interface ProviderOptions {
+  streamChunkSize?: number;
+  streamDelayMs?: number;
+  afterStreamChunk?: (chunk: {
+    task: { purpose: string; input: any };
+    call: RecordedCall;
+    index: number;
+    textSoFar: string;
+  }) => void | Promise<void>;
+}
 export function defaultResponse({ purpose, input }: { purpose: string; input: any }) {
   const context = input?.context || input;
   if (purpose === 'test') return { ok: true };
@@ -80,7 +90,10 @@ export function defaultResponse({ purpose, input }: { purpose: string; input: an
     };
   throw Error(`Unknown fixture purpose ${purpose}`);
 }
-export async function startProvider(responder: Responder = defaultResponse) {
+export async function startProvider(
+  responder: Responder = defaultResponse,
+  options: ProviderOptions = {},
+) {
   const calls: RecordedCall[] = [];
   let failures: { status: number; count: number } | undefined;
   const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
@@ -107,6 +120,127 @@ export async function startProvider(responder: Responder = defaultResponse) {
         : JSON.parse(userText);
       const value = await responder(task, call),
         text = typeof value === 'string' ? value : JSON.stringify(value);
+      if (body.stream) {
+        res.writeHead(200, {
+          'Content-Type': 'text/event-stream; charset=utf-8',
+          'Cache-Control': 'no-cache',
+        });
+        res.flushHeaders();
+        const frame = (event: string | null, data: unknown) => {
+          const payload = `${event ? `event: ${event}\n` : ''}data: ${typeof data === 'string' ? data : JSON.stringify(data)}\n\n`;
+          const bytes = Buffer.from(payload);
+          const split = bytes.findIndex((b) => b >= 0xe0);
+          // Deliberately allow a transport boundary inside a Chinese UTF-8 character.
+          if (split >= 0) {
+            res.write(bytes.subarray(0, split + 1));
+            res.write(bytes.subarray(split + 1));
+          } else res.write(bytes);
+        };
+        const responses = req.url?.endsWith('/responses'),
+          anthropic = req.url?.endsWith('/messages');
+        if (responses) {
+          frame('response.created', {
+            type: 'response.created',
+            response: { id: 'fixture-response', status: 'in_progress' },
+          });
+          frame('response.reasoning_text.delta', {
+            type: 'response.reasoning_text.delta',
+            delta: 'HIDDEN_REASONING',
+          });
+        } else if (anthropic) {
+          frame('message_start', {
+            type: 'message_start',
+            message: {
+              id: 'fixture-message',
+              type: 'message',
+              role: 'assistant',
+              content: [],
+              usage: { input_tokens: 20, output_tokens: 0 },
+            },
+          });
+          frame('content_block_start', {
+            type: 'content_block_start',
+            index: 0,
+            content_block: { type: 'thinking', thinking: '' },
+          });
+          frame('content_block_delta', {
+            type: 'content_block_delta',
+            index: 0,
+            delta: { type: 'thinking_delta', thinking: 'HIDDEN_REASONING' },
+          });
+          frame('content_block_stop', { type: 'content_block_stop', index: 0 });
+          frame('content_block_start', {
+            type: 'content_block_start',
+            index: 1,
+            content_block: { type: 'text', text: '' },
+          });
+        } else {
+          frame(null, {
+            choices: [
+              {
+                index: 0,
+                delta: { role: 'assistant', reasoning_content: 'HIDDEN_REASONING' },
+                finish_reason: null,
+              },
+            ],
+          });
+        }
+        const chars = Array.from(text),
+          size = Math.max(1, options.streamChunkSize || 8);
+        let textSoFar = '';
+        for (let at = 0, index = 0; at < chars.length; at += size, index++) {
+          if (res.destroyed || res.writableEnded) return;
+          const delta = chars.slice(at, at + size).join('');
+          textSoFar += delta;
+          if (responses)
+            frame('response.output_text.delta', {
+              type: 'response.output_text.delta',
+              response_id: 'fixture-response',
+              item_id: 'fixture-output',
+              output_index: 0,
+              content_index: 0,
+              delta,
+            });
+          else if (anthropic)
+            frame('content_block_delta', {
+              type: 'content_block_delta',
+              index: 1,
+              delta: { type: 'text_delta', text: delta },
+            });
+          else
+            frame(null, {
+              choices: [{ index: 0, delta: { content: delta }, finish_reason: null }],
+            });
+          await options.afterStreamChunk?.({ task, call, index, textSoFar });
+          if (options.streamDelayMs) await new Promise((r) => setTimeout(r, options.streamDelayMs));
+        }
+        if (res.destroyed || res.writableEnded) return;
+        if (responses)
+          frame('response.completed', {
+            type: 'response.completed',
+            response: {
+              id: 'fixture-response',
+              status: 'completed',
+              output: [{ type: 'message', content: [{ type: 'output_text', text }] }],
+              usage: { input_tokens: 20, output_tokens: 10 },
+            },
+          });
+        else if (anthropic) {
+          frame('content_block_stop', { type: 'content_block_stop', index: 1 });
+          frame('message_delta', {
+            type: 'message_delta',
+            delta: { stop_reason: 'end_turn', stop_sequence: null },
+            usage: { output_tokens: 10 },
+          });
+          frame('message_stop', { type: 'message_stop' });
+        } else {
+          frame(null, { choices: [{ index: 0, delta: {}, finish_reason: 'stop' }] });
+          frame(null, { choices: [], usage: { prompt_tokens: 20, completion_tokens: 10 } });
+          frame(null, '[DONE]');
+        }
+        res.end();
+        return;
+      }
       const result = req.url?.endsWith('/responses')
         ? {
             output: [{ type: 'message', content: [{ type: 'output_text', text }] }],
@@ -127,8 +261,11 @@ export async function startProvider(responder: Responder = defaultResponse) {
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(result));
     } catch {
-      res.writeHead(500, { 'Content-Type': 'application/json' });
-      res.end('{}');
+      if (res.headersSent) res.destroy();
+      else {
+        res.writeHead(500, { 'Content-Type': 'application/json' });
+        res.end('{}');
+      }
     }
   });
   server.listen(0, '127.0.0.1');

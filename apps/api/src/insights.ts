@@ -5,6 +5,7 @@ import type { Repository } from './repository';
 import type { ModelGateway } from './gateway';
 import type { InsightsPort } from './engine';
 import { AppError } from './errors';
+import { openSpeechDraft } from './speech-draft';
 type Job = { generation: number; pending: boolean; promise: Promise<void>; error: unknown };
 export class InsightsService implements InsightsPort {
   private jobs = new Map<string, Job>();
@@ -106,31 +107,44 @@ export class InsightsService implements InsightsPort {
       'speaking',
       '整理本场共识、分歧与待验证问题',
     );
-    const output = await this.gateway.generate({
-      connection: this.repo.hostConnection(id),
-      purpose: 'summary',
-      discussionId: id,
-      participantId: moderator.id,
+    const turnId = randomUUID();
+    const draft = openSpeechDraft(
+      this.repo,
+      id,
       generation,
+      { turnId, participantId: moderator.id, kind: 'summary', replyToMessageId: null },
       signal,
-      input: {
-        context: {
-          topic: s.discussion.topic,
-          participants: s.participants,
-          messages: s.messages.filter((m) => m.kind !== 'summary'),
-          insights: s.insights,
+    );
+    try {
+      const output = await this.gateway.generate({
+        connection: this.repo.hostConnection(id),
+        purpose: 'summary',
+        onText: draft.onText,
+        discussionId: id,
+        participantId: moderator.id,
+        generation,
+        signal,
+        input: {
+          context: {
+            topic: s.discussion.topic,
+            participants: s.participants,
+            messages: s.messages.filter((m) => m.kind !== 'summary'),
+            insights: s.insights,
+          },
         },
-      },
-      schema: ProseOutputSchema,
-    });
-    if (signal.aborted) throw new AppError('CANCELLED', '总结已取消', 409);
-    this.repo.appendMessage(id, generation, {
-      turnId: randomUUID(),
-      participantId: moderator.id,
-      kind: 'summary',
-      content: output.content,
-      replyToMessageId: null,
-    });
+        schema: ProseOutputSchema,
+      });
+      if (signal.aborted) throw new AppError('CANCELLED', '总结已取消', 409);
+      this.repo.appendMessage(id, generation, {
+        turnId,
+        participantId: moderator.id,
+        kind: 'summary',
+        content: output.content,
+        replyToMessageId: null,
+      });
+    } finally {
+      draft.close();
+    }
   }
   async close() {
     await Promise.allSettled([...this.jobs.values()].map((j) => j.promise));

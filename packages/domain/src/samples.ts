@@ -175,6 +175,7 @@ export function makeSample(index: number): DiscussionSnapshot {
         evidence: [{ messageId: messages[3].id, relation: 'qualifies' }],
       },
     ],
+    draft: null,
     lastEventSeq: 0,
   };
 }

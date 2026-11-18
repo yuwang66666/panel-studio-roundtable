@@ -11,13 +11,34 @@ let provider: Awaited<ReturnType<typeof startProvider>>,
   backend: Awaited<ReturnType<typeof createApp>>,
   vite: any,
   dir: string;
+const openingPauses = [24, 36].map((at) => {
+  let release!: () => void;
+  const promise = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  return { at, entered: false, promise, release };
+});
 test.beforeAll(async () => {
   mkdirSync(resolve('.tmp'), { recursive: true });
   dir = mkdtempSync(resolve('.tmp/e2e-'));
-  provider = await startProvider(async (task) => {
-    await new Promise((r) => setTimeout(r, task.purpose === 'utterance' ? 180 : 70));
-    return defaultResponse(task);
-  });
+  provider = await startProvider(
+    async (task) => {
+      await new Promise((r) => setTimeout(r, task.purpose === 'utterance' ? 100 : 50));
+      return defaultResponse(task);
+    },
+    {
+      streamChunkSize: 6,
+      streamDelayMs: 15,
+      afterStreamChunk: async ({ task, textSoFar }) => {
+        if (task.purpose !== 'opening') return;
+        const pause = openingPauses.find((p) => !p.entered && textSoFar.length >= p.at);
+        if (pause) {
+          pause.entered = true;
+          await pause.promise;
+        }
+      },
+    },
+  );
   const fixtureEnv = [
     'PANEL_MODELS=CHAT,CLAUDE,GPT',
     'PANEL_DEFAULT_MODERATOR=CHAT',
@@ -69,12 +90,13 @@ test.beforeAll(async () => {
   await vite.listen();
 });
 test.afterAll(async () => {
+  openingPauses.forEach((p) => p.release());
   await vite?.close();
   await backend?.app.close();
   await provider?.close();
   if (dir?.startsWith(resolve('.tmp') + sep)) rmSync(dir, { recursive: true, force: true });
 });
-test('预配置模型直接选择，完成阵容、讨论、断线恢复与总结', async ({ page, context }) => {
+test('三协议发言逐段显示，刷新和断线恢复草稿并完成讨论', async ({ page, context }) => {
   const errors: string[] = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.setViewportSize({ width: 1440, height: 900 });
@@ -108,30 +130,90 @@ test('预配置模型直接选择，完成阵容、讨论、断线恢复与总�
   await page.getByLabel('嘉宾2的模型').selectOption({ label: 'GPT 协议专家 · fixture-gpt' });
   await page.getByRole('button', { name: '确认阵容，开始讨论' }).click();
   await expect(page.getByRole('heading', { name: '现场讨论' })).toBeVisible();
+  const discussionId = page.url().split('/').at(-1)!;
+  const draft = page.locator('.streaming-message');
+  await expect.poll(() => openingPauses[0].entered).toBe(true);
+  await expect(draft.locator('.message-content')).toContainText('欢迎');
+  await expect(page.locator('.message')).toHaveCount(0);
+  const firstDraft = backend.repo.snapshot(discussionId).draft!;
+  expect(firstDraft.content.length).toBeGreaterThan(0);
+  expect(firstDraft.content.length).toBeLessThan(
+    '欢迎来到圆桌，请各位结合专业背景，讨论这个问题成立的条件。'.length,
+  );
+  for (const hidden of ['HIDDEN_REASONING', '"content"', '"sentences"', '{'])
+    expect(await draft.innerText()).not.toContain(hidden);
+  await page.setViewportSize({ width: 375, height: 812 });
+  await expect(draft).toBeInViewport();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.screenshot({ path: 'test-results/live/streaming-mobile.png', fullPage: true });
+  await page.reload();
+  await expect(draft).toHaveAttribute('data-turn-id', firstDraft.turnId);
+  await expect(draft.locator('.message-content')).toContainText(firstDraft.content);
+  await expect(page.locator('.message')).toHaveCount(0);
+  await context.setOffline(true);
+  openingPauses[0].release();
+  await expect.poll(() => openingPauses[1].entered).toBe(true);
+  await expect
+    .poll(() => backend.repo.snapshot(discussionId).draft?.content.length || 0)
+    .toBeGreaterThan(firstDraft.content.length);
+  const offlineDraft = backend.repo.snapshot(discussionId).draft!;
+  await context.setOffline(false);
+  await expect(draft).toHaveAttribute('data-turn-id', firstDraft.turnId);
+  await expect(draft.locator('.message-content')).toContainText(offlineDraft.content);
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.screenshot({ path: 'test-results/live/streaming-desktop.png', fullPage: true });
+  openingPauses[1].release();
+  await expect(page.locator('.message').first()).toContainText(
+    '欢迎来到圆桌，请各位结合专业背景，讨论这个问题成立的条件。',
+  );
+  await expect(page.locator(`.streaming-message[data-turn-id="${firstDraft.turnId}"]`)).toHaveCount(
+    0,
+  );
   await expect.poll(() => page.locator('.message').count()).toBeGreaterThanOrEqual(7);
   await page.locator('.transcript-scroll').evaluate((el) => {
     el.scrollTo({ top: 0, behavior: 'instant' });
     el.dispatchEvent(new Event('scroll'));
   });
+  await expect(page.locator('.streaming-message .message-content')).toBeVisible();
+  const beforeGrowth = await page.locator('.transcript-scroll').innerText();
+  await expect.poll(() => page.locator('.transcript-scroll').innerText()).not.toBe(beforeGrowth);
+  expect(await page.locator('.transcript-scroll').evaluate((el) => el.scrollTop)).toBeLessThan(50);
   await expect(page.locator('.new-messages')).toBeVisible();
   expect(await page.locator('.transcript-scroll').evaluate((el) => el.scrollTop)).toBeLessThan(50);
   await context.setOffline(true);
   await page.waitForTimeout(700);
   await context.setOffline(false);
-  await expect(page.locator('.summary-title')).toHaveText('本场圆桌总结', { timeout: 30000 });
+  try {
+    await expect(page.locator('.summary-title')).toHaveText('本场圆桌总结', { timeout: 30000 });
+  } catch (error) {
+    const current = backend.repo.snapshot(discussionId);
+    console.info('Isolated discussion diagnostics', {
+      status: current.discussion.status,
+      messageCount: current.messages.length,
+      eventSeq: current.lastEventSeq,
+      draft: current.draft && { kind: current.draft.kind, length: current.draft.content.length },
+      calls: provider.calls.length,
+    });
+    throw error;
+  }
   await expect(page.locator('.message')).toHaveCount(18);
+  await expect(page.locator('.streaming-message')).toHaveCount(0);
+  expect(backend.repo.snapshot(discussionId).draft).toBeNull();
+  for (const path of ['/v1/chat/completions', '/v1/messages', '/v1/responses'])
+    expect(provider.calls.some((c) => c.path === path && c.body.stream === true)).toBe(true);
+  expect(await page.locator('.transcript-scroll').innerText()).not.toContain('HIDDEN_REASONING');
   const ids = await page.locator('.message').evaluateAll((nodes) => nodes.map((n) => n.id));
   expect(new Set(ids).size).toBe(ids.length);
   await page.reload();
   await expect(page.locator('.message')).toHaveCount(18);
   await expect(page.locator('.insight-card')).not.toHaveCount(0);
-  await page.screenshot({ path: 'test-results/live-studio.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/live/live-studio.png', fullPage: true });
   expect(errors).toEqual([]);
 });
 test('手机页面、独立滚动与键盘焦点可用', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 });
   await page.goto('/');
-  await page.screenshot({ path: 'test-results/home-mobile.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/live/home-mobile.png', fullPage: true });
   await page.getByRole('button', { name: '开启一场圆桌' }).click();
   await expect(page.getByRole('dialog')).toBeVisible();
   await page.keyboard.press('Escape');
@@ -145,10 +227,10 @@ test('手机页面、独立滚动与键盘焦点可用', async ({ page }) => {
   await page.getByRole('button', { name: '查看证据发言 2' }).first().click();
   await expect(page.locator('#sample-1-m2')).toBeInViewport();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-  await page.screenshot({ path: 'test-results/studio-mobile.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/live/studio-mobile.png', fullPage: true });
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  await page.screenshot({ path: 'test-results/home-desktop.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/live/home-desktop.png', fullPage: true });
   await page.getByRole('link', { name: '模型设置', exact: true }).click();
   await page.getByLabel('搜索模型').focus();
   await page.keyboard.press('Tab');
@@ -166,7 +248,7 @@ test('手机页面、独立滚动与键盘焦点可用', async ({ page }) => {
       true,
     );
     await expect(page.getByLabel('默认主持人模型')).toBeVisible();
-    await page.screenshot({ path: `test-results/settings-${width}.png`, fullPage: true });
+    await page.screenshot({ path: `test-results/live/settings-${width}.png`, fullPage: true });
   }
 });
 

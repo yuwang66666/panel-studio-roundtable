@@ -9,6 +9,7 @@ import { buildContext, validShortUtterance } from '../../../packages/domain/src/
 import { AppError } from './errors';
 import type { Repository } from './repository';
 import type { ModelGateway } from './gateway';
+import { openSpeechDraft } from './speech-draft';
 export class SpeechService {
   constructor(
     private repo: Repository,
@@ -27,14 +28,22 @@ export class SpeechService {
       through = s.messages.at(-1)?.messageSeq || 0;
     const context = buildContext(s, participantId, through, target),
       connection = this.repo.actorConnection(d.id, participantId);
-    this.repo.setParticipantState(
+    const turnId = options.turnId || randomUUID();
+    const draft = openSpeechDraft(
+      this.repo,
       d.id,
       generation,
-      participantId,
-      'preparing',
-      options.focus || null,
+      { turnId, participantId, kind, replyToMessageId: target },
+      signal,
     );
     try {
+      this.repo.setParticipantState(
+        d.id,
+        generation,
+        participantId,
+        'preparing',
+        options.focus || null,
+      );
       this.repo.setParticipantState(
         d.id,
         generation,
@@ -51,6 +60,7 @@ export class SpeechService {
           participantId,
           generation,
           signal,
+          onText: draft.onText,
           input: { context, focus: options.focus },
           schema: UtteranceOutputSchema,
           validate: (r) => {
@@ -67,6 +77,7 @@ export class SpeechService {
           participantId,
           generation,
           signal,
+          onText: draft.onText,
           input: { context },
           schema: ProseOutputSchema,
         });
@@ -74,13 +85,14 @@ export class SpeechService {
       }
       if (signal.aborted) throw new AppError('CANCELLED', '发言已取消', 409);
       return this.repo.appendMessage(d.id, generation, {
-        turnId: options.turnId || randomUUID(),
+        turnId,
         participantId,
         kind,
         content,
         replyToMessageId: target,
       });
     } finally {
+      draft.close();
       const current = this.repo.discussion(d.id);
       if (current.generation === generation && ['running', 'summarizing'].includes(current.status))
         this.repo.setParticipantState(d.id, generation, participantId, 'idle', null);

@@ -12,6 +12,7 @@ import {
   SnapshotSchema,
   DiscussionSchema,
   PublicEventSchema,
+  SpeechDraftSchema,
   type ConnectionInput,
   type ModelConnectionSummary,
   type Discussion,
@@ -22,6 +23,7 @@ import {
   type Insight,
   type PublicEvent,
   type DiscussionStatus,
+  type SpeechDraft,
 } from '@panel/contracts';
 import { assertTransition, callBudget } from '@panel/domain';
 import { connections } from './schema';
@@ -52,11 +54,12 @@ export class Repository {
     this.db.pragma('journal_mode = WAL');
     this.db.pragma('foreign_keys = ON');
     this.db.pragma('busy_timeout = 5000');
-    this.db.transaction(() =>
-      this.db.exec(
-        readFileSync(new URL('../../../db/migrations/001.sql', import.meta.url), 'utf8'),
-      ),
-    )();
+    this.db.transaction(() => {
+      for (const name of ['001', '002'])
+        this.db.exec(
+          readFileSync(new URL(`../../../db/migrations/${name}.sql`, import.meta.url), 'utf8'),
+        );
+    })();
     this.orm = drizzle(this.db);
     this.events.setMaxListeners(100);
   }
@@ -302,6 +305,7 @@ export class Repository {
         participants: parse('participants', 'ORDER BY rowid'),
         bindings: parse('agent_bindings'),
         messages: parse('messages', 'ORDER BY message_seq'),
+        draft: parse('speech_drafts')[0] || null,
         insights: parse('insights', 'ORDER BY rowid'),
         lastEventSeq: seq.seq,
       });
@@ -503,6 +507,7 @@ export class Repository {
       if (options.bumpGeneration) d.generation++;
       d.failureStage = options.failureStage ?? null;
       d.error = options.error ?? null;
+      this.discardSpeechDraft(id);
       this.persist(d);
       this.emit(id, next === 'failed' ? 'discussion.failed' : 'discussion.status_changed', {
         discussion: d,
@@ -579,6 +584,7 @@ export class Repository {
   }
   clearStates(id: string) {
     this.transaction(() => {
+      this.discardSpeechDraft(id);
       for (const p of this.snapshot(id).participants) {
         if (p.status === 'idle' && p.publicFocus === null) continue;
         p.status = 'idle';
@@ -593,6 +599,72 @@ export class Repository {
         });
       }
     });
+  }
+  beginSpeechDraft(
+    id: string,
+    generation: number,
+    input: Pick<SpeechDraft, 'turnId' | 'participantId' | 'kind' | 'replyToMessageId'>,
+  ): SpeechDraft {
+    return this.transaction(() => {
+      this.guard(id, generation, input.kind === 'summary' ? ['summarizing'] : ['running']);
+      const s = this.snapshot(id);
+      const participant = s.participants.find((p) => p.id === input.participantId);
+      if (!participant || (input.kind === 'expert') !== (participant.role === 'expert'))
+        throw conflict('流式发言角色不属于当前讨论');
+      if (
+        input.replyToMessageId &&
+        !s.messages.some((m) => m.id === input.replyToMessageId && m.kind !== 'summary')
+      )
+        throw conflict('回应目标不属于当前讨论');
+      if (s.draft || s.messages.some((m) => m.turnId === input.turnId))
+        throw conflict('该讨论已有进行中的发言或该轮发言已提交');
+      const draft = SpeechDraftSchema.parse({
+        ...input,
+        discussionId: id,
+        generation,
+        content: '',
+        startedAt: now(),
+      });
+      this.db
+        .prepare('INSERT INTO speech_drafts VALUES(?,?,?,?,?)')
+        .run(id, input.turnId, generation, input.participantId, JSON.stringify(draft));
+      this.emit(id, 'speech.updated', { draft });
+      return draft;
+    });
+  }
+  updateSpeechDraft(id: string, generation: number, turnId: string, content: string) {
+    this.transaction(() => {
+      this.guard(id, generation, ['running', 'summarizing']);
+      const row = this.db
+        .prepare(
+          'SELECT data_json FROM speech_drafts WHERE discussion_id=? AND turn_id=? AND generation=?',
+        )
+        .get(id, turnId, generation) as { data_json: string } | undefined;
+      if (!row) throw new AppError('STALE_RESULT', '流式发言已结束', 409);
+      const draft = SpeechDraftSchema.parse({ ...JSON.parse(row.data_json), content });
+      this.guard(id, generation, draft.kind === 'summary' ? ['summarizing'] : ['running']);
+      if (JSON.parse(row.data_json).content === content) return;
+      this.db
+        .prepare('UPDATE speech_drafts SET data_json=? WHERE discussion_id=?')
+        .run(JSON.stringify(draft), id);
+      this.emit(id, 'speech.updated', { draft });
+    });
+  }
+  clearSpeechDraft(id: string, generation: number, turnId: string) {
+    this.transaction(() => {
+      const row = this.db
+        .prepare('SELECT 1 FROM speech_drafts WHERE discussion_id=? AND turn_id=? AND generation=?')
+        .get(id, turnId, generation);
+      if (row) this.discardSpeechDraft(id);
+    });
+  }
+  private discardSpeechDraft(id: string) {
+    const row = this.db
+      .prepare('SELECT turn_id FROM speech_drafts WHERE discussion_id=?')
+      .get(id) as { turn_id: string } | undefined;
+    if (!row) return;
+    this.db.prepare('DELETE FROM speech_drafts WHERE discussion_id=?').run(id);
+    this.emit(id, 'speech.cleared', { turnId: row.turn_id });
   }
   appendMessage(
     id: string,
@@ -611,6 +683,13 @@ export class Repository {
       if (existing) return JSON.parse(existing.data_json) as Message;
       const s = this.snapshot(id),
         p = s.participants.find((p) => p.id === input.participantId);
+      if (
+        s.draft &&
+        (s.draft.turnId !== input.turnId ||
+          s.draft.participantId !== input.participantId ||
+          s.draft.kind !== input.kind)
+      )
+        throw conflict('正式发言与当前流式发言不匹配');
       if (!p || (input.kind === 'expert') !== (p.role === 'expert'))
         throw conflict('发言角色不匹配');
       if (
@@ -642,6 +721,10 @@ export class Repository {
           JSON.stringify(message),
         );
       p.status = 'idle';
+      // Removal and final message/event commit share the same transaction.
+      this.db
+        .prepare('DELETE FROM speech_drafts WHERE discussion_id=? AND turn_id=?')
+        .run(id, input.turnId);
       p.publicFocus = null;
       this.db
         .prepare('UPDATE participants SET data_json=? WHERE id=?')

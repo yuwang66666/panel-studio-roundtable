@@ -12,4 +12,14 @@ REST 统一 /api 前缀。错误返回 `{error:{code,message}}`，不包含上�
 
 SSE event 使用 `panel`，id 使用讨论内 eventSeq；data 为共享 PublicEventSchema 定义的 JSON。重连优先使用 Last-Event-ID，初次连接使用 after。每 20 秒心跳，慢连接断开后按游标补发。公开事件仅包含状态、阵容、发言或洞察增量。浏览器使用快照初始化并按 seq 归并，不使用内部意愿作为聊天内容。
 
+快照新增 `draft: SpeechDraft | null`，包含 `turnId`、`discussionId`、`participantId`、`generation`、`kind`、`content`、`replyToMessageId`、`startedAt`。kind 为 expert/opening/probe/summary；content 为累计公开正文，允许空串表示等待首段或重新生成。草稿不属于 `messages`，没有 messageSeq。
+
+| 流式相关事件        | payload                | 客户端行为                                                                  |
+| ------------------- | ---------------------- | --------------------------------------------------------------------------- |
+| `speech.updated`    | `{ draft }`            | 按 turnId、generation 和讨论归属校验后全文替换，不能把 content 追加到旧文本 |
+| `speech.cleared`    | `{ turnId }`           | 仅清除匹配的当前草稿                                                        |
+| `message.committed` | 既有正式消息及讨论信息 | 清除相同 turnId 草稿，再按消息 ID/turnId 去重加入正式记录                   |
+
+草稿和事件入库后才推送，刷新通过 snapshot 恢复；续传、缺口和去重与其他公开事件相同。终态或 generation 变化时丢弃过期草稿。失败和取消不会把未校验草稿变成正式发言；只有正式消息可用于引用和洞察证据。草稿公开正文最多6000字符，专家展示额外限制为400字符。
+
 所有公开对象采用严格 Zod 白名单。具体字段与枚举以 packages/contracts 为可执行来源。后端监听 127.0.0.1，写接口校验 Origin 及 JSON 内容类型；没有 Origin 的本地 CLI 需显式发送 X-Panel-Client: local。

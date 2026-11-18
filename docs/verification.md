@@ -1,5 +1,16 @@
 # 阶段验收证据
 
+## T17 · 讨论区流式发言 · 2026-11-18
+
+- 第一步：新增SpeechDraft快照、speech.updated/speech.cleared事件及迁移002。`scripts/tool.ps1 exec vitest run tests/drafts.test.ts tests/repository.test.ts tests/contracts.test.ts` 14/14通过，覆盖原子回滚、跨场隔离、草稿恢复、取消和修复重置。
+- 第二步：三协议供应商SSE解析与累计正文投影。流式专项27项加既有网关9项共36/36通过，覆盖中文UTF-8分片、转义、隐藏推理隔离、用量、结束标记、异常截断、取消/超时、回调失败和普通JSON回退。
+- 第三步：前端显示生成中草稿，正式提交替换，阅读旧消息时保留滚动位置。`scripts/tool.ps1 test` 84/84通过；`scripts/tool.ps1 build` 生产构建和前后端类型检查通过。
+- 第四步：`scripts/tool.ps1 test:e2e:live` 3/3通过，使用本地HTTP模型服务验证三协议真实分片、首段早于正式消息、375px草稿、刷新与断线续传、上翻不抢滚动、最终18条消息且无残留草稿或重复。第一次运行在并行HMR修改期间等待总结超时，代码稳定后重跑通过。`scripts/tool.ps1 test:e2e` 2/2通过，覆盖375/768/1024/1440宽度、原型和模型选择。
+- 第五步：北京时间19:16:46完成DeepSeek真实专家短发言验证，使用实际业务system和隔离数据库。收到text/event-stream；首段15.851秒、完成16.415秒；持久化5次非空草稿更新，正式消息1条，完成后draft=null；1次调用、0次错误，输入927/输出834 token。时间为单次观测且包含首段前等待，不能视为平均延迟。脱敏报告位于被忽略的 `.data/streaming-verification-2026-11-18.json`。
+- 真实流式本次只验证DeepSeek；GPT、Claude、Qwen、Kimi保持既有最小连接结果，未把三协议测试桩等同于各供应商真实流式验收。整场真实混合讨论和Claude角色兼容性仍待验收。
+- README、PRD、架构、ER、API/SSE及从共享Schema生成的OpenAPI已同步。草稿不作为上下文或洞察证据，完整发言校验成功后才进入正式记录。
+- 测试截图改为 `test-results/live` 与 `test-results/prototype` 独立目录。随后依次运行正式3/3（12.2秒）、原型2/2（4.2秒），10张正式流程截图前后SHA256一致，确认后者不会清除前者证据；375px与1440px流式截图已目视复核。`scripts/tool.ps1 format:check` 通过，后端和前端同源代理健康检查均ok。
+
 ## T16 · GPT/Claude更新凭据复测 · 2026-11-18
 
 - 用户要求更新密钥后复测。无进行中讨论时重启服务；GPT和Claude均加载为版本2。GPT首轮6.436秒通过，Claude收到自然语言而非所需JSON，返回INVALID_OUTPUT。

@@ -1,6 +1,7 @@
 import { z, type ZodType } from 'zod';
 import type { Repository, PrivateConnection } from './repository';
 import { AppError } from './errors';
+import { projectSpeechText, readModelStream } from './streaming';
 export type Purpose =
   'test' | 'cast' | 'intent' | 'opening' | 'probe' | 'utterance' | 'insights' | 'summary';
 export interface ModelRequest<T> {
@@ -13,6 +14,8 @@ export interface ModelRequest<T> {
   generation?: number;
   signal?: AbortSignal;
   validate?: (data: T) => void;
+  /** The current accumulated public speech; an empty value starts a fresh attempt. */
+  onText?: (text: string) => void;
 }
 const instructions: Record<Purpose, string> = {
   test: '返回 {"ok":true}。',
@@ -103,6 +106,7 @@ async function readJson(response: Response) {
     return JSON.parse(Buffer.concat(chunks).toString('utf8'));
   } catch (e) {
     if (e instanceof AppError) throw e;
+    if (e instanceof Error && ['AbortError', 'TimeoutError'].includes(e.name)) throw e;
     throw new AppError('INVALID_OUTPUT', '模型响应不是合法 JSON', 502);
   } finally {
     reader.releaseLock();
@@ -112,6 +116,7 @@ export class ModelGateway {
   private global: Semaphore;
   private connections = new Map<string, Semaphore>();
   private discussionSlots = new Map<string, Semaphore>();
+  private callbackErrors = new WeakSet<AppError>();
   constructor(
     private repo: Repository,
     private options = {
@@ -129,6 +134,7 @@ export class ModelGateway {
       try {
         return await this.call(request, repair > 0);
       } catch (e) {
+        if (e instanceof AppError && this.callbackErrors.has(e)) throw e;
         const invalid =
           e instanceof SyntaxError ||
           e instanceof z.ZodError ||
@@ -167,7 +173,23 @@ export class ModelGateway {
         attempted = false,
         usage: unknown = null,
         errorCode: string | null = null;
+      let lastText = '';
+      const publish = (text: string, reset = false) => {
+        if (!r.onText || (!reset && text === lastText)) return;
+        try {
+          r.onText(text);
+          lastText = text;
+        } catch (error) {
+          const failure =
+            error instanceof AppError
+              ? error
+              : new AppError('STREAM_CALLBACK', '流式发言更新失败', 500);
+          this.callbackErrors.add(failure);
+          throw failure;
+        }
+      };
       try {
+        publish('', true);
         let sem = this.connections.get(c.id);
         if (!sem) {
           sem = new Semaphore(this.options.connectionConcurrency);
@@ -210,6 +232,7 @@ export class ModelGateway {
           headers['anthropic-version'] = '2023-06-01';
           body = {
             model: c.model,
+            ...(r.onText ? { stream: true } : {}),
             max_tokens: tokens,
             ...(connectionTest ? {} : { system }),
             messages: [{ role: 'user', content: user }],
@@ -219,6 +242,7 @@ export class ModelGateway {
           headers.Authorization = `Bearer ${c.apiKey}`;
           body = {
             model: c.model,
+            ...(r.onText ? { stream: true } : {}),
             ...(connectionTest ? {} : { instructions: system }),
             input: [{ role: 'user', content: user }],
             max_output_tokens: tokens,
@@ -230,6 +254,7 @@ export class ModelGateway {
           headers.Authorization = `Bearer ${c.apiKey}`;
           body = {
             model: c.model,
+            ...(r.onText ? { stream: true, stream_options: { include_usage: true } } : {}),
             messages: [
               ...(connectionTest ? [] : [{ role: 'system', content: system }]),
               { role: 'user', content: user },
@@ -259,29 +284,51 @@ export class ModelGateway {
             502,
           );
         }
-        const data = await readJson(response);
-        usage = data.usage
-          ? {
-              inputTokens: Number(data.usage.input_tokens ?? data.usage.prompt_tokens ?? 0),
-              outputTokens: Number(data.usage.output_tokens ?? data.usage.completion_tokens ?? 0),
-            }
-          : null;
-        const text =
-          c.protocol === 'anthropic'
-            ? data.content
-                ?.filter((x: any) => x.type === 'text')
-                .map((x: any) => x.text)
-                .join('')
-            : c.protocol === 'openai-responses'
-              ? data.output
-                  ?.filter((x: any) => x.type === 'message')
-                  .flatMap((x: any) => x.content || [])
-                  .filter((x: any) => x.type === 'output_text')
+        let text: string;
+        if (
+          r.onText &&
+          response.headers.get('content-type')?.toLowerCase().includes('text/event-stream')
+        ) {
+          text = await readModelStream(
+            response,
+            c.protocol,
+            (raw) => publish(projectSpeechText(raw, r.purpose)),
+            (value) => {
+              usage = value;
+            },
+          );
+        } else {
+          const data = await readJson(response);
+          usage = data.usage
+            ? {
+                inputTokens: Number(data.usage.input_tokens ?? data.usage.prompt_tokens ?? 0),
+                outputTokens: Number(data.usage.output_tokens ?? data.usage.completion_tokens ?? 0),
+              }
+            : null;
+          text =
+            c.protocol === 'anthropic'
+              ? data.content
+                  ?.filter((x: any) => x.type === 'text')
                   .map((x: any) => x.text)
                   .join('')
-              : data.choices?.[0]?.message?.content;
+              : c.protocol === 'openai-responses'
+                ? data.output
+                    ?.filter((x: any) => x.type === 'message')
+                    .flatMap((x: any) => x.content || [])
+                    .filter((x: any) => x.type === 'output_text')
+                    .map((x: any) => x.text)
+                    .join('')
+                : data.choices?.[0]?.message?.content;
+        }
+        if (signal.aborted)
+          throw new AppError(
+            r.signal?.aborted ? 'CANCELLED' : 'TIMEOUT',
+            '模型调用已取消或超时',
+            504,
+          );
         if (typeof text !== 'string' || !text.trim())
           throw new AppError('INVALID_OUTPUT', '模型没有返回可用的公开文本', 502);
+        let parsed: T;
         try {
           const data = JSON.parse(
             text
@@ -289,12 +336,19 @@ export class ModelGateway {
               .replace(/^```(?:json)?\s*/i, '')
               .replace(/\s*```$/, ''),
           );
-          const parsed = r.schema.parse(data);
+          parsed = r.schema.parse(data);
           r.validate?.(parsed);
-          return parsed;
         } catch {
           throw new AppError('INVALID_OUTPUT', '模型输出未通过格式或业务校验', 502);
         }
+        publish(projectSpeechText(text, r.purpose));
+        if (signal.aborted)
+          throw new AppError(
+            r.signal?.aborted ? 'CANCELLED' : 'TIMEOUT',
+            '模型调用已取消或超时',
+            504,
+          );
+        return parsed;
       } catch (error) {
         let e =
           error instanceof AppError
@@ -314,6 +368,7 @@ export class ModelGateway {
         if (
           retry < 2 &&
           ['UPSTREAM_RATE_LIMIT', 'UPSTREAM_TEMPORARY', 'UPSTREAM_NETWORK'].includes(e.code) &&
+          !this.callbackErrors.has(e) &&
           !r.signal?.aborted
         ) {
           releaseGlobal?.();
