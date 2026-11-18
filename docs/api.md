@@ -2,6 +2,52 @@
 
 REST 统一 /api 前缀。错误返回 `{error:{code,message}}`，不包含上游原始响应或请求凭据。
 
+## 接口速查
+
+本地地址 `http://127.0.0.1:3001/api`；浏览器通过5173同源代理调用。机器可读契约为 [openapi.json](openapi.json)，由 `pnpm docs:api` 生成；下表与示例为Markdown阅读入口。
+
+| 方法与完整路径                            | 请求                                                                    | 成功响应                                          |
+| ----------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------- |
+| GET `/api/health`                         | 无                                                                      | 200 `{ok:true}`                                   |
+| GET `/api/model-connections`              | 无                                                                      | 200 模型摘要数组，含id/version/hasApiKey，不含Key |
+| POST `/api/model-connections/:id/test`    | `{}`                                                                    | 200 `{ok:true,message}`，执行一次最小模型调用     |
+| GET / PATCH `/api/settings`               | PATCH为 `{defaultModeratorConnectionId}`                                | 200 当前设置                                      |
+| GET `/api/discussions`                    | status可选，limit默认50/最大100，cursor透传                             | 200 `{items,nextCursor}`                          |
+| POST `/api/discussions`                   | `{topic,expertCount?,moderatorConnectionId?}`                           | 202 初始Snapshot，阵容后台生成                    |
+| GET `/api/discussions/:id/snapshot`       | 无                                                                      | 200 Snapshot                                      |
+| PUT `/api/discussions/:id/agent-bindings` | `{expectedVersion,castVersion,bindings:[{participantId,connectionId}]}` | 200 新Snapshot                                    |
+| POST `/api/discussions/:id/start`         | `{expectedVersion,castVersion}`                                         | 202 Snapshot                                      |
+| POST `/api/discussions/:id/finish`        | `{expectedVersion}`                                                     | 202 Snapshot                                      |
+| POST `/api/discussions/:id/retry`         | `{expectedVersion}`                                                     | 202 Snapshot                                      |
+| DELETE `/api/discussions/:id`             | `{expectedVersion}`                                                     | 200 `{id,deleted:true}`                           |
+| GET `/api/discussions/:id/usage`          | 无                                                                      | 200 `{calls,errorCalls,inputTokens,outputTokens}` |
+| GET `/api/discussions/:id/events`         | after或Last-Event-ID                                                    | 200 `text/event-stream`                           |
+| GET `/api/openapi.json`                   | 无                                                                      | 200 OpenAPI 3.0.3文档                             |
+
+Snapshot包含 `discussion`、`participants`、`bindings`、`messages`、`draft`、`insights`、`lastEventSeq`。创建话题须为5–500字符，专家人数默认4、范围2–6；bindings必须覆盖主持人及全部专家。保存绑定会改变version，开始前必须使用返回的新版本。事件序号不替代控制命令版本。
+
+## 调用示例与错误处理
+
+只读样例查询不需要模型配置：
+
+```powershell
+$snapshot = Invoke-RestMethod http://127.0.0.1:3001/api/discussions/sample-1/snapshot
+$snapshot.participants | Select-Object name, occupation, stance
+```
+
+以下创建示例会使用已配置的默认主持人并产生模型调用。先完成环境配置；网络重试同一请求时保留原Idempotency-Key，新动作使用新键。
+
+```powershell
+$headers = @{ 'X-Panel-Client' = 'local'; 'Idempotency-Key' = [guid]::NewGuid().ToString() }
+$body = @{ topic = '城市如何改善公共交通的可靠性？'; expertCount = 4 } | ConvertTo-Json
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:3001/api/discussions `
+  -Headers $headers -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($body))
+```
+
+参数错误400应先改输入；403检查Origin或本地客户端请求头；404重新获取列表；409重新取快照并检查状态/版本，不盲目重放旧版本；429等待容量释放。模型调用失败返回安全错误信息，具体阶段可从讨论的failureStage/error读取。删除后旧创建幂等键返回410，模型配置写接口返回405。JSON写入的内容类型不正确返回415。
+
+## 版本、事件与隐私契约
+
 模型目录：GET `/model-connections` 返回模型连接摘要（包含 active 状态，不含密钥）；网页只提供启用模型供选择。POST `/model-connections/:id/test` 使用后端保存的凭据执行最小调用，JSON 请求体为 `{}`。GET/PATCH `/settings` 查询或选择默认主持人连接。
 
 模型配置只从根目录 `.env` 加载，由后端启动时同步。旧 POST `/model-connections` 与 PATCH `/model-connections/:id` 不再接收配置，合法本地 JSON 请求返回 `405` 与错误码 `ENV_MANAGED`。来源和内容类型检查仍先于路由执行。没有网页密钥输入、创建、编辑或启停模型流程。字段和加载规则见 README 的“预先配置模型”。

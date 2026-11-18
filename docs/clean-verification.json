@@ -1,13 +1,20 @@
 {
+  "checkedAt": "2026-11-18T15:13:05.841Z",
+  "sourceRevision": "4048c0dd9b0c06acd5c31aebd51b1a06ca1388dd",
+  "includesWorkingTree": true,
   "source": "E:\\圆桌app",
-  "isolatedCopy": "E:\\圆桌app\\.tmp\\clean-V9DGqA",
+  "isolatedCopy": "E:\\圆桌app\\.tmp\\clean-a39LeG",
   "node": "v24.22.3",
+  "unitTestsPassed": 265,
   "checks": [
     "install --frozen-lockfile --store-dir E:\\圆桌app\\.pnpm-store",
     "build",
+    "test",
+    "db:init",
     "seed",
     "seed",
-    "isolated API health with blank .env template; exactly 5 samples after two seed runs; no copied connections or model environment; OpenAPI available"
+    "isolated API and frontend proxy health with blank .env template; exactly 5 complete samples after two seed runs; no copied connections or model environment; OpenAPI available",
+    "client entry, Vite client and React refresh available; four private file routes return 403"
   ],
   "result": "passed"
 }

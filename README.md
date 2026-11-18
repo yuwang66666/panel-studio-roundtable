@@ -2,20 +2,40 @@
 
 本地运行的中文多智能体圆桌讨论应用。按话题动态生成专家，为每位专家分配不同模型，让专家基于公开讨论自主选择参与，并实时形成带发言证据的共识、分歧和主持人总结。
 
+源码仓库：<https://github.com/yuwang66666/panel-studio-roundtable>。交付入口见 [交付清单](docs/delivery.md)，真实提交阶段见 [Git 演进记录](docs/git-history.md)。
+
+| 文档                                                                     | 阅读内容                                     |
+| ------------------------------------------------------------------------ | -------------------------------------------- |
+| [PRD](docs/PRD.md)                                                       | 用户流程、需求边界、默认参数与验收要求       |
+| [架构与状态机](docs/architecture.md)                                     | 模块职责、Mermaid 状态机、请求与事件时序     |
+| [ER 图与数据模型](docs/data-model.md)                                    | Mermaid 实体关系、主外键、事务与迁移         |
+| [数据库初始化](docs/database.md)                                         | 空库初始化、幂等样例导入、持久化与备份       |
+| [5 场完整样例](docs/samples.md)                                          | 预设话题、对应嘉宾、发言、共识分歧证据和总结 |
+| [API 文档](docs/api.md)                                                  | REST 请求/响应、版本锁、幂等、SSE 和错误处理 |
+| [测试指南](docs/testing.md)                                              | 单元/集成/浏览器测试入口、覆盖范围与复现方式 |
+| [阶段验收](docs/verification.md)                                         | 每阶段的实际运行结果与已知边界               |
+| [Prompt 记录](docs/prompts.md) / [开发反思](docs/workflow-reflection.md) | 真实需求演进、实现选择和复盘                 |
+
 ## 启动
 
 推荐 Node.js 24 LTS、pnpm 10.28.2。首次运行：
 
 ```powershell
+git clone https://github.com/yuwang66666/panel-studio-roundtable.git
+cd panel-studio-roundtable
 pnpm install --frozen-lockfile
+pnpm db:init
 pnpm seed
 pnpm dev
 ```
+
+未配置模型也能启动并浏览样例；创建真实讨论前再按下节复制 `.env.example`、填写所需模型并重启。`db:init` 只初始化数据库，`seed` 会自动初始化并补入5场样例；已经执行 `seed` 时可省略单独的 `db:init`。
 
 本机默认 Node 没有激活时，项目提供 PowerShell 入口，会优先使用已安装的 Codex Node 运行环境，并将安装缓存放在项目目录内：
 
 ```powershell
 .\scripts\tool.ps1 install --frozen-lockfile
+.\scripts\tool.ps1 db:init
 .\scripts\tool.ps1 seed
 .\scripts\dev.ps1
 ```
@@ -124,6 +144,7 @@ pnpm test:e2e:live        # 隔离数据库中的真实前后端浏览器流程
 pnpm test:e2e:layout      # 五种宽度与短视口的容器滚动、页签、操作可达性检查
 pnpm verify:clean         # 将源文件复制到独立目录，重新安装、构建、初始化并启动验证
 pnpm docs:api             # 从共享 Zod 契约重新生成 OpenAPI
+pnpm docs:samples         # 从可执行样例导出 Markdown 话题、嘉宾与发言
 pnpm format:check         # 源文件格式检查
 ```
 
@@ -135,9 +156,21 @@ pnpm format:check         # 源文件格式检查
 
 前端为 React / Vite / TypeScript，TanStack Query 管理查询，Zustand 管理按讨论隔离的事件投影。后端为 Fastify 模块化单体，SQLite / Drizzle 保存业务数据，SSE 从持久事件日志推送。模型网关负责三协议、全局/连接/讨论并发、超时、重试与输出校验。
 
+| 选择                               | 采用原因与取舍                                                                                                     |
+| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| React、Vite、TypeScript            | 前后端共享类型，热更新便于逐项验证；生产构建与本地后端分别运行                                                     |
+| Fastify、Zod                       | 清晰的服务边界、运行时输入/输出校验，拒绝未知公开字段                                                              |
+| SQLite、better-sqlite3、Drizzle    | 无需独立数据库服务；Drizzle用于连接查询，显式SQL管理复杂事务和复合外键，迁移SQL是物理表结构依据；单写者适合本地MVP |
+| SSE                                | 讨论内容主要由服务器推送；HTTP可重连，持久事件游标负责补发；控制命令仍走REST                                       |
+| TanStack Query、Zustand            | 分别管理服务器查询缓存和按讨论隔离的事件状态，避免跨场共享上下文                                                   |
+| Tailwind CSS、Radix Slot、组件源码 | Tailwind工具与自定义CSS实现演播厅，按钮采用shadcn/ui风格的可维护源码；并非完整引入整套组件库                       |
+| Vitest、Playwright                 | 前者用临时数据库/本地模型测试服务验证逻辑，后者在真实浏览器验证刷新、重连、布局与键盘                              |
+| pnpm workspace、lockfile           | 前后端和共享包统一依赖管理，按锁安装复现版本                                                                       |
+
 - 模型目录：`GET /api/model-connections` 返回无密钥摘要，`POST /api/model-connections/:id/test` 验证已配置模型。旧创建和修改接口返回 `405 ENV_MANAGED`，模型配置只从 `.env` 加载。
 - 默认主持人：`GET/PATCH /api/settings`。
 - 讨论：`POST/GET /api/discussions`，`GET /:id/snapshot`，`PUT /:id/agent-bindings`，`POST /:id/start`、`/:id/finish`、`/:id/retry`。
+- 删除历史：`DELETE /api/discussions/:id`，提交当前版本；运行中禁止删除。
 - 实时事件：`GET /api/discussions/:id/events?after=N`，自动重连使用 Last-Event-ID。
 - 用量：`GET /api/discussions/:id/usage`。没有单位价格配置时只提供调用次数与 token，不估算人民币费用。
 - OpenAPI：`GET /api/openapi.json`；离线文件 [docs/openapi.json](docs/openapi.json)。
@@ -162,4 +195,16 @@ pnpm format:check         # 源文件格式检查
 
 阵容失败可重试；专家阶段持续模型失败时自动进入收尾；模型故障由备用连接或本地整理完成总结。数据库等本地存储异常仍保留错误状态，不能伪报已保存。运行中的讨论重启后可请求总结，不续跑专家轮次；已在收尾的讨论自动恢复。已有总结不会反向参与共识计算。当前版本为匿名本地单实例，不包括账号、联网检索、音视频、时间轴回放或云部署。
 
-过程记录见 [任务清单](docs/tasks.md)、[阶段验收](docs/verification.md)、[真实 Prompt 记录](docs/prompts.md)、[开发反思](docs/workflow-reflection.md)、[架构](docs/architecture.md) 与 [数据模型](docs/data-model.md)。按用户选择，本次交付保留本地 Git 仓库及逐阶段提交，不执行远程推送。
+## 已完成能力与后续方向
+
+已实现：动态阵容与模型分配、同轮全员参与判断及确定性仲裁、三协议模型接入、公开状态与流式正文、带证据的实时洞察、自然语言总结与有标注的本地兜底、历史持久化与删除、SSE恢复、多场隔离、文件与凭据边界、中文响应式容器滚动。对应验收见[交付清单](docs/delivery.md)与[阶段验收](docs/verification.md)。
+
+| 优先级 | 后续改进                                 | 验收方向                                                          |
+| ------ | ---------------------------------------- | ----------------------------------------------------------------- |
+| P0     | 完成至少两个真实服务商的混合讨论质量验收 | 真实阵容→交互→证据洞察→模型总结闭环；与本地兜底结果分别记录       |
+| P1     | 增强讨论与洞察质量评估                   | 固定评测题集，量化重复观点、无效反驳、证据准确度与延迟            |
+| P1     | 改进长讨论与成本观测                     | 按任务统计token和耗时，验证分段提炼；配置真实单位价格后再显示费用 |
+| P2     | 完善跨平台运行与自动化                   | 在Linux/macOS及独立Chromium环境复验安装和浏览器流程，补充CI       |
+| P2     | 改善维护边界                             | 拆分较大的页面与Repository模块，同时维持现有契约和回归            |
+
+账号、云部署、音视频与联网检索不属于当前交付范围。仓库保留真实逐阶段提交，未为制造“先测试后实现”的外观重写历史；[Git 演进记录](docs/git-history.md)将既有提交映射到需求、界面、测试和逻辑层。

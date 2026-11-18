@@ -1,5 +1,19 @@
 # 架构与生命周期
 
+## 模块划分
+
+| 路径                                     | 职责                                                    |
+| ---------------------------------------- | ------------------------------------------------------- |
+| `apps/web/src`                           | 四类页面、查询缓存、按讨论隔离的SSE投影、滚动与证据定位 |
+| `apps/api/src/app.ts`                    | REST路由、来源/输入校验、幂等命令与服务生命周期         |
+| `discussions.ts` / `engine.ts`           | 每场任务注册、全员意愿、确定性仲裁、预算与取消          |
+| `gateway.ts` / `streaming.ts`            | 三协议、并发、超时、重试、用量、流式公开正文提取        |
+| `speech.ts` / `insights.ts`              | 发言校验提交、洞察合并、最终总结及备用/本地整理         |
+| `repository.ts` / `db/migrations`        | 持久化、短事务、连接版本、事件、草稿与恢复任务          |
+| `packages/contracts` / `packages/domain` | 公开Schema，以及上下文、调度、证据和正文边界的纯函数    |
+
+数据库同步写入由单个本地API进程负责；模型网络请求是异步任务，不占用SQLite事务。扩展至多API实例需要外部任务协调与重新评估持久化方案，当前交付未实现此部署模式。
+
 ```mermaid
 flowchart LR
   Web[React 中文界面] -->|REST / 同源代理| API[Fastify 应用服务]
@@ -10,6 +24,35 @@ flowchart LR
   Engine --> Repo
   Repo --> Events[持久事件日志 / SSE]
   Events --> Web
+```
+
+## 单轮讨论与事件提交
+
+```mermaid
+sequenceDiagram
+  participant UI as 浏览器
+  participant API as Fastify
+  participant E as 本场执行器
+  participant G as 模型网关
+  participant DB as SQLite
+  UI->>API: start / 版本与幂等键
+  API->>DB: 校验绑定与状态，冻结版本
+  API->>E: 注册唯一执行器
+  loop 每轮直到结束条件
+    E->>DB: 读取同一throughMessageSeq快照
+    E->>G: 全员独立判断参与意愿
+    G-->>E: pass或候选与回应目标
+    E->>E: 过滤无效/过期候选，确定性仲裁
+    E->>G: 仅为选中专家生成发言
+    G-->>E: 公开正文片段
+    E->>DB: 草稿与事件原子保存
+    DB-->>UI: SSE公开草稿
+    E->>DB: 最终校验后消息与事件原子提交
+    DB-->>UI: 正式消息替换草稿
+  end
+  E->>G: 最终洞察与有限总结尝试
+  E->>DB: 总结来源、覆盖与完成状态原子保存
+  DB-->>UI: summary.ready
 ```
 
 Vite通过`server-security.ts`限制客户端文件访问，`server.fs.allow`只列出前端、共享契约源码、共享领域源码和依赖目录。开发服务与预览服务的前置中间件在路径解码后检查私有目录、敏感扩展名和`/@fs/`路径，结合真实文件路径检查阻止链接跳出白名单；模块加载钩子再检查实际文件，Vite虚拟模块保持可用。`.env`、`.data`、`.tmp`、`.git`、后端源码、数据库及密钥不属于浏览器文件资源；`/api`继续由同源代理转交Fastify。
