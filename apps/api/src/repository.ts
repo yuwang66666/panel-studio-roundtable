@@ -27,6 +27,7 @@ import {
   type SpeechDraft,
 } from '@panel/contracts';
 import { assertTransition, callBudget } from '@panel/domain';
+import { buildParticipantFocus } from '../../../packages/domain/src/participant-focus';
 import { connections } from './schema';
 import { AppError, conflict } from './errors';
 import type { ModelCatalog } from './model-catalog';
@@ -743,6 +744,7 @@ export class Repository {
       this.guard(id, generation, ['running', 'summarizing']);
       const p = this.snapshot(id).participants.find((p) => p.id === participantId);
       if (!p) throw conflict('参与者不属于当前讨论');
+      if (p.status === status && p.publicFocus === publicFocus) return;
       p.status = status;
       p.publicFocus = publicFocus;
       this.db
@@ -797,6 +799,13 @@ export class Repository {
       this.db
         .prepare('INSERT INTO speech_drafts VALUES(?,?,?,?,?)')
         .run(id, input.turnId, generation, input.participantId, JSON.stringify(draft));
+      this.setParticipantState(
+        id,
+        generation,
+        participant.id,
+        'preparing',
+        participant.publicFocus,
+      );
       this.emit(id, 'speech.updated', { draft });
       return draft;
     });
@@ -816,15 +825,42 @@ export class Repository {
       this.db
         .prepare('UPDATE speech_drafts SET data_json=? WHERE discussion_id=?')
         .run(JSON.stringify(draft), id);
+      const snapshot = this.snapshot(id),
+        participant = snapshot.participants.find((p) => p.id === draft.participantId)!,
+        hasPublicText = content.trim().length > 0;
+      this.setParticipantState(
+        id,
+        generation,
+        participant.id,
+        hasPublicText ? 'speaking' : 'preparing',
+        draft.kind === 'expert'
+          ? buildParticipantFocus(
+              snapshot,
+              participant.id,
+              hasPublicText ? 'speaking' : 'waiting',
+              draft.replyToMessageId,
+            )
+          : participant.publicFocus,
+      );
       this.emit(id, 'speech.updated', { draft });
     });
   }
   clearSpeechDraft(id: string, generation: number, turnId: string) {
     this.transaction(() => {
       const row = this.db
-        .prepare('SELECT 1 FROM speech_drafts WHERE discussion_id=? AND turn_id=? AND generation=?')
-        .get(id, turnId, generation);
-      if (row) this.discardSpeechDraft(id);
+        .prepare(
+          'SELECT participant_id FROM speech_drafts WHERE discussion_id=? AND turn_id=? AND generation=?',
+        )
+        .get(id, turnId, generation) as { participant_id: string } | undefined;
+      if (row) {
+        this.discardSpeechDraft(id);
+        const current = this.discussion(id);
+        if (
+          current.generation === generation &&
+          ['running', 'summarizing'].includes(current.status)
+        )
+          this.setParticipantState(id, generation, row.participant_id, 'idle', null);
+      }
     });
   }
   private discardSpeechDraft(id: string) {

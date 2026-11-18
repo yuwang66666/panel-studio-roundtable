@@ -917,6 +917,19 @@ function Cast({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
 }
 function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
   const network = useLive((state) => state.network[s.discussion.id]);
+  const preparingCount = s.participants.filter((p) => p.status === 'preparing').length;
+  const speakingNames = s.participants.filter((p) => p.status === 'speaking').map((p) => p.name);
+  const idleCount = s.participants.filter((p) => p.status === 'idle').length;
+  const expertStatusSummary =
+    idleCount === s.participants.length
+      ? '全部待机'
+      : [
+          preparingCount ? `${preparingCount} 位准备中` : '',
+          speakingNames.length ? `${speakingNames.join('、')}发言中` : '',
+          idleCount ? `${idleCount} 位待机` : '',
+        ]
+          .filter(Boolean)
+          .join('；');
   const d = s.discussion,
     qc = useQueryClient(),
     [tab, setTab] = useState('transcript'),
@@ -1065,10 +1078,17 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
             </h2>
             <span>{s.participants.length}</span>
           </div>
+          <p className="experts-note">状态实时同步，关注点依据公开讨论信息整理。</p>
+          <p className="expert-status-summary" role="status" aria-live="polite" aria-atomic="true">
+            {expertStatusSummary}
+          </p>
           <div className="panel-scroll experts-list">
             {s.participants.map((p) => (
               <article
                 key={p.id}
+                aria-label={`${p.name}的状态`}
+                data-participant-id={p.id}
+                data-state={p.status}
                 className={`expert-item ${p.status !== 'idle' ? 'expert-active' : ''}`}
                 style={{ '--person': colors[p.colorKey] } as React.CSSProperties}
               >
@@ -1084,19 +1104,24 @@ function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
                 </div>
                 <p className="expert-stance">{p.stance}</p>
                 <div className="expert-state">
-                  <span>
-                    <i />
-                    {p.status === 'idle'
-                      ? '聆听中'
-                      : p.status === 'preparing'
-                        ? '准备中'
-                        : '发言中'}
+                  <span className="expert-status-label">
+                    {p.status === 'idle' ? (
+                      <Circle size={13} aria-hidden="true" />
+                    ) : p.status === 'preparing' ? (
+                      <LoaderCircle size={13} className="spin" aria-hidden="true" />
+                    ) : (
+                      <Radio size={13} aria-hidden="true" />
+                    )}
+                    {p.status === 'idle' ? '待机' : p.status === 'preparing' ? '准备中' : '发言中'}
                   </span>
-                  <span>
+                  <span className="expert-model" aria-label="使用模型">
                     {s.bindings.find((b) => b.participantId === p.id)?.model || '样例角色'}
                   </span>
                 </div>
-                {p.publicFocus && <p className="focus">{p.publicFocus}</p>}
+                <div className={`focus ${p.publicFocus ? '' : 'focus-empty'}`}>
+                  <span className="focus-label">公开关注点</span>
+                  <p>{p.publicFocus || '暂无公开关注点，等待新的讨论内容。'}</p>
+                </div>
               </article>
             ))}
           </div>

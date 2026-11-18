@@ -1,6 +1,7 @@
 import { IntentSchema, type Intent, type Message } from '@panel/contracts';
 import { buildContext } from '../../../packages/domain/src/context';
 import { validIntents, selectNextSpeaker } from '../../../packages/domain/src/scheduler';
+import { buildParticipantFocus } from '../../../packages/domain/src/participant-focus';
 import type { Repository } from './repository';
 import type { ModelGateway } from './gateway';
 import { SpeechService } from './speech';
@@ -25,6 +26,15 @@ export class DiscussionEngine {
     this.speech = new SpeechService(repo, gateway);
   }
   async run(id: string, signal: AbortSignal) {
+    const generation = this.repo.discussion(id).generation;
+    try {
+      await this.execute(id, signal);
+    } finally {
+      // A cancelled or failed round must not leave experts preparing indefinitely.
+      if (this.repo.discussion(id).generation === generation) this.repo.clearStates(id);
+    }
+  }
+  private async execute(id: string, signal: AbortSignal) {
     let s = this.repo.snapshot(id);
     const generation = s.discussion.generation,
       host = s.participants.find((p) => p.role === 'moderator')!;
@@ -71,21 +81,54 @@ export class DiscussionEngine {
         s.participants
           .filter((p) => p.role === 'expert')
           .map(async (p) => {
-            const context = buildContext(s, p.id, through),
-              connection = this.repo.actorConnection(id, p.id);
-            const intent = await this.gateway.generate({
-              connection,
-              purpose: 'intent',
-              input: { context },
-              schema: IntentSchema,
-              discussionId: id,
-              participantId: p.id,
-              generation,
-              signal,
-            });
-            return { ...intent, participantId: p.id, basedOnMessageSeq: through } satisfies Intent;
+            try {
+              if (signal.aborted) throw new AppError('CANCELLED', '参与判断已取消', 409);
+              this.repo.setParticipantState(
+                id,
+                generation,
+                p.id,
+                'preparing',
+                buildParticipantFocus(s, p.id, 'assessing'),
+              );
+              const context = buildContext(s, p.id, through),
+                connection = this.repo.actorConnection(id, p.id);
+              const output = await this.gateway.generate({
+                connection,
+                purpose: 'intent',
+                input: { context },
+                schema: IntentSchema,
+                discussionId: id,
+                participantId: p.id,
+                generation,
+                signal,
+              });
+              if (signal.aborted) throw new AppError('CANCELLED', '参与判断已取消', 409);
+              const current = this.repo.guard(id, generation, ['running']);
+              const intent = {
+                ...output,
+                participantId: p.id,
+                basedOnMessageSeq: through,
+              } satisfies Intent;
+              const waiting =
+                !current.finishRequested && validIntents([intent], s.messages, through).length > 0;
+              this.repo.setParticipantState(
+                id,
+                generation,
+                p.id,
+                waiting ? 'preparing' : 'idle',
+                waiting ? buildParticipantFocus(s, p.id, 'waiting', intent.targetMessageId) : null,
+              );
+              return intent;
+            } catch (error) {
+              const current = this.repo.discussion(id);
+              if (current.generation === generation && current.status === 'running')
+                this.repo.setParticipantState(id, generation, p.id, 'idle', null);
+              throw error;
+            }
           }),
       );
+      if (signal.aborted) throw new AppError('CANCELLED', '参与判断已取消', 409);
+      this.repo.guard(id, generation, ['running']);
       if (this.repo.discussion(id).finishRequested) break;
       const intents = results
         .filter((r): r is PromiseFulfilledResult<Intent> => r.status === 'fulfilled')
@@ -96,6 +139,9 @@ export class DiscussionEngine {
         continue;
       }
       const chosen = selectNextSpeaker(intents, s.messages, through, waits, previousFocus);
+      for (const p of s.participants.filter((p) => p.role === 'expert'))
+        if (p.id !== chosen?.participantId)
+          this.repo.setParticipantState(id, generation, p.id, 'idle', null);
       if (!chosen) {
         if (
           emptyRounds >= 2 ||

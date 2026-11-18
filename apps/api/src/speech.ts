@@ -6,6 +6,7 @@ import {
   type DiscussionSnapshot,
 } from '@panel/contracts';
 import { buildContext, validShortUtterance } from '../../../packages/domain/src/context';
+import { buildParticipantFocus } from '../../../packages/domain/src/participant-focus';
 import { AppError } from './errors';
 import type { Repository } from './repository';
 import type { ModelGateway } from './gateway';
@@ -42,14 +43,11 @@ export class SpeechService {
         generation,
         participantId,
         'preparing',
-        options.focus || null,
-      );
-      this.repo.setParticipantState(
-        d.id,
-        generation,
-        participantId,
-        'speaking',
-        options.focus || null,
+        kind === 'expert'
+          ? buildParticipantFocus(s, participantId, 'waiting', target)
+          : kind === 'opening'
+            ? '介绍本场话题，邀请各位专家展开讨论'
+            : '围绕已有观点澄清问题、衔接讨论',
       );
       let content: string;
       if (kind === 'expert') {

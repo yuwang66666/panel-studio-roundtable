@@ -16,15 +16,20 @@ DELETE `/discussions/:id` 接收 JSON `{expectedVersion:number}`，返回 `{id,d
 
 SSE event 使用 `panel`，id 使用讨论内 eventSeq；data 为共享 PublicEventSchema 定义的 JSON。重连优先使用 Last-Event-ID，初次连接使用 after。每 20 秒心跳，慢连接断开后按游标补发。公开事件仅包含状态、阵容、发言或洞察增量。浏览器使用快照初始化并按 seq 归并，不使用内部意愿作为聊天内容。
 
+参与者快照沿用 `status: idle|preparing|speaking` 和 `publicFocus: string|null`。idle在界面显示“待机”；preparing包括全员参与判断、排队、等待公开首段和修复；speaking仅在出现非空白公开正文后成立。放弃、无效、未获选、提交、取消、失败及重启复位为idle，并清除过期关注点。`publicFocus`由后端从公开专业标签和本场正式目标发言序号构造，不返回意愿`proposedFocus`、完整意愿JSON、reasoning或thinking。旧快照字段结构保持不变。
+
 快照新增 `draft: SpeechDraft | null`，包含 `turnId`、`discussionId`、`participantId`、`generation`、`kind`、`content`、`replyToMessageId`、`startedAt`。kind 为 expert/opening/probe/summary；content 为累计公开正文，允许空串表示等待首段或重新生成。草稿不属于 `messages`，没有 messageSeq。
 
-| 流式相关事件        | payload                | 客户端行为                                                                  |
-| ------------------- | ---------------------- | --------------------------------------------------------------------------- |
-| `speech.updated`    | `{ draft }`            | 按 turnId、generation 和讨论归属校验后全文替换，不能把 content 追加到旧文本 |
-| `speech.cleared`    | `{ turnId }`           | 仅清除匹配的当前草稿                                                        |
-| `message.committed` | 既有正式消息及讨论信息 | 清除相同 turnId 草稿，再按消息 ID/turnId 去重加入正式记录                   |
+| 流式与状态事件              | payload                                  | 客户端行为                                                                  |
+| --------------------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| `speech.updated`            | `{ draft }`                              | 按 turnId、generation 和讨论归属校验后全文替换，不能把 content 追加到旧文本 |
+| `speech.cleared`            | `{ turnId }`                             | 仅清除匹配的当前草稿                                                        |
+| `message.committed`         | 既有正式消息及讨论信息                   | 清除相同 turnId 草稿，再按消息 ID/turnId 去重加入正式记录                   |
+| `participant.state_changed` | `{ participantId, status, publicFocus }` | 仅更新对应参与者状态卡，不作为Transcript发言；重复事件仍按seq去重           |
 
 草稿和事件入库后才推送，刷新通过 snapshot 恢复；续传、缺口和去重与其他公开事件相同。终态或 generation 变化时丢弃过期草稿。失败和取消不会把未校验草稿变成正式发言；只有正式消息可用于引用和洞察证据。草稿公开正文最多6000字符，专家展示额外限制为400字符。
+
+草稿开始、正文出现、修复清空及正式提交所对应的参与者状态在同一事务中保存；事务失败不留下只有草稿或只有状态的部分结果。前端先以快照恢复状态，再接续事件游标；状态播报由专家席一个聚合的aria-live区域承担，不把关注点或正文的每个片段逐字播报。
 
 所有公开对象采用严格 Zod 白名单。具体字段与枚举以 packages/contracts 为可执行来源。后端监听 127.0.0.1，写接口校验 Origin 及 JSON 内容类型；没有 Origin 的本地 CLI 需显式发送 X-Panel-Client: local。
 

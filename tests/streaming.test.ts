@@ -6,6 +6,7 @@ import { ModelGateway } from '../apps/api/src/gateway';
 import type { PrivateConnection, Repository } from '../apps/api/src/repository';
 import { AppError } from '../apps/api/src/errors';
 import { projectSpeechText } from '../apps/api/src/streaming';
+import { IntentSchema } from '../packages/contracts/src/index';
 
 type Protocol = PrivateConnection['protocol'];
 const protocols: Protocol[] = ['openai-chat', 'openai-responses', 'anthropic'];
@@ -147,6 +148,91 @@ describe('公开 JSON 文本投影', () => {
     ).toBe('你好😀\n"引号"\\路径');
     expect(projectSpeechText('```js', 'summary')).toBe('');
     expect(projectSpeechText('{"content":"字\\u4', 'probe')).toBe('字');
+  });
+});
+
+describe('参与判断的隐藏字段隔离', () => {
+  it.each(protocols)(
+    '%s ignores vendor reasoning in non-streaming intent responses',
+    async (protocol) => {
+      const expected = { action: 'raise', targetMessageId: null, proposedFocus: '内部参与关注点' };
+      const text = JSON.stringify(expected);
+      const privateText = 'PRIVATE_VENDOR_REASONING';
+      const s = await setup(protocol, (res) => {
+        const response =
+          protocol === 'openai-chat'
+            ? { choices: [{ message: { content: text, reasoning_content: privateText } }] }
+            : protocol === 'anthropic'
+              ? {
+                  content: [
+                    { type: 'thinking', thinking: privateText },
+                    { type: 'text', text },
+                  ],
+                }
+              : {
+                  output: [
+                    { type: 'reasoning', summary: [{ type: 'summary_text', text: privateText }] },
+                    { type: 'message', content: [{ type: 'output_text', text }] },
+                  ],
+                };
+        res.writeHead(200, { 'Content-Type': 'application/json' });
+        res.end(JSON.stringify(response));
+      });
+      try {
+        const intent = await s.gateway.generate({
+          connection: s.connection,
+          purpose: 'intent',
+          input: {},
+          schema: IntentSchema,
+        });
+        expect(intent).toEqual(expected);
+        expect(projectSpeechText(JSON.stringify(intent), 'intent')).toBe('');
+        expect(JSON.stringify(s.runs)).not.toContain(privateText);
+        expect(JSON.stringify(s.runs)).not.toContain(expected.proposedFocus);
+        expect(s.calls[0].stream).toBeUndefined();
+      } finally {
+        await s.close();
+      }
+    },
+  );
+
+  it('rejects extra hidden-reasoning fields inside the intent payload without echoing them', async () => {
+    const s = await setup('openai-chat', (res) => {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(
+        JSON.stringify({
+          choices: [
+            {
+              message: {
+                content: JSON.stringify({
+                  action: 'raise',
+                  targetMessageId: null,
+                  proposedFocus: '公开方向',
+                  reasoning: 'PRIVATE_PAYLOAD_REASONING',
+                }),
+              },
+            },
+          ],
+        }),
+      );
+    });
+    try {
+      const error = await s.gateway
+        .generate({
+          connection: s.connection,
+          purpose: 'intent',
+          input: {},
+          schema: IntentSchema,
+          maxRepairs: 0,
+        })
+        .catch((reason) => reason);
+      expect(error).toMatchObject({ code: 'INVALID_OUTPUT' });
+      expect(error.message).not.toContain('PRIVATE_PAYLOAD_REASONING');
+      expect(JSON.stringify(s.runs)).not.toContain('PRIVATE_PAYLOAD_REASONING');
+      expect(s.calls).toHaveLength(1);
+    } finally {
+      await s.close();
+    }
   });
 });
 

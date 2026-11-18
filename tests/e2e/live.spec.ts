@@ -19,11 +19,38 @@ const openingPauses = [24, 36].map((at) => {
   });
   return { at, entered: false, promise, release };
 });
+const stateTopic = '专家状态小窗如何准确反映当前公开讨论？';
+const statePauses = ['intent', 'beforeText', 'partialText'].map((name) => {
+  let release!: () => void;
+  const promise = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  return { name, entered: false, promise, release };
+});
 test.beforeAll(async () => {
   mkdirSync(resolve('.tmp'), { recursive: true });
   dir = mkdtempSync(resolve('.tmp/e2e-'));
   provider = await startProvider(
     async (task) => {
+      if (task.input?.context?.topic === stateTopic) {
+        if (task.purpose === 'intent') {
+          statePauses[0].entered = true;
+          await statePauses[0].promise;
+          const context = task.input.context;
+          return context.participant.name === '嘉宾1'
+            ? {
+                action: 'rebut',
+                targetMessageId: context.messages[0].id,
+                proposedFocus: 'PRIVATE_INTENT_NOT_PUBLIC',
+              }
+            : { action: 'pass', targetMessageId: null, proposedFocus: 'PRIVATE_INTENT_NOT_PUBLIC' };
+        }
+        if (task.purpose === 'utterance') {
+          statePauses[1].entered = true;
+          await statePauses[1].promise;
+        }
+        return defaultResponse(task);
+      }
       await new Promise((r) => setTimeout(r, task.purpose === 'utterance' ? 100 : 50));
       return defaultResponse(task);
     },
@@ -31,6 +58,13 @@ test.beforeAll(async () => {
       streamChunkSize: 6,
       streamDelayMs: 15,
       afterStreamChunk: async ({ task, textSoFar }) => {
+        if (task.input?.context?.topic === stateTopic) {
+          if (task.purpose === 'utterance' && textSoFar.length >= 36 && !statePauses[2].entered) {
+            statePauses[2].entered = true;
+            await statePauses[2].promise;
+          }
+          return;
+        }
         if (task.purpose !== 'opening') return;
         const pause = openingPauses.find((p) => !p.entered && textSoFar.length >= p.at);
         if (pause) {
@@ -92,6 +126,7 @@ test.beforeAll(async () => {
 });
 test.afterAll(async () => {
   openingPauses.forEach((p) => p.release());
+  statePauses.forEach((p) => p.release());
   await vite?.close();
   await backend?.app.close();
   await provider?.close();
@@ -399,5 +434,84 @@ test('历史讨论确认删除、失败重试、刷新和跨页清理可用', as
   } finally {
     release();
     await watcher.close();
+  }
+});
+
+test('专家状态准确随任务推进，刷新重连恢复且不泄露内部意愿', async ({ page, context }) => {
+  const created = backend.repo.createDiscussion(stateTopic, 4, 'env:CHAT', 1);
+  const id = created.discussion.id;
+  backend.discussions.cast(id);
+  await backend.discussions.idle(id);
+  const ready = backend.repo.snapshot(id);
+  const experts = ready.participants.filter((p) => p.role === 'expert');
+  const speaker = experts.find((p) => p.name === '嘉宾1')!;
+  const card = (participantId: string) =>
+    page.locator(`.expert-item[data-participant-id="${participantId}"]`);
+  try {
+    await page.goto(`/discussions/${id}`);
+    await page.getByRole('button', { name: '确认阵容，开始讨论' }).click();
+    await expect.poll(() => statePauses[0].entered).toBe(true);
+    for (const p of experts) {
+      await expect(card(p.id)).toHaveAttribute('data-state', 'preparing');
+      await expect(card(p.id).locator('.focus')).toContainText('公开关注点');
+      await expect(card(p.id).locator('.focus')).toContainText('第 1 条发言');
+    }
+    await expect(page.locator('.experts-panel [role="status"]')).toHaveCount(1);
+    await page.setViewportSize({ width: 375, height: 900 });
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.getByRole('tab', { name: '专家' }).click();
+    await expect(page.getByRole('tab', { name: '专家' })).toHaveAttribute('aria-selected', 'true');
+    await expect(page.locator('.experts-panel')).toBeVisible();
+    await expect(card(speaker.id).locator('.spin')).toHaveCSS('animation-name', 'none');
+    await page.screenshot({ path: 'test-results/live/expert-preparing-375.png', fullPage: true });
+    await page.reload();
+    await page.getByRole('tab', { name: '专家' }).click();
+    for (const p of experts) await expect(card(p.id)).toHaveAttribute('data-state', 'preparing');
+    await context.setOffline(true);
+    statePauses[0].release();
+    await expect.poll(() => statePauses[1].entered).toBe(true);
+    expect(backend.repo.snapshot(id).draft?.content).toBe('');
+    await context.setOffline(false);
+    await expect(card(speaker.id)).toHaveAttribute('data-state', 'preparing');
+    for (const p of experts.filter((p) => p.id !== speaker.id))
+      await expect(card(p.id)).toHaveAttribute('data-state', 'idle');
+    await expect(card(speaker.id).locator('.focus')).toContainText('准备回应第 1 条发言');
+    statePauses[1].release();
+    await expect.poll(() => statePauses[2].entered).toBe(true);
+    await expect(card(speaker.id)).toHaveAttribute('data-state', 'speaking');
+    await expect(card(speaker.id).locator('.expert-status-label')).toHaveText('发言中');
+    await expect(card(speaker.id).locator('.focus')).toContainText('正在回应第 1 条发言');
+    await page.screenshot({ path: 'test-results/live/expert-speaking-375.png', fullPage: true });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.reload();
+    await expect(card(speaker.id)).toHaveAttribute('data-state', 'speaking');
+    await page.screenshot({ path: 'test-results/live/expert-speaking-1440.png', fullPage: true });
+    for (const width of [375, 768, 1024, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      if (width <= 1100) await page.getByRole('tab', { name: '专家' }).click();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+    }
+    const publicState = JSON.stringify(backend.repo.snapshot(id));
+    const publicEvents = JSON.stringify(backend.repo.eventsAfter(id, 0, 1000));
+    for (const secret of ['PRIVATE_INTENT_NOT_PUBLIC', 'HIDDEN_REASONING']) {
+      expect(publicState).not.toContain(secret);
+      expect(publicEvents).not.toContain(secret);
+      expect(await page.locator('body').innerText()).not.toContain(secret);
+    }
+    statePauses[2].release();
+    await expect(page.locator('.summary-title')).toBeVisible();
+    for (const p of ready.participants) {
+      await expect(card(p.id)).toHaveAttribute('data-state', 'idle');
+      expect(
+        backend.repo.snapshot(id).participants.find((actor) => actor.id === p.id)?.publicFocus,
+      ).toBeNull();
+    }
+    await expect(page.locator('.expert-status-summary')).toHaveText('全部待机');
+    expect(backend.repo.snapshot(id).messages.filter((m) => m.kind === 'expert')).toHaveLength(1);
+  } finally {
+    statePauses.forEach((p) => p.release());
+    await context.setOffline(false);
   }
 });

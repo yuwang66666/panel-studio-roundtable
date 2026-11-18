@@ -212,7 +212,7 @@ export class InsightsService implements InsightsPort {
         id,
         generation,
         moderator.id,
-        'speaking',
+        'preparing',
         '整理本场共识、分歧与待验证问题',
       );
       while (messages.length > 0 && !expired()) {
