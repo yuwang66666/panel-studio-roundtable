@@ -1,6 +1,6 @@
 import Fastify from 'fastify';
 import { z } from 'zod';
-import { ConnectionInputSchema,ConnectionPatchSchema,SettingsSchema,CreateDiscussionSchema,BindingsCommandSchema,VersionCommandSchema,StatusSchema } from '@panel/contracts';
+import { ConnectionInputSchema,ConnectionPatchSchema,SettingsSchema,CreateDiscussionSchema,BindingsCommandSchema,VersionCommandSchema,StartCommandSchema,StatusSchema } from '@panel/contracts';
 import { Repository } from './repository';
 import { ModelGateway } from './gateway';
 import { config } from './config';
@@ -34,9 +34,12 @@ export async function createApp(options:{dataDir?:string;logger?:boolean;recover
  app.get<{Params:{id:string}}>('/api/discussions/:id/snapshot',async(req)=>repo.snapshot(req.params.id));
  app.put<{Params:{id:string}}>('/api/discussions/:id/agent-bindings',async(req)=>{const body=BindingsCommandSchema.parse(req.body),key=z.string().min(1).max(200).parse(req.headers['idempotency-key']);return repo.command(`bindings:${req.params.id}`,key,body,()=>repo.bind(req.params.id,body.expectedVersion,body.castVersion,body.bindings)).result;});
  app.post<{Params:{id:string}}>('/api/discussions/:id/retry',async(req,reply)=>{const body=VersionCommandSchema.parse(req.body),key=z.string().min(1).max(200).parse(req.headers['idempotency-key']),id=req.params.id;
-   const {result,replayed}=repo.command(`retry:${id}`,key,body,()=>{const d=repo.checkVersion(id,body.expectedVersion);if(d.status!=='failed'||d.failureStage!=='cast')throw new AppError('CONFLICT','当前阶段不能重新生成阵容',409);repo.refreshCastConnection(id);return repo.transition(id,'casting',{expectedVersion:body.expectedVersion,bumpGeneration:true});});
-   if(!replayed)discussions.cast(id);return reply.code(202).send(result);
+   const {result,replayed}=repo.command(`retry:${id}`,key,body,()=>{const d=repo.checkVersion(id,body.expectedVersion);if(d.status!=='failed')throw new AppError('CONFLICT','当前阶段不能重试',409);if(d.failureStage==='cast'){repo.refreshCastConnection(id);return repo.transition(id,'casting',{expectedVersion:body.expectedVersion,bumpGeneration:true});}if(!['summary','insights'].includes(d.failureStage||'')||!repo.snapshot(id).messages.length)throw new AppError('CONFLICT','请通过结束操作生成总结',409);return resumeSummary(id,body.expectedVersion);});
+   if(!replayed){if(result.discussion.status==='casting')discussions.cast(id);else discussions.summarize(id);}return reply.code(202).send(result);
  });
+ function resumeSummary(id:string,version:number){const count=(repo.db.prepare("SELECT count(*) AS n FROM discussions WHERE status IN ('running','summarizing')").get() as any).n;if(count>=config.maxDiscussions)throw new AppError('CAPACITY','同时运行的讨论已达到上限',429);return repo.transition(id,'summarizing',{expectedVersion:version,bumpGeneration:true});}
+ app.post<{Params:{id:string}}>('/api/discussions/:id/start',async(req,reply)=>{const body=StartCommandSchema.parse(req.body),key=z.string().min(1).max(200).parse(req.headers['idempotency-key']),id=req.params.id;const {result,replayed}=repo.command(`start:${id}`,key,body,()=>repo.start(id,body.expectedVersion,body.castVersion,config.maxDiscussions));if(!replayed)discussions.run(id);return reply.code(202).send(result);});
+ app.post<{Params:{id:string}}>('/api/discussions/:id/finish',async(req,reply)=>{const body=VersionCommandSchema.parse(req.body),key=z.string().min(1).max(200).parse(req.headers['idempotency-key']),id=req.params.id;const {result,replayed}=repo.command(`finish:${id}`,key,body,()=>{const d=repo.checkVersion(id,body.expectedVersion);if(d.status==='running')return repo.requestFinish(id,body.expectedVersion);if(['failed','interrupted'].includes(d.status)&&d.failureStage!=='cast'&&repo.snapshot(id).messages.length)return resumeSummary(id,body.expectedVersion);throw new AppError('CONFLICT','当前讨论不能结束或总结',409);});if(!replayed&&result.discussion.status==='summarizing')discussions.summarize(id);return reply.code(202).send(result);});
  app.addHook('onClose',async()=>{await discussions.close();repo.close();});
  return {app,repo,gateway,discussions};
 }

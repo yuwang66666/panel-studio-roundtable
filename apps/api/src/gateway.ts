@@ -39,7 +39,7 @@ export class ModelGateway{
      try{
        let sem=this.connections.get(c.id);if(!sem){sem=new Semaphore(this.options.connectionConcurrency);this.connections.set(c.id,sem);}releaseConnection=await sem.acquire(signal);releaseGlobal=await this.global.acquire(signal);
        if(signal.aborted)throw new AppError(r.signal?.aborted?'CANCELLED':'TIMEOUT','模型调用已取消或超时',504);
-       if(r.discussionId)this.repo.reserveCall(r.discussionId,r.generation!,['insights','summary'].includes(r.purpose));
+       if(r.discussionId)this.repo.reserveCall(r.discussionId,r.generation!,r.purpose==='summary'||(r.purpose==='insights'&&this.repo.discussion(r.discussionId).status==='summarizing'));
        attempted=true;
        const headers:Record<string,string>={'Content-Type':'application/json'},tokens=r.purpose==='summary'||r.purpose==='cast'||r.purpose==='insights'?4096:1200;
        let path:string,body:unknown;

@@ -118,6 +118,7 @@ export class Repository {
     const d=this.guard(id,generation,input.kind==='summary'?['summarizing']:['running']);
     const existing=this.db.prepare('SELECT data_json FROM messages WHERE discussion_id=? AND turn_id=?').get(id,input.turnId) as any;if(existing)return JSON.parse(existing.data_json) as Message;
     const s=this.snapshot(id),p=s.participants.find(p=>p.id===input.participantId);if(!p||((input.kind==='expert')!==(p.role==='expert')))throw conflict('发言角色不匹配');
+    if(input.kind==='summary'&&d.insightsThrough<(s.messages.filter(m=>m.kind!=='summary').at(-1)?.messageSeq||0))throw conflict('洞察尚未覆盖全部发言，不能提交总结');
     if(input.replyToMessageId&&!s.messages.some(m=>m.id===input.replyToMessageId&&m.kind!=='summary'))throw conflict('回应目标不属于当前讨论');
     const message:Message={...input,id:randomUUID(),discussionId:id,messageSeq:(s.messages.at(-1)?.messageSeq||0)+1,createdAt:now()};
     this.db.prepare('INSERT INTO messages VALUES(?,?,?,?,?,?,?)').run(message.id,id,message.messageSeq,message.turnId,message.participantId,message.replyToMessageId,JSON.stringify(message));
