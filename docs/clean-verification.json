@@ -1,0 +1,13 @@
+{
+  "source": "E:\\圆桌app",
+  "isolatedCopy": "E:\\圆桌app\\.tmp\\clean-7z5FoF",
+  "node": "v24.22.1",
+  "checks": [
+    "install --frozen-lockfile --store-dir E:\\圆桌app\\.pnpm-store",
+    "build",
+    "seed",
+    "seed",
+    "isolated API health; exactly 5 samples after two seed runs; no copied connections; OpenAPI available"
+  ],
+  "result": "passed"
+}

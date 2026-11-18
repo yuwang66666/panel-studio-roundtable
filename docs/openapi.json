@@ -1,0 +1,2793 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "AI Panel Studio 本地 API",
+    "version": "0.1.0",
+    "description": "写接口只允许配置的本地 Origin；无 Origin 的 CLI 需发送 X-Panel-Client: local。凭据仅在输入中存在，所有公开响应均为白名单类型。"
+  },
+  "servers": [
+    {
+      "url": "/api"
+    }
+  ],
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "健康检查",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/model-connections": {
+      "get": {
+        "summary": "列出模型连接摘要",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConnectionSummary"
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      },
+      "post": {
+        "summary": "创建加密保存的模型连接",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/model-connections/{id}": {
+      "patch": {
+        "summary": "更新或停用连接并保存新版本",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionPatch"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionSummary"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/model-connections/{id}/test": {
+      "post": {
+        "summary": "最小真实调用测试",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/settings": {
+      "get": {
+        "summary": "查询默认主持人",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      },
+      "patch": {
+        "summary": "设置默认主持人",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Settings"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Settings"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/discussions": {
+      "get": {
+        "summary": "查询讨论列表",
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "allOf": [
+                          {
+                            "$ref": "#/components/schemas/Discussion"
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "preview": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "nextCursor": {
+                      "type": "string",
+                      "nullable": true
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      },
+      "post": {
+        "summary": "创建讨论并异步生成阵容",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDiscussion"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/discussions/{id}/snapshot": {
+      "get": {
+        "summary": "读取一致快照与事件游标",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/discussions/{id}/usage": {
+      "get": {
+        "summary": "查询调用和 token 用量",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "calls": {
+                      "type": "integer"
+                    },
+                    "errorCalls": {
+                      "type": "integer"
+                    },
+                    "inputTokens": {
+                      "type": "integer"
+                    },
+                    "outputTokens": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/discussions/{id}/agent-bindings": {
+      "put": {
+        "summary": "更新确认阶段的模型分配",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BindingsCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/discussions/{id}/start": {
+      "post": {
+        "summary": "冻结连接版本并启动唯一执行器",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StartCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/discussions/{id}/finish": {
+      "post": {
+        "summary": "请求结束或对中断讨论生成总结",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/discussions/{id}/retry": {
+      "post": {
+        "summary": "按失败阶段重试阵容或总结",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 200
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VersionCommand"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snapshot"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "参数错误"
+          },
+          "403": {
+            "description": "本地来源校验失败"
+          },
+          "404": {
+            "description": "资源不存在"
+          },
+          "409": {
+            "description": "状态或版本冲突"
+          },
+          "429": {
+            "description": "并发或调用预算限制"
+          },
+          "502": {
+            "description": "模型调用或输出校验失败"
+          }
+        }
+      }
+    },
+    "/discussions/{id}/events": {
+      "get": {
+        "summary": "持久事件 SSE 流；event: panel；id: eventSeq；缺口重置 event: reset",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          {
+            "name": "Last-Event-ID",
+            "in": "header",
+            "schema": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "按游标补发的公开事件，Last-Event-ID 优先于 after；20秒心跳。",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Empty": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "ConnectionInput": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "provider": {
+            "type": "string",
+            "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"]
+          },
+          "protocol": {
+            "type": "string",
+            "enum": ["openai-chat", "openai-responses", "anthropic"]
+          },
+          "baseUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "apiKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "structuredOutput": {
+            "type": "boolean",
+            "default": false
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": ["name", "provider", "protocol", "baseUrl", "model", "apiKey"],
+        "additionalProperties": false
+      },
+      "ConnectionPatch": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "provider": {
+            "type": "string",
+            "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"]
+          },
+          "protocol": {
+            "type": "string",
+            "enum": ["openai-chat", "openai-responses", "anthropic"]
+          },
+          "baseUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "apiKey": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "structuredOutput": {
+            "type": "boolean",
+            "default": false
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "ConnectionSummary": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "provider": {
+            "type": "string",
+            "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"]
+          },
+          "protocol": {
+            "type": "string",
+            "enum": ["openai-chat", "openai-responses", "anthropic"]
+          },
+          "baseUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "model": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "structuredOutput": {
+            "type": "boolean",
+            "default": false
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          },
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "version": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "hasApiKey": {
+            "type": "boolean"
+          },
+          "testedAt": {
+            "type": "string",
+            "nullable": true
+          },
+          "testStatus": {
+            "type": "string",
+            "enum": ["untested", "passed", "failed"]
+          },
+          "createdAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "provider",
+          "protocol",
+          "baseUrl",
+          "model",
+          "id",
+          "version",
+          "hasApiKey",
+          "testedAt",
+          "testStatus",
+          "createdAt"
+        ],
+        "additionalProperties": false
+      },
+      "CreateDiscussion": {
+        "type": "object",
+        "properties": {
+          "topic": {
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 500
+          },
+          "expertCount": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 6,
+            "default": 4
+          },
+          "moderatorConnectionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          }
+        },
+        "required": ["topic"],
+        "additionalProperties": false
+      },
+      "BindingsCommand": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "castVersion": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "bindings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "participantId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "connectionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                }
+              },
+              "required": ["participantId", "connectionId"],
+              "additionalProperties": false
+            },
+            "minItems": 3,
+            "maxItems": 7
+          }
+        },
+        "required": ["expectedVersion", "castVersion", "bindings"],
+        "additionalProperties": false
+      },
+      "VersionCommand": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          }
+        },
+        "required": ["expectedVersion"],
+        "additionalProperties": false
+      },
+      "StartCommand": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "castVersion": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          }
+        },
+        "required": ["expectedVersion", "castVersion"],
+        "additionalProperties": false
+      },
+      "Settings": {
+        "type": "object",
+        "properties": {
+          "defaultModeratorConnectionId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "nullable": true
+          }
+        },
+        "required": ["defaultModeratorConnectionId"],
+        "additionalProperties": false
+      },
+      "Snapshot": {
+        "type": "object",
+        "properties": {
+          "discussion": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "topic": {
+                "type": "string"
+              },
+              "expertCount": {
+                "type": "integer",
+                "minimum": 2,
+                "maximum": 6
+              },
+              "status": {
+                "type": "string",
+                "enum": [
+                  "casting",
+                  "awaiting_confirmation",
+                  "running",
+                  "summarizing",
+                  "completed",
+                  "failed",
+                  "interrupted"
+                ]
+              },
+              "version": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "castVersion": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "generation": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "finishRequested": {
+                "type": "boolean"
+              },
+              "failureStage": {
+                "type": "string",
+                "enum": ["cast", "discussion", "insights", "summary"],
+                "nullable": true
+              },
+              "error": {
+                "type": "string",
+                "nullable": true
+              },
+              "maxUtterances": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "maxCalls": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "callCount": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "insightsThrough": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "isSample": {
+                "type": "boolean"
+              },
+              "createdAt": {
+                "type": "string"
+              },
+              "updatedAt": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "topic",
+              "expertCount",
+              "status",
+              "version",
+              "castVersion",
+              "generation",
+              "finishRequested",
+              "failureStage",
+              "error",
+              "maxUtterances",
+              "maxCalls",
+              "callCount",
+              "insightsThrough",
+              "isSample",
+              "createdAt",
+              "updatedAt"
+            ],
+            "additionalProperties": false
+          },
+          "participants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "discussionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "role": {
+                  "type": "string",
+                  "enum": ["moderator", "expert"]
+                },
+                "name": {
+                  "type": "string"
+                },
+                "occupation": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "stance": {
+                  "type": "string"
+                },
+                "specialty": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "colorKey": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 6
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["idle", "preparing", "speaking"]
+                },
+                "publicFocus": {
+                  "type": "string",
+                  "nullable": true
+                }
+              },
+              "required": [
+                "id",
+                "discussionId",
+                "role",
+                "name",
+                "occupation",
+                "title",
+                "stance",
+                "specialty",
+                "colorKey",
+                "status",
+                "publicFocus"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "bindings": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "participantId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "connectionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "connectionVersion": {
+                  "type": "integer",
+                  "exclusiveMinimum": true,
+                  "minimum": 0
+                },
+                "model": {
+                  "type": "string"
+                },
+                "provider": {
+                  "type": "string",
+                  "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"]
+                }
+              },
+              "required": [
+                "participantId",
+                "connectionId",
+                "connectionVersion",
+                "model",
+                "provider"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "messages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "discussionId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "messageSeq": {
+                  "type": "integer",
+                  "exclusiveMinimum": true,
+                  "minimum": 0
+                },
+                "turnId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "participantId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": ["opening", "probe", "expert", "summary"]
+                },
+                "content": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "replyToMessageId": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100,
+                  "nullable": true
+                },
+                "createdAt": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "discussionId",
+                "messageSeq",
+                "turnId",
+                "participantId",
+                "kind",
+                "content",
+                "replyToMessageId",
+                "createdAt"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "insights": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 100
+                },
+                "kind": {
+                  "type": "string",
+                  "enum": ["consensus", "divergence", "open_question"]
+                },
+                "status": {
+                  "type": "string",
+                  "enum": ["emerging", "stable", "revised", "resolved"]
+                },
+                "scope": {
+                  "type": "string",
+                  "enum": ["local", "all"],
+                  "nullable": true
+                },
+                "text": {
+                  "type": "string"
+                },
+                "revision": {
+                  "type": "integer",
+                  "exclusiveMinimum": true,
+                  "minimum": 0
+                },
+                "throughMessageSeq": {
+                  "type": "integer",
+                  "minimum": 0
+                },
+                "participantIds": {
+                  "type": "array",
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  }
+                },
+                "evidence": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "messageId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "relation": {
+                        "type": "string",
+                        "enum": ["supports", "opposes", "qualifies"]
+                      }
+                    },
+                    "required": ["messageId", "relation"],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "status",
+                "scope",
+                "text",
+                "revision",
+                "throughMessageSeq",
+                "participantIds",
+                "evidence"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "lastEventSeq": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "required": [
+          "discussion",
+          "participants",
+          "bindings",
+          "messages",
+          "insights",
+          "lastEventSeq"
+        ],
+        "additionalProperties": false
+      },
+      "Discussion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "topic": {
+            "type": "string"
+          },
+          "expertCount": {
+            "type": "integer",
+            "minimum": 2,
+            "maximum": 6
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "casting",
+              "awaiting_confirmation",
+              "running",
+              "summarizing",
+              "completed",
+              "failed",
+              "interrupted"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "castVersion": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "generation": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "finishRequested": {
+            "type": "boolean"
+          },
+          "failureStage": {
+            "type": "string",
+            "enum": ["cast", "discussion", "insights", "summary"],
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "maxUtterances": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "maxCalls": {
+            "type": "integer",
+            "exclusiveMinimum": true,
+            "minimum": 0
+          },
+          "callCount": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "insightsThrough": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "isSample": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "topic",
+          "expertCount",
+          "status",
+          "version",
+          "castVersion",
+          "generation",
+          "finishRequested",
+          "failureStage",
+          "error",
+          "maxUtterances",
+          "maxCalls",
+          "callCount",
+          "insightsThrough",
+          "isSample",
+          "createdAt",
+          "updatedAt"
+        ],
+        "additionalProperties": false
+      },
+      "PublicEvent": {
+        "anyOf": [
+          {
+            "type": "object",
+            "properties": {
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "seq": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "schemaVersion": {
+                "type": "number",
+                "enum": [1]
+              },
+              "occurredAt": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["discussion.status_changed"]
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "discussion": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "topic": {
+                        "type": "string"
+                      },
+                      "expertCount": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 6
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "casting",
+                          "awaiting_confirmation",
+                          "running",
+                          "summarizing",
+                          "completed",
+                          "failed",
+                          "interrupted"
+                        ]
+                      },
+                      "version": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "castVersion": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "generation": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "finishRequested": {
+                        "type": "boolean"
+                      },
+                      "failureStage": {
+                        "type": "string",
+                        "enum": ["cast", "discussion", "insights", "summary"],
+                        "nullable": true
+                      },
+                      "error": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "maxUtterances": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "maxCalls": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "callCount": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "insightsThrough": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "isSample": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "topic",
+                      "expertCount",
+                      "status",
+                      "version",
+                      "castVersion",
+                      "generation",
+                      "finishRequested",
+                      "failureStage",
+                      "error",
+                      "maxUtterances",
+                      "maxCalls",
+                      "callCount",
+                      "insightsThrough",
+                      "isSample",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["discussion"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["discussionId", "seq", "schemaVersion", "occurredAt", "type", "payload"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "seq": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "schemaVersion": {
+                "type": "number",
+                "enum": [1]
+              },
+              "occurredAt": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["cast.ready"]
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "discussion": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "topic": {
+                        "type": "string"
+                      },
+                      "expertCount": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 6
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "casting",
+                          "awaiting_confirmation",
+                          "running",
+                          "summarizing",
+                          "completed",
+                          "failed",
+                          "interrupted"
+                        ]
+                      },
+                      "version": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "castVersion": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "generation": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "finishRequested": {
+                        "type": "boolean"
+                      },
+                      "failureStage": {
+                        "type": "string",
+                        "enum": ["cast", "discussion", "insights", "summary"],
+                        "nullable": true
+                      },
+                      "error": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "maxUtterances": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "maxCalls": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "callCount": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "insightsThrough": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "isSample": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "topic",
+                      "expertCount",
+                      "status",
+                      "version",
+                      "castVersion",
+                      "generation",
+                      "finishRequested",
+                      "failureStage",
+                      "error",
+                      "maxUtterances",
+                      "maxCalls",
+                      "callCount",
+                      "insightsThrough",
+                      "isSample",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "participants": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "discussionId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "role": {
+                          "type": "string",
+                          "enum": ["moderator", "expert"]
+                        },
+                        "name": {
+                          "type": "string"
+                        },
+                        "occupation": {
+                          "type": "string"
+                        },
+                        "title": {
+                          "type": "string"
+                        },
+                        "stance": {
+                          "type": "string"
+                        },
+                        "specialty": {
+                          "type": "array",
+                          "items": {
+                            "type": "string"
+                          }
+                        },
+                        "colorKey": {
+                          "type": "integer",
+                          "minimum": 0,
+                          "maximum": 6
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["idle", "preparing", "speaking"]
+                        },
+                        "publicFocus": {
+                          "type": "string",
+                          "nullable": true
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "discussionId",
+                        "role",
+                        "name",
+                        "occupation",
+                        "title",
+                        "stance",
+                        "specialty",
+                        "colorKey",
+                        "status",
+                        "publicFocus"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "bindings": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "participantId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "connectionId": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "connectionVersion": {
+                          "type": "integer",
+                          "exclusiveMinimum": true,
+                          "minimum": 0
+                        },
+                        "model": {
+                          "type": "string"
+                        },
+                        "provider": {
+                          "type": "string",
+                          "enum": ["deepseek", "claude", "qwen", "gpt", "kimi", "custom"]
+                        }
+                      },
+                      "required": [
+                        "participantId",
+                        "connectionId",
+                        "connectionVersion",
+                        "model",
+                        "provider"
+                      ],
+                      "additionalProperties": false
+                    }
+                  }
+                },
+                "required": ["discussion", "participants", "bindings"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["discussionId", "seq", "schemaVersion", "occurredAt", "type", "payload"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "seq": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "schemaVersion": {
+                "type": "number",
+                "enum": [1]
+              },
+              "occurredAt": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["participant.state_changed"]
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "participantId": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 100
+                  },
+                  "status": {
+                    "type": "string",
+                    "enum": ["idle", "preparing", "speaking"]
+                  },
+                  "publicFocus": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                },
+                "required": ["participantId", "status", "publicFocus"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["discussionId", "seq", "schemaVersion", "occurredAt", "type", "payload"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "seq": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "schemaVersion": {
+                "type": "number",
+                "enum": [1]
+              },
+              "occurredAt": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["message.committed"]
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "discussionId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "messageSeq": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "turnId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "participantId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": ["opening", "probe", "expert", "summary"]
+                      },
+                      "content": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "replyToMessageId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "nullable": true
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "discussionId",
+                      "messageSeq",
+                      "turnId",
+                      "participantId",
+                      "kind",
+                      "content",
+                      "replyToMessageId",
+                      "createdAt"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "discussion": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "topic": {
+                        "type": "string"
+                      },
+                      "expertCount": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 6
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "casting",
+                          "awaiting_confirmation",
+                          "running",
+                          "summarizing",
+                          "completed",
+                          "failed",
+                          "interrupted"
+                        ]
+                      },
+                      "version": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "castVersion": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "generation": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "finishRequested": {
+                        "type": "boolean"
+                      },
+                      "failureStage": {
+                        "type": "string",
+                        "enum": ["cast", "discussion", "insights", "summary"],
+                        "nullable": true
+                      },
+                      "error": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "maxUtterances": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "maxCalls": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "callCount": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "insightsThrough": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "isSample": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "topic",
+                      "expertCount",
+                      "status",
+                      "version",
+                      "castVersion",
+                      "generation",
+                      "finishRequested",
+                      "failureStage",
+                      "error",
+                      "maxUtterances",
+                      "maxCalls",
+                      "callCount",
+                      "insightsThrough",
+                      "isSample",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["message", "discussion"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["discussionId", "seq", "schemaVersion", "occurredAt", "type", "payload"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "seq": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "schemaVersion": {
+                "type": "number",
+                "enum": [1]
+              },
+              "occurredAt": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["insights.updated"]
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "insights": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 100
+                        },
+                        "kind": {
+                          "type": "string",
+                          "enum": ["consensus", "divergence", "open_question"]
+                        },
+                        "status": {
+                          "type": "string",
+                          "enum": ["emerging", "stable", "revised", "resolved"]
+                        },
+                        "scope": {
+                          "type": "string",
+                          "enum": ["local", "all"],
+                          "nullable": true
+                        },
+                        "text": {
+                          "type": "string"
+                        },
+                        "revision": {
+                          "type": "integer",
+                          "exclusiveMinimum": true,
+                          "minimum": 0
+                        },
+                        "throughMessageSeq": {
+                          "type": "integer",
+                          "minimum": 0
+                        },
+                        "participantIds": {
+                          "type": "array",
+                          "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 100
+                          }
+                        },
+                        "evidence": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "messageId": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 100
+                              },
+                              "relation": {
+                                "type": "string",
+                                "enum": ["supports", "opposes", "qualifies"]
+                              }
+                            },
+                            "required": ["messageId", "relation"],
+                            "additionalProperties": false
+                          }
+                        }
+                      },
+                      "required": [
+                        "id",
+                        "kind",
+                        "status",
+                        "scope",
+                        "text",
+                        "revision",
+                        "throughMessageSeq",
+                        "participantIds",
+                        "evidence"
+                      ],
+                      "additionalProperties": false
+                    }
+                  },
+                  "discussion": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "topic": {
+                        "type": "string"
+                      },
+                      "expertCount": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 6
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "casting",
+                          "awaiting_confirmation",
+                          "running",
+                          "summarizing",
+                          "completed",
+                          "failed",
+                          "interrupted"
+                        ]
+                      },
+                      "version": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "castVersion": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "generation": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "finishRequested": {
+                        "type": "boolean"
+                      },
+                      "failureStage": {
+                        "type": "string",
+                        "enum": ["cast", "discussion", "insights", "summary"],
+                        "nullable": true
+                      },
+                      "error": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "maxUtterances": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "maxCalls": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "callCount": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "insightsThrough": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "isSample": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "topic",
+                      "expertCount",
+                      "status",
+                      "version",
+                      "castVersion",
+                      "generation",
+                      "finishRequested",
+                      "failureStage",
+                      "error",
+                      "maxUtterances",
+                      "maxCalls",
+                      "callCount",
+                      "insightsThrough",
+                      "isSample",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["insights", "discussion"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["discussionId", "seq", "schemaVersion", "occurredAt", "type", "payload"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "seq": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "schemaVersion": {
+                "type": "number",
+                "enum": [1]
+              },
+              "occurredAt": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["summary.ready"]
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "discussionId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "messageSeq": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "turnId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "participantId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "kind": {
+                        "type": "string",
+                        "enum": ["opening", "probe", "expert", "summary"]
+                      },
+                      "content": {
+                        "type": "string",
+                        "minLength": 1
+                      },
+                      "replyToMessageId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100,
+                        "nullable": true
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "discussionId",
+                      "messageSeq",
+                      "turnId",
+                      "participantId",
+                      "kind",
+                      "content",
+                      "replyToMessageId",
+                      "createdAt"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "discussion": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "topic": {
+                        "type": "string"
+                      },
+                      "expertCount": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 6
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "casting",
+                          "awaiting_confirmation",
+                          "running",
+                          "summarizing",
+                          "completed",
+                          "failed",
+                          "interrupted"
+                        ]
+                      },
+                      "version": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "castVersion": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "generation": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "finishRequested": {
+                        "type": "boolean"
+                      },
+                      "failureStage": {
+                        "type": "string",
+                        "enum": ["cast", "discussion", "insights", "summary"],
+                        "nullable": true
+                      },
+                      "error": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "maxUtterances": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "maxCalls": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "callCount": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "insightsThrough": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "isSample": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "topic",
+                      "expertCount",
+                      "status",
+                      "version",
+                      "castVersion",
+                      "generation",
+                      "finishRequested",
+                      "failureStage",
+                      "error",
+                      "maxUtterances",
+                      "maxCalls",
+                      "callCount",
+                      "insightsThrough",
+                      "isSample",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["message", "discussion"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["discussionId", "seq", "schemaVersion", "occurredAt", "type", "payload"],
+            "additionalProperties": false
+          },
+          {
+            "type": "object",
+            "properties": {
+              "discussionId": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 100
+              },
+              "seq": {
+                "type": "integer",
+                "exclusiveMinimum": true,
+                "minimum": 0
+              },
+              "schemaVersion": {
+                "type": "number",
+                "enum": [1]
+              },
+              "occurredAt": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": ["discussion.failed"]
+              },
+              "payload": {
+                "type": "object",
+                "properties": {
+                  "discussion": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 100
+                      },
+                      "topic": {
+                        "type": "string"
+                      },
+                      "expertCount": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 6
+                      },
+                      "status": {
+                        "type": "string",
+                        "enum": [
+                          "casting",
+                          "awaiting_confirmation",
+                          "running",
+                          "summarizing",
+                          "completed",
+                          "failed",
+                          "interrupted"
+                        ]
+                      },
+                      "version": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "castVersion": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "generation": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "finishRequested": {
+                        "type": "boolean"
+                      },
+                      "failureStage": {
+                        "type": "string",
+                        "enum": ["cast", "discussion", "insights", "summary"],
+                        "nullable": true
+                      },
+                      "error": {
+                        "type": "string",
+                        "nullable": true
+                      },
+                      "maxUtterances": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "maxCalls": {
+                        "type": "integer",
+                        "exclusiveMinimum": true,
+                        "minimum": 0
+                      },
+                      "callCount": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "insightsThrough": {
+                        "type": "integer",
+                        "minimum": 0
+                      },
+                      "isSample": {
+                        "type": "boolean"
+                      },
+                      "createdAt": {
+                        "type": "string"
+                      },
+                      "updatedAt": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "topic",
+                      "expertCount",
+                      "status",
+                      "version",
+                      "castVersion",
+                      "generation",
+                      "finishRequested",
+                      "failureStage",
+                      "error",
+                      "maxUtterances",
+                      "maxCalls",
+                      "callCount",
+                      "insightsThrough",
+                      "isSample",
+                      "createdAt",
+                      "updatedAt"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "required": ["discussion"],
+                "additionalProperties": false
+              }
+            },
+            "required": ["discussionId", "seq", "schemaVersion", "occurredAt", "type", "payload"],
+            "additionalProperties": false
+          }
+        ]
+      }
+    }
+  }
+}

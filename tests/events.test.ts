@@ -1,9 +1,67 @@
-import { describe,it,expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { projectEvent } from '../packages/domain/src/events';
 import { makeSample } from '../packages/domain/src/samples';
 import { harness } from './fixtures/harness';
 import type { PublicEvent } from '../packages/contracts/src/index';
-describe('SSE 与事件归并',()=>{
- it('deduplicates events, rejects gaps and isolates discussions',()=>{const s=makeSample(0),event:PublicEvent={discussionId:s.discussion.id,seq:1,schemaVersion:1,occurredAt:'now',type:'discussion.status_changed',payload:{discussion:s.discussion}};const next=projectEvent(s,event)!;expect(next.lastEventSeq).toBe(1);expect(projectEvent(next,event)).toBe(next);expect(projectEvent(s,{...event,seq:3})).toBeNull();expect(projectEvent(s,{...event,discussionId:'other'})).toBe(s);});
- it('replays persisted events and honors Last-Event-ID over initial query cursor',async()=>{const h=await harness();const controller=new AbortController();try{const r=await h.command('POST','/api/discussions',{topic:'如何保证实时事件不丢失？'}),id=r.json().discussion.id;await h.discussions.idle(id);const initial=h.repo.snapshot(id),running=h.repo.start(id,initial.discussion.version,initial.discussion.castVersion,3);h.repo.appendMessage(id,running.discussion.generation,{turnId:'test',participantId:running.participants[1].id,kind:'expert',content:'先保存，再推送。',replyToMessageId:null});const events=h.repo.eventsAfter(id,initial.lastEventSeq);const address=await h.app.listen({port:0,host:'127.0.0.1'});const response=await fetch(`${address}/api/discussions/${id}/events?after=0`,{headers:{'Last-Event-ID':String(initial.lastEventSeq)},signal:controller.signal});expect(response.headers.get('content-type')).toContain('text/event-stream');const reader=response.body!.getReader();let buffer='',received:PublicEvent[]=[];while(received.length<events.length){const chunk=await reader.read();buffer+=new TextDecoder().decode(chunk.value);const blocks=buffer.split('\n\n');buffer=blocks.pop()!;for(const block of blocks){const data=block.split('\n').find(l=>l.startsWith('data: '));if(data)received.push(JSON.parse(data.slice(6)));}}expect(received.map(e=>e.seq)).toEqual(events.map(e=>e.seq));controller.abort();await reader.cancel().catch(()=>{});}finally{controller.abort();await h.close();}});
+describe('SSE 与事件归并', () => {
+  it('deduplicates events, rejects gaps and isolates discussions', () => {
+    const s = makeSample(0),
+      event: PublicEvent = {
+        discussionId: s.discussion.id,
+        seq: 1,
+        schemaVersion: 1,
+        occurredAt: 'now',
+        type: 'discussion.status_changed',
+        payload: { discussion: s.discussion },
+      };
+    const next = projectEvent(s, event)!;
+    expect(next.lastEventSeq).toBe(1);
+    expect(projectEvent(next, event)).toBe(next);
+    expect(projectEvent(s, { ...event, seq: 3 })).toBeNull();
+    expect(projectEvent(s, { ...event, discussionId: 'other' })).toBe(s);
+  });
+  it('replays persisted events and honors Last-Event-ID over initial query cursor', async () => {
+    const h = await harness();
+    const controller = new AbortController();
+    try {
+      const r = await h.command('POST', '/api/discussions', { topic: '如何保证实时事件不丢失？' }),
+        id = r.json().discussion.id;
+      await h.discussions.idle(id);
+      const initial = h.repo.snapshot(id),
+        running = h.repo.start(id, initial.discussion.version, initial.discussion.castVersion, 3);
+      h.repo.appendMessage(id, running.discussion.generation, {
+        turnId: 'test',
+        participantId: running.participants[1].id,
+        kind: 'expert',
+        content: '先保存，再推送。',
+        replyToMessageId: null,
+      });
+      const events = h.repo.eventsAfter(id, initial.lastEventSeq);
+      const address = await h.app.listen({ port: 0, host: '127.0.0.1' });
+      const response = await fetch(`${address}/api/discussions/${id}/events?after=0`, {
+        headers: { 'Last-Event-ID': String(initial.lastEventSeq) },
+        signal: controller.signal,
+      });
+      expect(response.headers.get('content-type')).toContain('text/event-stream');
+      const reader = response.body!.getReader();
+      let buffer = '',
+        received: PublicEvent[] = [];
+      while (received.length < events.length) {
+        const chunk = await reader.read();
+        buffer += new TextDecoder().decode(chunk.value);
+        const blocks = buffer.split('\n\n');
+        buffer = blocks.pop()!;
+        for (const block of blocks) {
+          const data = block.split('\n').find((l) => l.startsWith('data: '));
+          if (data) received.push(JSON.parse(data.slice(6)));
+        }
+      }
+      expect(received.map((e) => e.seq)).toEqual(events.map((e) => e.seq));
+      controller.abort();
+      await reader.cancel().catch(() => {});
+    } finally {
+      controller.abort();
+      await h.close();
+    }
+  });
 });

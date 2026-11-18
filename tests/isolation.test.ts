@@ -1,18 +1,226 @@
-import { describe,it,expect } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { randomUUID } from 'node:crypto';
 import { harness } from './fixtures/harness';
 import { defaultResponse } from './fixtures/provider';
 import type { DiscussionSnapshot } from '../packages/contracts/src/index';
-async function prepare(h:Awaited<ReturnType<typeof harness>>,topic:string,turns=4){const s=h.repo.createDiscussion(topic,4,h.connection.id,turns);h.discussions.cast(s.discussion.id);await h.discussions.idle(s.discussion.id);return h.repo.snapshot(s.discussion.id);}
-describe('并行、结束与异常隔离',()=>{
- it('runs two mixed-protocol discussions without cross-contamination and ignores duplicate starts',async()=>{const h=await harness();try{const a=await prepare(h,'主题甲：公共交通如何提升可达性？'),b=await prepare(h,'主题乙：企业如何组织远程办公？');const anthropic=h.repo.saveConnection({name:'Claude协议',provider:'claude',protocol:'anthropic',baseUrl:h.provider.baseUrl,model:'fixture-claude',apiKey:'claude-test',active:true,structuredOutput:false}),responses=h.repo.saveConnection({name:'GPT协议',provider:'gpt',protocol:'openai-responses',baseUrl:h.provider.baseUrl,model:'fixture-gpt',apiKey:'gpt-test',active:true,structuredOutput:false});
-   const aReady=h.repo.bind(a.discussion.id,a.discussion.version,a.discussion.castVersion,a.participants.map((p,i)=>({participantId:p.id,connectionId:i===1?anthropic.id:i===2?responses.id:h.connection.id})));const body={expectedVersion:aReady.discussion.version,castVersion:aReady.discussion.castVersion};const start=await h.command('POST',`/api/discussions/${a.discussion.id}/start`,body,'duplicate-start');const replay=await h.command('POST',`/api/discussions/${a.discussion.id}/start`,body,'duplicate-start');expect(start.statusCode).toBe(202);expect(replay.statusCode).toBe(202);await h.command('POST',`/api/discussions/${b.discussion.id}/start`,{expectedVersion:b.discussion.version,castVersion:b.discussion.castVersion});await Promise.all([h.discussions.idle(a.discussion.id),h.discussions.idle(b.discussion.id)]);
-   for(const ready of [a,b]){const s=h.repo.snapshot(ready.discussion.id);expect(s.discussion.status).toBe('completed');expect(s.messages.filter(m=>m.kind==='expert')).toHaveLength(4);expect(s.messages.filter(m=>m.kind==='summary')).toHaveLength(1);expect(s.messages.every(m=>m.discussionId===s.discussion.id&&s.participants.some(p=>p.id===m.participantId))).toBe(true);for(const i of s.insights)for(const e of i.evidence)expect(s.messages.some(m=>m.id===e.messageId)).toBe(true);}
-   for(const c of h.provider.calls){const raw=c.body.input?.at(-1)?.content||c.body.messages?.at(-1)?.content;const task=JSON.parse(raw),context=task.input?.context;if(context?.messages?.length){const ids=new Set(context.messages.map((m:any)=>m.discussionId));expect(ids.size).toBe(1);}}
-   expect(new Set(h.provider.calls.map(c=>c.path))).toEqual(new Set(['/v1/chat/completions','/v1/messages','/v1/responses']));
- }finally{await h.close();}});
- it('finishes after an in-flight utterance and starts no further expert turn',async()=>{let signalStart:()=>void=()=>{},unblock:()=>void=()=>{};const speaking=new Promise<void>(r=>signalStart=r),gate=new Promise<void>(r=>unblock=r);let utterances=0;const h=await harness(async task=>{if(task.purpose==='utterance'&&++utterances===1){signalStart();await gate;}return defaultResponse(task);});try{const ready=await prepare(h,'如何在讨论过程中可靠地提前结束？');const id=ready.discussion.id;await h.command('POST',`/api/discussions/${id}/start`,{expectedVersion:ready.discussion.version,castVersion:ready.discussion.castVersion});await speaking;const version=h.repo.discussion(id).version;expect((await h.command('POST',`/api/discussions/${id}/finish`,{expectedVersion:version})).statusCode).toBe(202);unblock();await h.discussions.idle(id);const s=h.repo.snapshot(id);expect(s.discussion.status).toBe('completed');expect(s.messages.filter(m=>m.kind==='expert')).toHaveLength(1);expect(utterances).toBe(1);expect(()=>h.repo.appendMessage(id,s.discussion.generation,{turnId:randomUUID(),participantId:s.participants[1].id,kind:'expert',content:'迟到的发言。',replyToMessageId:null})).toThrow();}finally{unblock();await h.close();}});
- it('preserves closing budget and rejects stale executor generations',async()=>{const h=await harness();try{const ready=await prepare(h,'预算不足时如何保证总结能够完成？');const id=ready.discussion.id,s=h.repo.start(id,ready.discussion.version,ready.discussion.castVersion,3);for(let i=s.discussion.callCount;i<s.discussion.maxCalls-12;i++)h.repo.reserveCall(id,s.discussion.generation,false);expect(()=>h.repo.reserveCall(id,s.discussion.generation,false)).toThrow();h.repo.appendMessage(id,s.discussion.generation,{turnId:'opening',participantId:s.participants[0].id,kind:'opening',content:'请说明判断依据。',replyToMessageId:null});h.discussions.run(id);await h.discussions.idle(id);expect(h.repo.discussion(id).status).toBe('completed');expect(h.repo.discussion(id).callCount).toBeLessThanOrEqual(s.discussion.maxCalls);expect(()=>h.repo.guard(id,s.discussion.generation-1,['completed'])).toThrow();}finally{await h.close();}});
- it('marks active work interrupted on graceful shutdown and caps simultaneous discussions',async()=>{let started:()=>void=()=>{};const beginning=new Promise<void>(r=>started=r);const h=await harness(async task=>{if(task.purpose==='opening'){started();await new Promise(r=>setTimeout(r,100));}return defaultResponse(task);});try{const ready=[];for(let i=0;i<4;i++)ready.push(await prepare(h,`第${i}场并行讨论验证隔离边界`));for(const s of ready.slice(0,3))h.repo.start(s.discussion.id,s.discussion.version,s.discussion.castVersion,3);const fourth=ready[3];expect(()=>h.repo.start(fourth.discussion.id,fourth.discussion.version,fourth.discussion.castVersion,3)).toThrow();h.discussions.run(ready[0].discussion.id);await beginning;await h.discussions.close();expect(h.repo.discussion(ready[0].discussion.id).status).toBe('interrupted');expect(h.repo.snapshot(ready[0].discussion.id).participants.every(p=>p.status==='idle')).toBe(true);}finally{await h.close();}});
- it('moderator intervenes when expert focus repeats',async()=>{const h=await harness(task=>{const r=defaultResponse(task);return task.purpose==='intent'?{...r as any,proposedFocus:'反复出现的相同关注点'}:r;});try{const ready=await prepare(h,'主持人如何识别并处理重复的观点？',5);const id=ready.discussion.id;h.repo.start(id,ready.discussion.version,ready.discussion.castVersion,3);h.discussions.run(id);await h.discussions.idle(id);expect(h.repo.snapshot(id).messages.some(m=>m.kind==='probe')).toBe(true);}finally{await h.close();}});
+async function prepare(h: Awaited<ReturnType<typeof harness>>, topic: string, turns = 4) {
+  const s = h.repo.createDiscussion(topic, 4, h.connection.id, turns);
+  h.discussions.cast(s.discussion.id);
+  await h.discussions.idle(s.discussion.id);
+  return h.repo.snapshot(s.discussion.id);
+}
+describe('并行、结束与异常隔离', () => {
+  it('runs two mixed-protocol discussions without cross-contamination and ignores duplicate starts', async () => {
+    const h = await harness();
+    try {
+      const a = await prepare(h, '主题甲：公共交通如何提升可达性？'),
+        b = await prepare(h, '主题乙：企业如何组织远程办公？');
+      const anthropic = h.repo.saveConnection({
+          name: 'Claude协议',
+          provider: 'claude',
+          protocol: 'anthropic',
+          baseUrl: h.provider.baseUrl,
+          model: 'fixture-claude',
+          apiKey: 'claude-test',
+          active: true,
+          structuredOutput: false,
+        }),
+        responses = h.repo.saveConnection({
+          name: 'GPT协议',
+          provider: 'gpt',
+          protocol: 'openai-responses',
+          baseUrl: h.provider.baseUrl,
+          model: 'fixture-gpt',
+          apiKey: 'gpt-test',
+          active: true,
+          structuredOutput: false,
+        });
+      const aReady = h.repo.bind(
+        a.discussion.id,
+        a.discussion.version,
+        a.discussion.castVersion,
+        a.participants.map((p, i) => ({
+          participantId: p.id,
+          connectionId: i === 1 ? anthropic.id : i === 2 ? responses.id : h.connection.id,
+        })),
+      );
+      const body = {
+        expectedVersion: aReady.discussion.version,
+        castVersion: aReady.discussion.castVersion,
+      };
+      const start = await h.command(
+        'POST',
+        `/api/discussions/${a.discussion.id}/start`,
+        body,
+        'duplicate-start',
+      );
+      const replay = await h.command(
+        'POST',
+        `/api/discussions/${a.discussion.id}/start`,
+        body,
+        'duplicate-start',
+      );
+      expect(start.statusCode).toBe(202);
+      expect(replay.statusCode).toBe(202);
+      await h.command('POST', `/api/discussions/${b.discussion.id}/start`, {
+        expectedVersion: b.discussion.version,
+        castVersion: b.discussion.castVersion,
+      });
+      await Promise.all([h.discussions.idle(a.discussion.id), h.discussions.idle(b.discussion.id)]);
+      for (const ready of [a, b]) {
+        const s = h.repo.snapshot(ready.discussion.id);
+        expect(s.discussion.status).toBe('completed');
+        expect(s.messages.filter((m) => m.kind === 'expert')).toHaveLength(4);
+        expect(s.messages.filter((m) => m.kind === 'summary')).toHaveLength(1);
+        expect(
+          s.messages.every(
+            (m) =>
+              m.discussionId === s.discussion.id &&
+              s.participants.some((p) => p.id === m.participantId),
+          ),
+        ).toBe(true);
+        for (const i of s.insights)
+          for (const e of i.evidence)
+            expect(s.messages.some((m) => m.id === e.messageId)).toBe(true);
+      }
+      for (const c of h.provider.calls) {
+        const raw = c.body.input?.at(-1)?.content || c.body.messages?.at(-1)?.content;
+        const task = JSON.parse(raw),
+          context = task.input?.context;
+        if (context?.messages?.length) {
+          const ids = new Set(context.messages.map((m: any) => m.discussionId));
+          expect(ids.size).toBe(1);
+        }
+      }
+      expect(new Set(h.provider.calls.map((c) => c.path))).toEqual(
+        new Set(['/v1/chat/completions', '/v1/messages', '/v1/responses']),
+      );
+    } finally {
+      await h.close();
+    }
+  });
+  it('finishes after an in-flight utterance and starts no further expert turn', async () => {
+    let signalStart: () => void = () => {},
+      unblock: () => void = () => {};
+    const speaking = new Promise<void>((r) => (signalStart = r)),
+      gate = new Promise<void>((r) => (unblock = r));
+    let utterances = 0;
+    const h = await harness(async (task) => {
+      if (task.purpose === 'utterance' && ++utterances === 1) {
+        signalStart();
+        await gate;
+      }
+      return defaultResponse(task);
+    });
+    try {
+      const ready = await prepare(h, '如何在讨论过程中可靠地提前结束？');
+      const id = ready.discussion.id;
+      await h.command('POST', `/api/discussions/${id}/start`, {
+        expectedVersion: ready.discussion.version,
+        castVersion: ready.discussion.castVersion,
+      });
+      await speaking;
+      const version = h.repo.discussion(id).version;
+      expect(
+        (await h.command('POST', `/api/discussions/${id}/finish`, { expectedVersion: version }))
+          .statusCode,
+      ).toBe(202);
+      unblock();
+      await h.discussions.idle(id);
+      const s = h.repo.snapshot(id);
+      expect(s.discussion.status).toBe('completed');
+      expect(s.messages.filter((m) => m.kind === 'expert')).toHaveLength(1);
+      expect(utterances).toBe(1);
+      expect(() =>
+        h.repo.appendMessage(id, s.discussion.generation, {
+          turnId: randomUUID(),
+          participantId: s.participants[1].id,
+          kind: 'expert',
+          content: '迟到的发言。',
+          replyToMessageId: null,
+        }),
+      ).toThrow();
+    } finally {
+      unblock();
+      await h.close();
+    }
+  });
+  it('preserves closing budget and rejects stale executor generations', async () => {
+    const h = await harness();
+    try {
+      const ready = await prepare(h, '预算不足时如何保证总结能够完成？');
+      const id = ready.discussion.id,
+        s = h.repo.start(id, ready.discussion.version, ready.discussion.castVersion, 3);
+      for (let i = s.discussion.callCount; i < s.discussion.maxCalls - 12; i++)
+        h.repo.reserveCall(id, s.discussion.generation, false);
+      expect(() => h.repo.reserveCall(id, s.discussion.generation, false)).toThrow();
+      h.repo.appendMessage(id, s.discussion.generation, {
+        turnId: 'opening',
+        participantId: s.participants[0].id,
+        kind: 'opening',
+        content: '请说明判断依据。',
+        replyToMessageId: null,
+      });
+      h.discussions.run(id);
+      await h.discussions.idle(id);
+      expect(h.repo.discussion(id).status).toBe('completed');
+      expect(h.repo.discussion(id).callCount).toBeLessThanOrEqual(s.discussion.maxCalls);
+      expect(() => h.repo.guard(id, s.discussion.generation - 1, ['completed'])).toThrow();
+    } finally {
+      await h.close();
+    }
+  });
+  it('marks active work interrupted on graceful shutdown and caps simultaneous discussions', async () => {
+    let started: () => void = () => {};
+    const beginning = new Promise<void>((r) => (started = r));
+    const h = await harness(async (task) => {
+      if (task.purpose === 'opening') {
+        started();
+        await new Promise((r) => setTimeout(r, 100));
+      }
+      return defaultResponse(task);
+    });
+    try {
+      const ready = [];
+      for (let i = 0; i < 4; i++) ready.push(await prepare(h, `第${i}场并行讨论验证隔离边界`));
+      for (const s of ready.slice(0, 3))
+        h.repo.start(s.discussion.id, s.discussion.version, s.discussion.castVersion, 3);
+      const fourth = ready[3];
+      expect(() =>
+        h.repo.start(
+          fourth.discussion.id,
+          fourth.discussion.version,
+          fourth.discussion.castVersion,
+          3,
+        ),
+      ).toThrow();
+      h.discussions.run(ready[0].discussion.id);
+      await beginning;
+      await h.discussions.close();
+      expect(h.repo.discussion(ready[0].discussion.id).status).toBe('interrupted');
+      expect(
+        h.repo.snapshot(ready[0].discussion.id).participants.every((p) => p.status === 'idle'),
+      ).toBe(true);
+    } finally {
+      await h.close();
+    }
+  });
+  it('moderator intervenes when expert focus repeats', async () => {
+    const h = await harness((task) => {
+      const r = defaultResponse(task);
+      return task.purpose === 'intent'
+        ? { ...(r as any), proposedFocus: '反复出现的相同关注点' }
+        : r;
+    });
+    try {
+      const ready = await prepare(h, '主持人如何识别并处理重复的观点？', 5);
+      const id = ready.discussion.id;
+      h.repo.start(id, ready.discussion.version, ready.discussion.castVersion, 3);
+      h.discussions.run(id);
+      await h.discussions.idle(id);
+      expect(h.repo.snapshot(id).messages.some((m) => m.kind === 'probe')).toBe(true);
+    } finally {
+      await h.close();
+    }
+  });
 });

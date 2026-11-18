@@ -1,65 +1,1276 @@
 import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { BrowserRouter, NavLink, Link, Routes, Route, useNavigate, useParams } from 'react-router-dom';
-import { QueryClient, QueryClientProvider, useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Orbit, Plus, ArrowUpRight, ArrowRight, Settings2, Radio, UsersRound, Layers3, ChevronLeft, Check, Circle, LoaderCircle, AlertCircle, X, PlugZap, RefreshCw, Square, MessageSquare, Sparkles, GitBranch, CircleHelp, ChevronDown, ExternalLink } from 'lucide-react';
-import { STATUS_LABEL, PROVIDER_LABEL, type Discussion, type DiscussionSnapshot, type Participant, type ModelConnectionSummary, type ConnectionInput, type AgentBinding } from '@panel/contracts';
+import {
+  BrowserRouter,
+  NavLink,
+  Link,
+  Routes,
+  Route,
+  useNavigate,
+  useParams,
+} from 'react-router-dom';
+import {
+  QueryClient,
+  QueryClientProvider,
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from '@tanstack/react-query';
+import {
+  Orbit,
+  Plus,
+  ArrowUpRight,
+  ArrowRight,
+  Settings2,
+  Radio,
+  UsersRound,
+  Layers3,
+  ChevronLeft,
+  Check,
+  Circle,
+  LoaderCircle,
+  AlertCircle,
+  X,
+  PlugZap,
+  RefreshCw,
+  Square,
+  MessageSquare,
+  Sparkles,
+  GitBranch,
+  CircleHelp,
+  ChevronDown,
+  ExternalLink,
+} from 'lucide-react';
+import {
+  STATUS_LABEL,
+  PROVIDER_LABEL,
+  type Discussion,
+  type DiscussionSnapshot,
+  type Participant,
+  type ModelConnectionSummary,
+  type ConnectionInput,
+  type AgentBinding,
+} from '@panel/contracts';
 import { Button } from './components/ui/button';
 import { request, isPreview } from './api';
 import { useLive, subscribe } from './live';
 import './styles.css';
-const queryClient = new QueryClient({defaultOptions:{queries:{retry:1,refetchOnWindowFocus:false}}});
-const colors = ['#d6e3ee','#b9e67c','#c9a4ef','#eab780','#7dbdd5','#ef96ac','#a8b8ff'];
-const atTime=(s:string)=>new Date(s).toLocaleString('zh-CN',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
-function ErrorNotice({error}:{error:unknown}) { return error?<div role="alert" className="error-notice"><AlertCircle size={17}/>{error instanceof Error?error.message:String(error)}</div>:null; }
-function Loading({text='正在加载'}:{text?:string}) { return <div className="empty"><LoaderCircle className="spin" size={24}/><p>{text}</p></div>; }
-function Badge({status,sample=false}:{status:Discussion['status'];sample?:boolean}) { return <span className={`badge ${status}`}><i/>{sample?'历史样例':STATUS_LABEL[status]}</span>; }
-function Avatar({p,small=false}:{p:Participant;small?:boolean}) { return <span className={`avatar ${small?'avatar-small':''}`} style={{'--person':colors[p.colorKey]} as React.CSSProperties}>{p.name.slice(-2)}</span>; }
-function Header(){return <header className="app-header"><Link to="/" className="brand"><span className="brand-icon"><Orbit size={23}/></span><strong>圆桌<span>Panel Studio</span></strong></Link><nav aria-label="主导航"><NavLink to="/" end><Layers3 size={16}/>讨论空间</NavLink><NavLink to="/settings"><Settings2 size={16}/>模型设置</NavLink></nav><span className="local-label"><i/>本地工作空间</span></header>;}
-export default function App(){return <QueryClientProvider client={queryClient}><BrowserRouter basename={isPreview?'/preview':undefined}><Header/>{isPreview&&<div className="preview-banner">界面原型 · 使用明确标识的静态样例，不调用真实模型</div>}<Routes><Route path="/" element={<Home/>}/><Route path="/settings" element={<Settings/>}/><Route path="/discussions/:id" element={<DiscussionPage/>}/><Route path="*" element={<div className="empty"><h2>页面不存在</h2><Link to="/">返回讨论空间</Link></div>}/></Routes></BrowserRouter></QueryClientProvider>;}
-function Dialog({open,onClose,title,children}:{open:boolean;onClose:()=>void;title:string;children:ReactNode}){const ref=useRef<HTMLDialogElement>(null);useEffect(()=>{if(open&&!ref.current?.open)ref.current?.showModal();if(!open&&ref.current?.open)ref.current.close();},[open]);return <dialog ref={ref} onCancel={onClose} onClick={e=>{if(e.target===e.currentTarget)onClose();}} className="dialog"><div className="dialog-head"><h2>{title}</h2><Button variant="ghost" size="icon" onClick={onClose} aria-label="关闭"><X size={20}/></Button></div>{children}</dialog>;}
-function Home(){
- const [filter,setFilter]=useState('all'),[open,setOpen]=useState(false);const nav=useNavigate();const qc=useQueryClient();
- const list=useQuery({queryKey:['discussions'],queryFn:()=>request<{items:(Discussion&{preview:string})[];nextCursor:string|null}>('/discussions?limit=50'),refetchInterval:isPreview?false:5000});
- const connections=useQuery({queryKey:['connections'],queryFn:()=>request<ModelConnectionSummary[]>('/model-connections')});
- const settings=useQuery({queryKey:['settings'],queryFn:()=>request<{defaultModeratorConnectionId:string|null}>('/settings')});
- const [topic,setTopic]=useState(''),[count,setCount]=useState(4),[host,setHost]=useState('');
- const create=useMutation({mutationFn:()=>request<DiscussionSnapshot>('/discussions','POST',{topic,expertCount:count,moderatorConnectionId:host||settings.data?.defaultModeratorConnectionId||undefined}),onSuccess:s=>{qc.invalidateQueries({queryKey:['discussions']});nav(`/discussions/${s.discussion.id}`);}});
- const items=list.data?.items||[],active=items.filter(d=>['running','casting','summarizing'].includes(d.status));
- const shown=items.filter(d=>filter==='all'||(filter==='active'?['running','casting','summarizing','awaiting_confirmation'].includes(d.status):filter==='samples'?d.isSample:d.status==='completed'&&!d.isSample));
- return <main className="home page-width"><section className="hero"><div><div className="eyebrow"><span className="little-line"/>多元视角，共同探索</div><h1>让观点交锋，<br/><span>让答案浮现。</span></h1><p>邀请不同领域的 AI 专家，围绕一个值得讨论的问题，<br className="desktop-break"/>在交流中找到共识，也看见分歧。</p><Button onClick={()=>setOpen(true)}><Plus size={18}/>开启一场圆桌<ArrowUpRight size={17}/></Button></div><div className="hero-art" aria-hidden="true"><div className="orbit-ring orbit-inner"/><div className="orbit-ring orbit-outer"/><div className="orbit-center"><Orbit size={44}/><span>不同视角，同一张桌</span></div><span className="orbit-node node-1">研究</span><span className="orbit-node node-2">实践</span><span className="orbit-node node-3">政策</span><span className="orbit-node node-4">社会</span><div className="orbit-caption">A SPACE FOR BETTER QUESTIONS</div></div></section>
- <section className="metrics" aria-label="工作空间概览"><div><Radio size={18}/><strong>{active.length.toString().padStart(2,'0')}</strong><span>正在进行</span></div><div><MessageSquare size={18}/><strong>{items.filter(d=>!d.isSample).length.toString().padStart(2,'0')}</strong><span>我的讨论</span></div><div><PlugZap size={18}/><strong>{(connections.data?.filter(c=>c.active).length||0).toString().padStart(2,'0')}</strong><span>模型连接</span><Link to="/settings">管理<ArrowUpRight size={14}/></Link></div></section>
- <section className="discussion-library"><div className="section-heading"><h2>讨论空间<span>{items.length}</span></h2><span className="subtle">每一个问题，都值得多看一面。</span></div><div className="filter-tabs" role="group" aria-label="筛选讨论">{[['all','全部讨论'],['active','进行中'],['completed','已完成'],['samples','灵感样例']].map(([v,l])=><button key={v} className={filter===v?'selected':''} aria-pressed={filter===v} onClick={()=>setFilter(v)}>{l}</button>)}</div><ErrorNotice error={list.error}/>{list.isPending?<Loading/>:shown.length===0?<div className="empty empty-card"><Orbit size={36}/><h3>从一个问题开始</h3><p>还没有符合筛选条件的讨论。创建话题，邀请不同视角入席。</p><Button variant="outline" onClick={()=>setOpen(true)}><Plus size={16}/>新建讨论</Button></div>:<div className="discussion-grid">{shown.map((d,i)=><Link className="discussion-card" key={d.id} to={`/discussions/${d.id}`}><div className="card-top"><Badge status={d.status} sample={d.isSample}/><ArrowUpRight size={19}/></div><h3>{d.topic}</h3><p>{d.isSample?'查看一场完整的示例圆桌，了解观点如何回应与演变。':d.preview?.slice(0,90)||'阵容已就绪，等待不同观点相遇。'}</p><div className="card-bottom"><div className="mini-avatars">{[1,2,3,4].slice(0,d.expertCount).map(c=><span key={c} style={{background:colors[c]+'24',color:colors[c]}}>{['研','策','实','社'][c-1]}</span>)}<span className="expert-count">{d.expertCount} 位专家</span></div><span>{d.isSample?'样例 '+String(i+1).padStart(2,'0'):atTime(d.updatedAt)}</span></div></Link>)}</div>}</section><footer className="page-footer"><span>圆桌 · AI Panel Studio</span><span>好的讨论，从不同意见开始。</span></footer>
- <Dialog open={open} onClose={()=>setOpen(false)} title="开启一场圆桌"><form onSubmit={e=>{e.preventDefault();create.mutate();}}><label className="field">想讨论什么？<textarea value={topic} onChange={e=>setTopic(e.target.value)} minLength={5} maxLength={500} required placeholder="例如：AI 会怎样改变年轻人的职业起点？" rows={4}/><small>{topic.length}/500 · 一个具体的问题，更容易产生有价值的讨论。</small></label><label className="field">专家人数<select value={count} onChange={e=>setCount(Number(e.target.value))}>{[2,3,4,5,6].map(n=><option key={n} value={n}>{n} 位专家 + 1 位主持人</option>)}</select></label><label className="field">主持人模型<select value={host||settings.data?.defaultModeratorConnectionId||''} onChange={e=>setHost(e.target.value)} required={!isPreview}><option value="">请选择模型连接</option>{connections.data?.filter(c=>c.active).map(c=><option key={c.id} value={c.id}>{c.name} · {c.model}</option>)}</select></label>{!connections.data?.some(c=>c.active)&&<p className="hint">请先<Link to="/settings">添加模型连接</Link>，用于生成阵容和主持讨论。</p>}<ErrorNotice error={create.error}/><div className="dialog-actions"><Button type="button" variant="ghost" onClick={()=>setOpen(false)}>取消</Button><Button disabled={create.isPending||(!isPreview&&!connections.data?.some(c=>c.active))}>{create.isPending?<LoaderCircle size={16} className="spin"/>:<Sparkles size={16}/>}生成讨论阵容</Button></div></form></Dialog></main>;
+const queryClient = new QueryClient({
+  defaultOptions: { queries: { retry: 1, refetchOnWindowFocus: false } },
+});
+const colors = ['#d6e3ee', '#b9e67c', '#c9a4ef', '#eab780', '#7dbdd5', '#ef96ac', '#a8b8ff'];
+const atTime = (s: string) =>
+  new Date(s).toLocaleString('zh-CN', {
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+function ErrorNotice({ error }: { error: unknown }) {
+  return error ? (
+    <div role="alert" className="error-notice">
+      <AlertCircle size={17} />
+      {error instanceof Error ? error.message : String(error)}
+    </div>
+  ) : null;
 }
-const presets:Record<string,{baseUrl:string;protocol:ConnectionInput['protocol']}>={deepseek:{baseUrl:'https://api.deepseek.com/v1',protocol:'openai-chat'},claude:{baseUrl:'https://api.anthropic.com/v1',protocol:'anthropic'},qwen:{baseUrl:'https://dashscope.aliyuncs.com/compatible-mode/v1',protocol:'openai-chat'},gpt:{baseUrl:'https://api.openai.com/v1',protocol:'openai-responses'},kimi:{baseUrl:'https://api.moonshot.cn/v1',protocol:'openai-chat'},custom:{baseUrl:'',protocol:'openai-chat'}};
-const blank:ConnectionInput={name:'',provider:'deepseek',protocol:'openai-chat',baseUrl:presets.deepseek.baseUrl,model:'',apiKey:'',structuredOutput:false,active:true};
-function Settings(){
- const qc=useQueryClient(),[editing,setEditing]=useState<ModelConnectionSummary|null>(null),[form,setForm]=useState<ConnectionInput>(blank),[notice,setNotice]=useState('');
- const list=useQuery({queryKey:['connections'],queryFn:()=>request<ModelConnectionSummary[]>('/model-connections')});const settings=useQuery({queryKey:['settings'],queryFn:()=>request<{defaultModeratorConnectionId:string|null}>('/settings')});
- const save=useMutation({mutationFn:()=>{const {apiKey,...rest}=form;return request('/model-connections'+(editing?'/'+editing.id:''),editing?'PATCH':'POST',{...rest,...(apiKey?{apiKey}: {})});},onSuccess:()=>{qc.invalidateQueries({queryKey:['connections']});setEditing(null);setForm({...blank});setNotice('模型连接已保存。请测试连接，确认接口与模型可用。');}});
- const test=useMutation({mutationFn:(id:string)=>request<{ok:boolean;message:string}>(`/model-connections/${id}/test`,'POST',{}),onSuccess:r=>{setNotice(r.message);qc.invalidateQueries({queryKey:['connections']});},onError:()=>qc.invalidateQueries({queryKey:['connections']})});
- const changeDefault=useMutation({mutationFn:(id:string)=>request('/settings','PATCH',{defaultModeratorConnectionId:id||null}),onSuccess:()=>qc.invalidateQueries({queryKey:['settings']})});
- const toggle=useMutation({mutationFn:(c:ModelConnectionSummary)=>request(`/model-connections/${c.id}`,'PATCH',{active:!c.active}),onSuccess:()=>qc.invalidateQueries({queryKey:['connections']})});
- const set=<K extends keyof ConnectionInput>(k:K,v:ConnectionInput[K])=>setForm(f=>({...f,[k]:v}));
- return <main className="page-width settings-page"><div className="page-title"><div className="eyebrow">连接不同的智能</div><h1>模型设置</h1><p>为每位专家选择合适的模型，让不同的能力在圆桌相遇。</p></div><div className="settings-layout"><section><div className="section-heading"><h2>我的连接<span>{list.data?.length||0}</span></h2></div><ErrorNotice error={list.error||test.error||toggle.error}/>{notice&&<div className="success-notice" role="status"><Check size={17}/>{notice}</div>}{list.isPending?<Loading/>:!list.data?.length?<div className="empty empty-card"><PlugZap size={32}/><h3>连接你的第一个模型</h3><p>支持 DeepSeek、Claude、Qwen、GPT、Kimi<br/>以及兼容的自定义接口。</p></div>:<div className="connection-list">{list.data.map(c=><article className={`connection-card ${!c.active?'disabled-card':''}`} key={c.id}><div className="connection-title"><span className="provider-logo">{PROVIDER_LABEL[c.provider].slice(0,1)}</span><div><h3>{c.name}</h3><p>{PROVIDER_LABEL[c.provider]} · {c.model}</p></div><span className={`test-tag ${c.testStatus}`}>{!c.active?'已停用':c.testStatus==='passed'?'连接验证通过':c.testStatus==='failed'?'测试失败':'待测试'}</span></div><div className="connection-meta"><span>{c.protocol}</span><span>凭据已保存 · v{c.version}</span></div><div className="connection-actions"><Button variant="outline" size="sm" disabled={test.isPending||!c.active} onClick={()=>test.mutate(c.id)}>{test.isPending&&test.variables===c.id?<LoaderCircle className="spin" size={14}/>:<PlugZap size={14}/>}测试连接</Button><Button variant="ghost" size="sm" onClick={()=>{setEditing(c);setForm({name:c.name,provider:c.provider,protocol:c.protocol,baseUrl:c.baseUrl,model:c.model,apiKey:'',structuredOutput:c.structuredOutput,active:c.active});}}>编辑</Button><Button variant="ghost" size="sm" disabled={toggle.isPending} onClick={()=>toggle.mutate(c)}>{c.active?'停用':'启用'}</Button></div></article>)}</div>}<section className="default-host"><h3>默认主持人</h3><p>负责生成阵容、组织讨论、提炼洞察与最终总结。</p><select aria-label="默认主持人模型" value={settings.data?.defaultModeratorConnectionId||''} disabled={changeDefault.isPending} onChange={e=>changeDefault.mutate(e.target.value)}><option value="">选择默认连接</option>{list.data?.filter(c=>c.active).map(c=><option value={c.id} key={c.id}>{c.name}</option>)}</select><ErrorNotice error={changeDefault.error}/></section></section><aside className="configuration-panel"><div className="section-heading"><h2>{editing?'编辑连接':'添加模型连接'}</h2>{editing&&<Button variant="ghost" size="sm" onClick={()=>{setEditing(null);setForm({...blank});}}>取消编辑</Button>}</div><form onSubmit={e=>{e.preventDefault();save.mutate();}}><label className="field">连接名称<input required maxLength={60} value={form.name} onChange={e=>set('name',e.target.value)} placeholder="例如：DeepSeek · 研究视角"/></label><div className="field-grid"><label className="field">服务商<select value={form.provider} onChange={e=>{const p=e.target.value as ConnectionInput['provider'];setForm(f=>({...f,provider:p,...presets[p]}));}}>{Object.entries(PROVIDER_LABEL).map(([v,l])=><option key={v} value={v}>{l}</option>)}</select></label><label className="field">接口协议<select value={form.protocol} onChange={e=>set('protocol',e.target.value as ConnectionInput['protocol'])}><option value="openai-chat">Chat Completions</option><option value="openai-responses">Responses</option><option value="anthropic">Anthropic Messages</option></select></label></div><label className="field">API 地址<input required type="url" value={form.baseUrl} onChange={e=>set('baseUrl',e.target.value)} placeholder="https://…/v1"/><small>填写基础地址，不附加 /chat/completions 等操作路径。</small></label><label className="field">模型名称<input required maxLength={120} value={form.model} onChange={e=>set('model',e.target.value)} placeholder="填写服务商提供的模型 ID"/></label><label className="field">API Key<input aria-label="API Key" autoComplete="off" type="password" required={!editing} value={form.apiKey} onChange={e=>set('apiKey',e.target.value)} placeholder={editing?'留空保留已有凭据':'输入 API Key'}/><small>仅保存在本机后端，保存后不会回显完整凭据。</small></label><label className="checkbox-label"><input type="checkbox" checked={form.structuredOutput} onChange={e=>set('structuredOutput',e.target.checked)}/>启用接口原生 JSON 输出<small>仅在模型支持时开启</small></label><ErrorNotice error={save.error}/><Button className="full-width" disabled={save.isPending}>{save.isPending?<LoaderCircle size={16} className="spin"/>:<Plus size={16}/>}保存连接</Button></form></aside></div></main>;
+function Loading({ text = '正在加载' }: { text?: string }) {
+  return (
+    <div className="empty">
+      <LoaderCircle className="spin" size={24} />
+      <p>{text}</p>
+    </div>
+  );
 }
-function DiscussionPage(){const {id}=useParams();const query=useQuery({queryKey:['snapshot',id],queryFn:()=>request<DiscussionSnapshot>(`/discussions/${id}/snapshot`)});const live=useLive(state=>state.snapshots[id!]);useEffect(()=>{if(query.data)useLive.getState().initialize(query.data);},[query.data]);useEffect(()=>{if(!isPreview&&id&&query.data)return subscribe(id);},[id,query.data?.discussion.id]);if(query.isPending)return <Loading text="正在进入圆桌"/>;if(query.error)return <main className="page-width"><ErrorNotice error={query.error}/><Link to="/">返回讨论空间</Link></main>;const s=isPreview?query.data!:live||query.data!;return ['casting','awaiting_confirmation'].includes(s.discussion.status)||(s.discussion.status==='failed'&&s.discussion.failureStage==='cast')?<Cast snapshot={s}/>:<Studio snapshot={s}/>;}
-function Cast({snapshot:s}:{snapshot:DiscussionSnapshot}){
- const qc=useQueryClient(),[bindings,setBindings]=useState<Record<string,string>>({});const list=useQuery({queryKey:['connections'],queryFn:()=>request<ModelConnectionSummary[]>('/model-connections')});const d=s.discussion;
- useEffect(()=>{setBindings(Object.fromEntries(s.bindings.map(b=>[b.participantId,b.connectionId])));},[d.id,d.castVersion]);
- const save=useMutation({mutationFn:async(start:boolean)=>{const updated=await request<DiscussionSnapshot>(`/discussions/${d.id}/agent-bindings`,'PUT',{expectedVersion:d.version,castVersion:d.castVersion,bindings:s.participants.map(p=>({participantId:p.id,connectionId:bindings[p.id]||s.bindings.find(b=>b.participantId===p.id)?.connectionId||list.data?.find(c=>c.active)?.id}))});return start?request<DiscussionSnapshot>(`/discussions/${d.id}/start`,'POST',{expectedVersion:updated.discussion.version,castVersion:updated.discussion.castVersion}):updated;},onSuccess:r=>{qc.setQueryData(['snapshot',d.id],r);qc.invalidateQueries({queryKey:['snapshot',d.id]});}});
- const retry=useMutation({mutationFn:()=>request(`/discussions/${d.id}/retry`,'POST',{expectedVersion:d.version}),onSuccess:()=>qc.invalidateQueries({queryKey:['snapshot',d.id]})});
- return <main className="page-width cast-page"><Link className="back-link" to="/"><ChevronLeft size={16}/>返回讨论空间</Link><div className="page-title"><div className="eyebrow">让不同的视角入席</div><h1>本场讨论阵容</h1><p className="cast-topic">{d.topic}</p></div>{d.status==='casting'?<Loading text="正在寻找互补的专业视角，生成主持人与专家…"/>:d.status==='failed'?<div className="empty"><ErrorNotice error={d.error}/><Button onClick={()=>retry.mutate()} disabled={retry.isPending}><RefreshCw size={16}/>重新生成阵容</Button><ErrorNotice error={retry.error}/></div>:<><div className="cast-grid">{s.participants.map(p=><article className={`cast-card ${p.role==='moderator'?'host-card':''}`} key={p.id}><div className="cast-identity"><Avatar p={p}/><div><span className="role-label">{p.role==='moderator'?'本场主持人':p.title}</span><h2>{p.name}</h2><span>{p.occupation}</span></div></div><p>{p.stance}</p><div className="specialties">{p.specialty.map(t=><span key={t}>{t}</span>)}</div><label className="field">{p.role==='moderator'?'主持人模型 · 同时负责洞察与总结':'专家模型'}<select aria-label={`${p.name}的模型`} value={bindings[p.id]||s.bindings.find(b=>b.participantId===p.id)?.connectionId||list.data?.find(c=>c.active)?.id||''} onChange={e=>setBindings(b=>({...b,[p.id]:e.target.value}))}><option value="">选择连接</option>{list.data?.filter(c=>c.active).map(c=><option key={c.id} value={c.id}>{c.name} · {c.model}</option>)}</select></label></article>)}</div><ErrorNotice error={save.error||list.error}/><div className="cast-actions"><p><UsersRound size={17}/>{d.expertCount} 位专家 + 1 位主持人<span>确认后，专家将根据现场讨论自主参与。</span></p><div><Button variant="outline" disabled={save.isPending||!list.data?.some(c=>c.active)} onClick={()=>save.mutate(false)}>保存分配</Button><Button disabled={save.isPending||!list.data?.some(c=>c.active)} onClick={()=>save.mutate(true)}>{save.isPending?<LoaderCircle className="spin" size={16}/>:<Radio size={16}/>}确认阵容，开始讨论</Button></div></div></>}</main>;
+function Badge({ status, sample = false }: { status: Discussion['status']; sample?: boolean }) {
+  return (
+    <span className={`badge ${status}`}>
+      <i />
+      {sample ? '历史样例' : STATUS_LABEL[status]}
+    </span>
+  );
 }
-function Studio({snapshot:s}:{snapshot:DiscussionSnapshot}){
- const network=useLive(state=>state.network[s.discussion.id]);const d=s.discussion,qc=useQueryClient(),[tab,setTab]=useState('transcript'),[unread,setUnread]=useState(0),[confirm,setConfirm]=useState(false);const transcript=useRef<HTMLDivElement>(null),atBottom=useRef(true),lastCount=useRef(0);
- const finish=useMutation({mutationFn:()=>request<DiscussionSnapshot>(`/discussions/${d.id}/${d.status==='failed'&&d.failureStage==='summary'?'retry':'finish'}`,'POST',{expectedVersion:d.version}),onSuccess:r=>{qc.setQueryData(['snapshot',d.id],r);setConfirm(false);}});
- const scrollBottom=()=>{transcript.current?.scrollTo({top:transcript.current.scrollHeight,behavior:'smooth'});setUnread(0);atBottom.current=true;};
- useEffect(()=>{if(s.messages.length>lastCount.current){if(atBottom.current)transcript.current?.scrollTo({top:transcript.current.scrollHeight});else setUnread(v=>v+s.messages.length-lastCount.current);}lastCount.current=s.messages.length;},[s.messages.length]);
- const locate=(id:string)=>{setTab('transcript');requestAnimationFrame(()=>{const el=document.getElementById(id);el?.scrollIntoView({block:'center',behavior:'smooth'});el?.classList.add('message-highlight');setTimeout(()=>el?.classList.remove('message-highlight'),1600);});};
- const participant=(id:string)=>s.participants.find(p=>p.id===id)!;
- return <main className="studio"><div className="studio-heading"><Link className="back-icon" to="/" aria-label="返回讨论空间"><ChevronLeft size={22}/></Link><div><div className="studio-eyebrow"><Badge status={d.status} sample={d.isSample}/><span>{d.expertCount} 位专家 · 1 位主持人</span></div><h1>{d.topic}</h1></div>{d.status==='running'&&<Button variant="outline" size="sm" onClick={()=>setConfirm(true)}><Square size={13}/>结束并总结</Button>}{['failed','interrupted'].includes(d.status)&&<Button variant="outline" size="sm" disabled={finish.isPending||!s.messages.length} onClick={()=>finish.mutate()}><RefreshCw size={14}/>重新请求总结</Button>}</div><ErrorNotice error={finish.error||d.error}/>{d.isSample&&<div className="sample-note"><Sparkles size={14}/>历史演示样例 · 以下内容为预置示例，不代表正在发生的模型调用。</div>}<div className="studio-tabs" role="tablist" aria-label="演播厅分区">{[['transcript','现场',MessageSquare],['experts','专家',UsersRound],['insights','洞察',Layers3]].map(([v,l,Icon])=><button key={String(v)} role="tab" aria-selected={tab===v} onClick={()=>setTab(String(v))}>{typeof Icon!=='string'&&<Icon size={16}/>}<span>{String(l)}</span></button>)}</div><div className={`studio-grid tab-${tab}`}>
- <aside className="studio-panel experts-panel"><div className="panel-title"><h2><UsersRound size={16}/>专家席</h2><span>{s.participants.length}</span></div><div className="panel-scroll experts-list">{s.participants.map(p=><article key={p.id} className={`expert-item ${p.status!=='idle'?'expert-active':''}`} style={{'--person':colors[p.colorKey]} as React.CSSProperties}><div className="expert-identity"><Avatar p={p} small/><div><h3>{p.name}{p.role==='moderator'&&<span>主持</span>}</h3><p>{p.occupation}</p></div></div><p className="expert-stance">{p.stance}</p><div className="expert-state"><span><i/>{p.status==='idle'?'聆听中':p.status==='preparing'?'准备中':'发言中'}</span><span>{s.bindings.find(b=>b.participantId===p.id)?.model||'样例角色'}</span></div>{p.publicFocus&&<p className="focus">{p.publicFocus}</p>}</article>)}</div></aside>
- <section className="studio-panel transcript-panel"><div className="panel-title"><h2><Radio size={16}/>现场讨论</h2><span>{s.messages.filter(m=>m.kind!=='summary').length} 条发言</span></div><div className="transcript-scroll" ref={transcript} onScroll={()=>{const el=transcript.current!;atBottom.current=el.scrollHeight-el.scrollTop-el.clientHeight<90;if(atBottom.current)setUnread(0);}}>{!s.messages.length&&<Loading text="主持人正在准备开场…"/>}{s.messages.map(m=>{const p=participant(m.participantId);if(!p)return null;return <article id={m.id} key={m.id} className={`message ${m.kind==='summary'?'summary-message':''}`}><Avatar p={p} small/><div className="message-body"><div className="message-meta"><strong style={{color:colors[p.colorKey]}}>{p.name}</strong><span>{p.role==='moderator'?'主持人':p.title}</span><time>{new Date(m.createdAt).toLocaleTimeString('zh-CN',{hour:'2-digit',minute:'2-digit',hour12:false})}</time></div>{m.replyToMessageId&&<button className="reply-reference" onClick={()=>locate(m.replyToMessageId!)}><GitBranch size={13}/>回应 {participant(s.messages.find(x=>x.id===m.replyToMessageId)?.participantId||'')?.name||'先前观点'}<ArrowUpRight size={12}/></button>}{m.kind==='summary'&&<h3 className="summary-title"><Sparkles size={17}/>本场圆桌总结</h3>}<div className="message-content">{m.content.split('\n').map((line,i)=><p key={i}>{line||<br/>}</p>)}</div></div></article>;})}{['completed','summarizing','failed','interrupted'].includes(d.status)&&<div className="transcript-end"><span/>{d.status==='completed'?<Check size={14}/>:d.status==='summarizing'?<LoaderCircle className="spin" size={14}/>:<AlertCircle size={14}/>}<span className="end-label">{d.status==='completed'?'本场讨论已结束':STATUS_LABEL[d.status]}</span><span/></div>}</div>{unread>0&&<button className="new-messages" onClick={scrollBottom}>{unread} 条新发言<ChevronDown size={16}/></button>}<footer className="transcript-footer"><span><i/>{['running','summarizing'].includes(d.status)?(network==='connected'?'实时已连接':'正在重新连接'):'讨论记录已保存'}</span><span>观点由 AI 角色生成</span></footer></section>
- <aside className="studio-panel insights-panel"><div className="panel-title"><h2><Layers3 size={16}/>共识与分歧</h2><span className="live-text">{d.status==='running'?'实时更新':'讨论洞察'}</span></div><div className="panel-scroll insights-list">{(['consensus','divergence','open_question'] as const).map(kind=><section key={kind} className={`insight-section ${kind}`}><h3>{kind==='consensus'?<Check size={15}/>:kind==='divergence'?<GitBranch size={15}/>:<CircleHelp size={15}/>}{{consensus:'达成共识',divergence:'仍有分歧',open_question:'开放问题'}[kind]}<span>{s.insights.filter(i=>i.kind===kind).length}</span></h3>{s.insights.filter(i=>i.kind===kind).length===0?<p className="insight-empty">等待更多观点，逐步形成洞察。</p>:s.insights.filter(i=>i.kind===kind).map(i=><article key={i.id} className="insight-card">{kind==='consensus'&&<span className="scope-label">{i.scope==='all'?'全体共识':'局部共识'}</span>}<p>{i.text}</p><div className="evidence-links">{i.evidence.map((e,j)=><button key={e.messageId+j} onClick={()=>locate(e.messageId)} aria-label={`查看证据发言 ${s.messages.find(m=>m.id===e.messageId)?.messageSeq}`}><MessageSquare size={11}/>{participant(s.messages.find(m=>m.id===e.messageId)?.participantId||'')?.name||'原始发言'}<ArrowUpRight size={10}/></button>)}</div></article>)}</section>)}<p className="insight-footnote">洞察来自已公开的发言。点击来源，回到观点发生的现场。</p></div></aside></div><Dialog open={confirm} onClose={()=>setConfirm(false)} title="结束本场讨论？"><p className="dialog-description">当前发言完成或取消后，主持人将整理最后的共识与分歧，并生成总结。</p><ErrorNotice error={finish.error}/><div className="dialog-actions"><Button variant="ghost" onClick={()=>setConfirm(false)}>继续讨论</Button><Button disabled={finish.isPending} onClick={()=>finish.mutate()}>结束并生成总结</Button></div></Dialog></main>;
+function Avatar({ p, small = false }: { p: Participant; small?: boolean }) {
+  return (
+    <span
+      className={`avatar ${small ? 'avatar-small' : ''}`}
+      style={{ '--person': colors[p.colorKey] } as React.CSSProperties}
+    >
+      {p.name.slice(-2)}
+    </span>
+  );
+}
+function Header() {
+  return (
+    <header className="app-header">
+      <Link to="/" className="brand">
+        <span className="brand-icon">
+          <Orbit size={23} />
+        </span>
+        <strong>
+          圆桌<span>Panel Studio</span>
+        </strong>
+      </Link>
+      <nav aria-label="主导航">
+        <NavLink to="/" end>
+          <Layers3 size={16} />
+          讨论空间
+        </NavLink>
+        <NavLink to="/settings">
+          <Settings2 size={16} />
+          模型设置
+        </NavLink>
+      </nav>
+      <span className="local-label">
+        <i />
+        本地工作空间
+      </span>
+    </header>
+  );
+}
+export default function App() {
+  return (
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter basename={isPreview ? '/preview' : undefined}>
+        <Header />
+        {isPreview && (
+          <div className="preview-banner">界面原型 · 使用明确标识的静态样例，不调用真实模型</div>
+        )}
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/discussions/:id" element={<DiscussionPage />} />
+          <Route
+            path="*"
+            element={
+              <div className="empty">
+                <h2>页面不存在</h2>
+                <Link to="/">返回讨论空间</Link>
+              </div>
+            }
+          />
+        </Routes>
+      </BrowserRouter>
+    </QueryClientProvider>
+  );
+}
+function Dialog({
+  open,
+  onClose,
+  title,
+  children,
+}: {
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  useEffect(() => {
+    if (open && !ref.current?.open) ref.current?.showModal();
+    if (!open && ref.current?.open) ref.current.close();
+  }, [open]);
+  return (
+    <dialog
+      ref={ref}
+      onCancel={onClose}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onClose();
+      }}
+      className="dialog"
+    >
+      <div className="dialog-head">
+        <h2>{title}</h2>
+        <Button variant="ghost" size="icon" onClick={onClose} aria-label="关闭">
+          <X size={20} />
+        </Button>
+      </div>
+      {children}
+    </dialog>
+  );
+}
+function Home() {
+  const [filter, setFilter] = useState('all'),
+    [open, setOpen] = useState(false);
+  const nav = useNavigate();
+  const qc = useQueryClient();
+  const list = useQuery({
+    queryKey: ['discussions'],
+    queryFn: () =>
+      request<{ items: (Discussion & { preview: string })[]; nextCursor: string | null }>(
+        '/discussions?limit=50',
+      ),
+    refetchInterval: isPreview ? false : 5000,
+  });
+  const connections = useQuery({
+    queryKey: ['connections'],
+    queryFn: () => request<ModelConnectionSummary[]>('/model-connections'),
+  });
+  const settings = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => request<{ defaultModeratorConnectionId: string | null }>('/settings'),
+  });
+  const [topic, setTopic] = useState(''),
+    [count, setCount] = useState(4),
+    [host, setHost] = useState('');
+  const create = useMutation({
+    mutationFn: () =>
+      request<DiscussionSnapshot>('/discussions', 'POST', {
+        topic,
+        expertCount: count,
+        moderatorConnectionId: host || settings.data?.defaultModeratorConnectionId || undefined,
+      }),
+    onSuccess: (s) => {
+      qc.invalidateQueries({ queryKey: ['discussions'] });
+      nav(`/discussions/${s.discussion.id}`);
+    },
+  });
+  const items = list.data?.items || [],
+    active = items.filter((d) => ['running', 'casting', 'summarizing'].includes(d.status));
+  const shown = items.filter(
+    (d) =>
+      filter === 'all' ||
+      (filter === 'active'
+        ? ['running', 'casting', 'summarizing', 'awaiting_confirmation'].includes(d.status)
+        : filter === 'samples'
+          ? d.isSample
+          : d.status === 'completed' && !d.isSample),
+  );
+  return (
+    <main className="home page-width">
+      <section className="hero">
+        <div>
+          <div className="eyebrow">
+            <span className="little-line" />
+            多元视角，共同探索
+          </div>
+          <h1>
+            让观点交锋，
+            <br />
+            <span>让答案浮现。</span>
+          </h1>
+          <p>
+            邀请不同领域的 AI 专家，围绕一个值得讨论的问题，
+            <br className="desktop-break" />
+            在交流中找到共识，也看见分歧。
+          </p>
+          <Button onClick={() => setOpen(true)}>
+            <Plus size={18} />
+            开启一场圆桌
+            <ArrowUpRight size={17} />
+          </Button>
+        </div>
+        <div className="hero-art" aria-hidden="true">
+          <div className="orbit-ring orbit-inner" />
+          <div className="orbit-ring orbit-outer" />
+          <div className="orbit-center">
+            <Orbit size={44} />
+            <span>不同视角，同一张桌</span>
+          </div>
+          <span className="orbit-node node-1">研究</span>
+          <span className="orbit-node node-2">实践</span>
+          <span className="orbit-node node-3">政策</span>
+          <span className="orbit-node node-4">社会</span>
+          <div className="orbit-caption">A SPACE FOR BETTER QUESTIONS</div>
+        </div>
+      </section>
+      <section className="metrics" aria-label="工作空间概览">
+        <div>
+          <Radio size={18} />
+          <strong>{active.length.toString().padStart(2, '0')}</strong>
+          <span>正在进行</span>
+        </div>
+        <div>
+          <MessageSquare size={18} />
+          <strong>
+            {items
+              .filter((d) => !d.isSample)
+              .length.toString()
+              .padStart(2, '0')}
+          </strong>
+          <span>我的讨论</span>
+        </div>
+        <div>
+          <PlugZap size={18} />
+          <strong>
+            {(connections.data?.filter((c) => c.active).length || 0).toString().padStart(2, '0')}
+          </strong>
+          <span>模型连接</span>
+          <Link to="/settings">
+            管理
+            <ArrowUpRight size={14} />
+          </Link>
+        </div>
+      </section>
+      <section className="discussion-library">
+        <div className="section-heading">
+          <h2>
+            讨论空间<span>{items.length}</span>
+          </h2>
+          <span className="subtle">每一个问题，都值得多看一面。</span>
+        </div>
+        <div className="filter-tabs" role="group" aria-label="筛选讨论">
+          {[
+            ['all', '全部讨论'],
+            ['active', '进行中'],
+            ['completed', '已完成'],
+            ['samples', '灵感样例'],
+          ].map(([v, l]) => (
+            <button
+              key={v}
+              className={filter === v ? 'selected' : ''}
+              aria-pressed={filter === v}
+              onClick={() => setFilter(v)}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+        <ErrorNotice error={list.error} />
+        {list.isPending ? (
+          <Loading />
+        ) : shown.length === 0 ? (
+          <div className="empty empty-card">
+            <Orbit size={36} />
+            <h3>从一个问题开始</h3>
+            <p>还没有符合筛选条件的讨论。创建话题，邀请不同视角入席。</p>
+            <Button variant="outline" onClick={() => setOpen(true)}>
+              <Plus size={16} />
+              新建讨论
+            </Button>
+          </div>
+        ) : (
+          <div className="discussion-grid">
+            {shown.map((d, i) => (
+              <Link className="discussion-card" key={d.id} to={`/discussions/${d.id}`}>
+                <div className="card-top">
+                  <Badge status={d.status} sample={d.isSample} />
+                  <ArrowUpRight size={19} />
+                </div>
+                <h3>{d.topic}</h3>
+                <p>
+                  {d.isSample
+                    ? '查看一场完整的示例圆桌，了解观点如何回应与演变。'
+                    : d.preview?.slice(0, 90) || '阵容已就绪，等待不同观点相遇。'}
+                </p>
+                <div className="card-bottom">
+                  <div className="mini-avatars">
+                    {[1, 2, 3, 4].slice(0, d.expertCount).map((c) => (
+                      <span key={c} style={{ background: colors[c] + '24', color: colors[c] }}>
+                        {['研', '策', '实', '社'][c - 1]}
+                      </span>
+                    ))}
+                    <span className="expert-count">{d.expertCount} 位专家</span>
+                  </div>
+                  <span>
+                    {d.isSample ? '样例 ' + String(i + 1).padStart(2, '0') : atTime(d.updatedAt)}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+      <footer className="page-footer">
+        <span>圆桌 · AI Panel Studio</span>
+        <span>好的讨论，从不同意见开始。</span>
+      </footer>
+      <Dialog open={open} onClose={() => setOpen(false)} title="开启一场圆桌">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            create.mutate();
+          }}
+        >
+          <label className="field">
+            想讨论什么？
+            <textarea
+              value={topic}
+              onChange={(e) => setTopic(e.target.value)}
+              minLength={5}
+              maxLength={500}
+              required
+              placeholder="例如：AI 会怎样改变年轻人的职业起点？"
+              rows={4}
+            />
+            <small>{topic.length}/500 · 一个具体的问题，更容易产生有价值的讨论。</small>
+          </label>
+          <label className="field">
+            专家人数
+            <select value={count} onChange={(e) => setCount(Number(e.target.value))}>
+              {[2, 3, 4, 5, 6].map((n) => (
+                <option key={n} value={n}>
+                  {n} 位专家 + 1 位主持人
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="field">
+            主持人模型
+            <select
+              value={host || settings.data?.defaultModeratorConnectionId || ''}
+              onChange={(e) => setHost(e.target.value)}
+              required={!isPreview}
+            >
+              <option value="">请选择模型连接</option>
+              {connections.data
+                ?.filter((c) => c.active)
+                .map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} · {c.model}
+                  </option>
+                ))}
+            </select>
+          </label>
+          {!connections.data?.some((c) => c.active) && (
+            <p className="hint">
+              请先<Link to="/settings">添加模型连接</Link>，用于生成阵容和主持讨论。
+            </p>
+          )}
+          <ErrorNotice error={create.error} />
+          <div className="dialog-actions">
+            <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
+              取消
+            </Button>
+            <Button
+              disabled={
+                create.isPending || (!isPreview && !connections.data?.some((c) => c.active))
+              }
+            >
+              {create.isPending ? (
+                <LoaderCircle size={16} className="spin" />
+              ) : (
+                <Sparkles size={16} />
+              )}
+              生成讨论阵容
+            </Button>
+          </div>
+        </form>
+      </Dialog>
+    </main>
+  );
+}
+const presets: Record<string, { baseUrl: string; protocol: ConnectionInput['protocol'] }> = {
+  deepseek: { baseUrl: 'https://api.deepseek.com/v1', protocol: 'openai-chat' },
+  claude: { baseUrl: 'https://api.anthropic.com/v1', protocol: 'anthropic' },
+  qwen: { baseUrl: 'https://dashscope.aliyuncs.com/compatible-mode/v1', protocol: 'openai-chat' },
+  gpt: { baseUrl: 'https://api.openai.com/v1', protocol: 'openai-responses' },
+  kimi: { baseUrl: 'https://api.moonshot.cn/v1', protocol: 'openai-chat' },
+  custom: { baseUrl: '', protocol: 'openai-chat' },
+};
+const blank: ConnectionInput = {
+  name: '',
+  provider: 'deepseek',
+  protocol: 'openai-chat',
+  baseUrl: presets.deepseek.baseUrl,
+  model: '',
+  apiKey: '',
+  structuredOutput: false,
+  active: true,
+};
+function Settings() {
+  const qc = useQueryClient(),
+    [editing, setEditing] = useState<ModelConnectionSummary | null>(null),
+    [form, setForm] = useState<ConnectionInput>(blank),
+    [notice, setNotice] = useState('');
+  const list = useQuery({
+    queryKey: ['connections'],
+    queryFn: () => request<ModelConnectionSummary[]>('/model-connections'),
+  });
+  const settings = useQuery({
+    queryKey: ['settings'],
+    queryFn: () => request<{ defaultModeratorConnectionId: string | null }>('/settings'),
+  });
+  const save = useMutation({
+    mutationFn: () => {
+      const { apiKey, ...rest } = form;
+      return request(
+        '/model-connections' + (editing ? '/' + editing.id : ''),
+        editing ? 'PATCH' : 'POST',
+        { ...rest, ...(apiKey ? { apiKey } : {}) },
+      );
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['connections'] });
+      setEditing(null);
+      setForm({ ...blank });
+      setNotice('模型连接已保存。请测试连接，确认接口与模型可用。');
+    },
+  });
+  const test = useMutation({
+    mutationFn: (id: string) =>
+      request<{ ok: boolean; message: string }>(`/model-connections/${id}/test`, 'POST', {}),
+    onSuccess: (r) => {
+      setNotice(r.message);
+      qc.invalidateQueries({ queryKey: ['connections'] });
+    },
+    onError: () => qc.invalidateQueries({ queryKey: ['connections'] }),
+  });
+  const changeDefault = useMutation({
+    mutationFn: (id: string) =>
+      request('/settings', 'PATCH', { defaultModeratorConnectionId: id || null }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['settings'] }),
+  });
+  const toggle = useMutation({
+    mutationFn: (c: ModelConnectionSummary) =>
+      request(`/model-connections/${c.id}`, 'PATCH', { active: !c.active }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['connections'] }),
+  });
+  const set = <K extends keyof ConnectionInput>(k: K, v: ConnectionInput[K]) =>
+    setForm((f) => ({ ...f, [k]: v }));
+  return (
+    <main className="page-width settings-page">
+      <div className="page-title">
+        <div className="eyebrow">连接不同的智能</div>
+        <h1>模型设置</h1>
+        <p>为每位专家选择合适的模型，让不同的能力在圆桌相遇。</p>
+      </div>
+      <div className="settings-layout">
+        <section>
+          <div className="section-heading">
+            <h2>
+              我的连接<span>{list.data?.length || 0}</span>
+            </h2>
+          </div>
+          <ErrorNotice error={list.error || test.error || toggle.error} />
+          {notice && (
+            <div className="success-notice" role="status">
+              <Check size={17} />
+              {notice}
+            </div>
+          )}
+          {list.isPending ? (
+            <Loading />
+          ) : !list.data?.length ? (
+            <div className="empty empty-card">
+              <PlugZap size={32} />
+              <h3>连接你的第一个模型</h3>
+              <p>
+                支持 DeepSeek、Claude、Qwen、GPT、Kimi
+                <br />
+                以及兼容的自定义接口。
+              </p>
+            </div>
+          ) : (
+            <div className="connection-list">
+              {list.data.map((c) => (
+                <article
+                  className={`connection-card ${!c.active ? 'disabled-card' : ''}`}
+                  key={c.id}
+                >
+                  <div className="connection-title">
+                    <span className="provider-logo">{PROVIDER_LABEL[c.provider].slice(0, 1)}</span>
+                    <div>
+                      <h3>{c.name}</h3>
+                      <p>
+                        {PROVIDER_LABEL[c.provider]} · {c.model}
+                      </p>
+                    </div>
+                    <span className={`test-tag ${c.testStatus}`}>
+                      {!c.active
+                        ? '已停用'
+                        : c.testStatus === 'passed'
+                          ? '连接验证通过'
+                          : c.testStatus === 'failed'
+                            ? '测试失败'
+                            : '待测试'}
+                    </span>
+                  </div>
+                  <div className="connection-meta">
+                    <span>{c.protocol}</span>
+                    <span>凭据已保存 · v{c.version}</span>
+                  </div>
+                  <div className="connection-actions">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={test.isPending || !c.active}
+                      onClick={() => test.mutate(c.id)}
+                    >
+                      {test.isPending && test.variables === c.id ? (
+                        <LoaderCircle className="spin" size={14} />
+                      ) : (
+                        <PlugZap size={14} />
+                      )}
+                      测试连接
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setEditing(c);
+                        setForm({
+                          name: c.name,
+                          provider: c.provider,
+                          protocol: c.protocol,
+                          baseUrl: c.baseUrl,
+                          model: c.model,
+                          apiKey: '',
+                          structuredOutput: c.structuredOutput,
+                          active: c.active,
+                        });
+                      }}
+                    >
+                      编辑
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      disabled={toggle.isPending}
+                      onClick={() => toggle.mutate(c)}
+                    >
+                      {c.active ? '停用' : '启用'}
+                    </Button>
+                  </div>
+                </article>
+              ))}
+            </div>
+          )}
+          <section className="default-host">
+            <h3>默认主持人</h3>
+            <p>负责生成阵容、组织讨论、提炼洞察与最终总结。</p>
+            <select
+              aria-label="默认主持人模型"
+              value={settings.data?.defaultModeratorConnectionId || ''}
+              disabled={changeDefault.isPending}
+              onChange={(e) => changeDefault.mutate(e.target.value)}
+            >
+              <option value="">选择默认连接</option>
+              {list.data
+                ?.filter((c) => c.active)
+                .map((c) => (
+                  <option value={c.id} key={c.id}>
+                    {c.name}
+                  </option>
+                ))}
+            </select>
+            <ErrorNotice error={changeDefault.error} />
+          </section>
+        </section>
+        <aside className="configuration-panel">
+          <div className="section-heading">
+            <h2>{editing ? '编辑连接' : '添加模型连接'}</h2>
+            {editing && (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditing(null);
+                  setForm({ ...blank });
+                }}
+              >
+                取消编辑
+              </Button>
+            )}
+          </div>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              save.mutate();
+            }}
+          >
+            <label className="field">
+              连接名称
+              <input
+                required
+                maxLength={60}
+                value={form.name}
+                onChange={(e) => set('name', e.target.value)}
+                placeholder="例如：DeepSeek · 研究视角"
+              />
+            </label>
+            <div className="field-grid">
+              <label className="field">
+                服务商
+                <select
+                  value={form.provider}
+                  onChange={(e) => {
+                    const p = e.target.value as ConnectionInput['provider'];
+                    setForm((f) => ({ ...f, provider: p, ...presets[p], structuredOutput: false }));
+                  }}
+                >
+                  {Object.entries(PROVIDER_LABEL).map(([v, l]) => (
+                    <option key={v} value={v}>
+                      {l}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <label className="field">
+                接口协议
+                <select
+                  value={form.protocol}
+                  onChange={(e) => set('protocol', e.target.value as ConnectionInput['protocol'])}
+                >
+                  <option value="openai-chat">Chat Completions</option>
+                  <option value="openai-responses">Responses</option>
+                  <option value="anthropic">Anthropic Messages</option>
+                </select>
+              </label>
+            </div>
+            <label className="field">
+              API 地址
+              <input
+                required
+                type="url"
+                value={form.baseUrl}
+                onChange={(e) => set('baseUrl', e.target.value)}
+                placeholder="https://…/v1"
+              />
+              <small>填写基础地址，不附加 /chat/completions 等操作路径。</small>
+            </label>
+            <label className="field">
+              模型名称
+              <input
+                required
+                maxLength={120}
+                value={form.model}
+                onChange={(e) => set('model', e.target.value)}
+                placeholder="填写服务商提供的模型 ID"
+              />
+            </label>
+            <label className="field">
+              API Key
+              <input
+                aria-label="API Key"
+                autoComplete="off"
+                type="password"
+                required={!editing}
+                value={form.apiKey}
+                onChange={(e) => set('apiKey', e.target.value)}
+                placeholder={editing ? '留空保留已有凭据' : '输入 API Key'}
+              />
+              <small>仅保存在本机后端，保存后不会回显完整凭据。</small>
+            </label>
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={form.structuredOutput}
+                disabled={form.protocol === 'anthropic'}
+                onChange={(e) => set('structuredOutput', e.target.checked)}
+              />
+              启用接口原生 JSON 输出<small>仅在模型支持时开启</small>
+            </label>
+            <ErrorNotice error={save.error} />
+            <Button className="full-width" disabled={save.isPending}>
+              {save.isPending ? <LoaderCircle size={16} className="spin" /> : <Plus size={16} />}
+              保存连接
+            </Button>
+          </form>
+        </aside>
+      </div>
+    </main>
+  );
+}
+function DiscussionPage() {
+  const { id } = useParams();
+  const query = useQuery({
+    queryKey: ['snapshot', id],
+    queryFn: () => request<DiscussionSnapshot>(`/discussions/${id}/snapshot`),
+  });
+  const live = useLive((state) => state.snapshots[id!]);
+  useEffect(() => {
+    if (query.data) useLive.getState().initialize(query.data);
+  }, [query.data]);
+  useEffect(() => {
+    if (!isPreview && id && query.data) return subscribe(id);
+  }, [id, query.data?.discussion.id]);
+  if (query.isPending) return <Loading text="正在进入圆桌" />;
+  if (query.error)
+    return (
+      <main className="page-width">
+        <ErrorNotice error={query.error} />
+        <Link to="/">返回讨论空间</Link>
+      </main>
+    );
+  const s = isPreview ? query.data! : live || query.data!;
+  return ['casting', 'awaiting_confirmation'].includes(s.discussion.status) ||
+    (s.discussion.status === 'failed' && s.discussion.failureStage === 'cast') ? (
+    <Cast snapshot={s} />
+  ) : (
+    <Studio snapshot={s} />
+  );
+}
+function Cast({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
+  const qc = useQueryClient(),
+    [bindings, setBindings] = useState<Record<string, string>>({});
+  const list = useQuery({
+    queryKey: ['connections'],
+    queryFn: () => request<ModelConnectionSummary[]>('/model-connections'),
+  });
+  const d = s.discussion;
+  useEffect(() => {
+    setBindings(Object.fromEntries(s.bindings.map((b) => [b.participantId, b.connectionId])));
+  }, [d.id, d.castVersion]);
+  const save = useMutation({
+    mutationFn: async (start: boolean) => {
+      const updated = await request<DiscussionSnapshot>(
+        `/discussions/${d.id}/agent-bindings`,
+        'PUT',
+        {
+          expectedVersion: d.version,
+          castVersion: d.castVersion,
+          bindings: s.participants.map((p) => ({
+            participantId: p.id,
+            connectionId:
+              bindings[p.id] ||
+              s.bindings.find((b) => b.participantId === p.id)?.connectionId ||
+              list.data?.find((c) => c.active)?.id,
+          })),
+        },
+      );
+      return start
+        ? request<DiscussionSnapshot>(`/discussions/${d.id}/start`, 'POST', {
+            expectedVersion: updated.discussion.version,
+            castVersion: updated.discussion.castVersion,
+          })
+        : updated;
+    },
+    onSuccess: (r) => {
+      qc.setQueryData(['snapshot', d.id], r);
+      qc.invalidateQueries({ queryKey: ['snapshot', d.id] });
+    },
+  });
+  const retry = useMutation({
+    mutationFn: () => request(`/discussions/${d.id}/retry`, 'POST', { expectedVersion: d.version }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ['snapshot', d.id] }),
+  });
+  return (
+    <main className="page-width cast-page">
+      <Link className="back-link" to="/">
+        <ChevronLeft size={16} />
+        返回讨论空间
+      </Link>
+      <div className="page-title">
+        <div className="eyebrow">让不同的视角入席</div>
+        <h1>本场讨论阵容</h1>
+        <p className="cast-topic">{d.topic}</p>
+      </div>
+      {d.status === 'casting' ? (
+        <Loading text="正在寻找互补的专业视角，生成主持人与专家…" />
+      ) : d.status === 'failed' ? (
+        <div className="empty">
+          <ErrorNotice error={d.error} />
+          <Button onClick={() => retry.mutate()} disabled={retry.isPending}>
+            <RefreshCw size={16} />
+            重新生成阵容
+          </Button>
+          <ErrorNotice error={retry.error} />
+        </div>
+      ) : (
+        <>
+          <div className="cast-grid">
+            {s.participants.map((p) => (
+              <article
+                className={`cast-card ${p.role === 'moderator' ? 'host-card' : ''}`}
+                key={p.id}
+              >
+                <div className="cast-identity">
+                  <Avatar p={p} />
+                  <div>
+                    <span className="role-label">
+                      {p.role === 'moderator' ? '本场主持人' : p.title}
+                    </span>
+                    <h2>{p.name}</h2>
+                    <span>{p.occupation}</span>
+                  </div>
+                </div>
+                <p>{p.stance}</p>
+                <div className="specialties">
+                  {p.specialty.map((t) => (
+                    <span key={t}>{t}</span>
+                  ))}
+                </div>
+                <label className="field">
+                  {p.role === 'moderator' ? '主持人模型 · 同时负责洞察与总结' : '专家模型'}
+                  <select
+                    aria-label={`${p.name}的模型`}
+                    value={
+                      bindings[p.id] ||
+                      s.bindings.find((b) => b.participantId === p.id)?.connectionId ||
+                      list.data?.find((c) => c.active)?.id ||
+                      ''
+                    }
+                    onChange={(e) => setBindings((b) => ({ ...b, [p.id]: e.target.value }))}
+                  >
+                    <option value="">选择连接</option>
+                    {list.data
+                      ?.filter((c) => c.active)
+                      .map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.name} · {c.model}
+                        </option>
+                      ))}
+                  </select>
+                </label>
+              </article>
+            ))}
+          </div>
+          <ErrorNotice error={save.error || list.error} />
+          <div className="cast-actions">
+            <p>
+              <UsersRound size={17} />
+              {d.expertCount} 位专家 + 1 位主持人<span>确认后，专家将根据现场讨论自主参与。</span>
+            </p>
+            <div>
+              <Button
+                variant="outline"
+                disabled={save.isPending || !list.data?.some((c) => c.active)}
+                onClick={() => save.mutate(false)}
+              >
+                保存分配
+              </Button>
+              <Button
+                disabled={save.isPending || !list.data?.some((c) => c.active)}
+                onClick={() => save.mutate(true)}
+              >
+                {save.isPending ? <LoaderCircle className="spin" size={16} /> : <Radio size={16} />}
+                确认阵容，开始讨论
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
+    </main>
+  );
+}
+function Studio({ snapshot: s }: { snapshot: DiscussionSnapshot }) {
+  const network = useLive((state) => state.network[s.discussion.id]);
+  const d = s.discussion,
+    qc = useQueryClient(),
+    [tab, setTab] = useState('transcript'),
+    [unread, setUnread] = useState(0),
+    [confirm, setConfirm] = useState(false);
+  const transcript = useRef<HTMLDivElement>(null),
+    atBottom = useRef(true),
+    lastCount = useRef(0);
+  const usage = useQuery({
+    queryKey: ['usage', d.id, d.status],
+    queryFn: () =>
+      request<{ calls: number; inputTokens: number; outputTokens: number }>(
+        `/discussions/${d.id}/usage`,
+      ),
+    enabled: !isPreview && !d.isSample,
+    refetchInterval: d.status === 'running' ? 5000 : false,
+  });
+  const finish = useMutation({
+    mutationFn: () =>
+      request<DiscussionSnapshot>(
+        `/discussions/${d.id}/${d.status === 'failed' && d.failureStage === 'summary' ? 'retry' : 'finish'}`,
+        'POST',
+        { expectedVersion: d.version },
+      ),
+    onSuccess: (r) => {
+      qc.setQueryData(['snapshot', d.id], r);
+      setConfirm(false);
+    },
+  });
+  const scrollBottom = () => {
+    transcript.current?.scrollTo({ top: transcript.current.scrollHeight, behavior: 'smooth' });
+    setUnread(0);
+    atBottom.current = true;
+  };
+  useEffect(() => {
+    if (s.messages.length > lastCount.current) {
+      if (atBottom.current) transcript.current?.scrollTo({ top: transcript.current.scrollHeight });
+      else setUnread((v) => v + s.messages.length - lastCount.current);
+    }
+    lastCount.current = s.messages.length;
+  }, [s.messages.length]);
+  const locate = (id: string) => {
+    setTab('transcript');
+    requestAnimationFrame(() => {
+      const el = document.getElementById(id);
+      el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      el?.classList.add('message-highlight');
+      setTimeout(() => el?.classList.remove('message-highlight'), 1600);
+    });
+  };
+  const participant = (id: string) => s.participants.find((p) => p.id === id)!;
+  return (
+    <main className="studio">
+      <div className="studio-heading">
+        <Link className="back-icon" to="/" aria-label="返回讨论空间">
+          <ChevronLeft size={22} />
+        </Link>
+        <div>
+          <div className="studio-eyebrow">
+            <Badge status={d.status} sample={d.isSample} />
+            <span>{d.expertCount} 位专家 · 1 位主持人</span>
+          </div>
+          <h1>{d.topic}</h1>
+        </div>
+        {d.status === 'running' && (
+          <Button variant="outline" size="sm" onClick={() => setConfirm(true)}>
+            <Square size={13} />
+            结束并总结
+          </Button>
+        )}
+        {['failed', 'interrupted'].includes(d.status) && (
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={finish.isPending || !s.messages.length}
+            onClick={() => finish.mutate()}
+          >
+            <RefreshCw size={14} />
+            重新请求总结
+          </Button>
+        )}
+      </div>
+      <ErrorNotice error={finish.error || d.error} />
+      {d.isSample && (
+        <div className="sample-note">
+          <Sparkles size={14} />
+          历史演示样例 · 以下内容为预置示例，不代表正在发生的模型调用。
+        </div>
+      )}
+      <div className="studio-tabs" role="tablist" aria-label="演播厅分区">
+        {[
+          ['transcript', '现场', MessageSquare],
+          ['experts', '专家', UsersRound],
+          ['insights', '洞察', Layers3],
+        ].map(([v, l, Icon]) => (
+          <button
+            key={String(v)}
+            role="tab"
+            aria-selected={tab === v}
+            onClick={() => setTab(String(v))}
+          >
+            {typeof Icon !== 'string' && <Icon size={16} />}
+            <span>{String(l)}</span>
+          </button>
+        ))}
+      </div>
+      <div className={`studio-grid tab-${tab}`}>
+        <aside className="studio-panel experts-panel">
+          <div className="panel-title">
+            <h2>
+              <UsersRound size={16} />
+              专家席
+            </h2>
+            <span>{s.participants.length}</span>
+          </div>
+          <div className="panel-scroll experts-list">
+            {s.participants.map((p) => (
+              <article
+                key={p.id}
+                className={`expert-item ${p.status !== 'idle' ? 'expert-active' : ''}`}
+                style={{ '--person': colors[p.colorKey] } as React.CSSProperties}
+              >
+                <div className="expert-identity">
+                  <Avatar p={p} small />
+                  <div>
+                    <h3>
+                      {p.name}
+                      {p.role === 'moderator' && <span>主持</span>}
+                    </h3>
+                    <p>{p.occupation}</p>
+                  </div>
+                </div>
+                <p className="expert-stance">{p.stance}</p>
+                <div className="expert-state">
+                  <span>
+                    <i />
+                    {p.status === 'idle'
+                      ? '聆听中'
+                      : p.status === 'preparing'
+                        ? '准备中'
+                        : '发言中'}
+                  </span>
+                  <span>
+                    {s.bindings.find((b) => b.participantId === p.id)?.model || '样例角色'}
+                  </span>
+                </div>
+                {p.publicFocus && <p className="focus">{p.publicFocus}</p>}
+              </article>
+            ))}
+          </div>
+        </aside>
+        <section className="studio-panel transcript-panel">
+          <div className="panel-title">
+            <h2>
+              <Radio size={16} />
+              现场讨论
+            </h2>
+            <span>{s.messages.filter((m) => m.kind !== 'summary').length} 条发言</span>
+          </div>
+          <div
+            className="transcript-scroll"
+            ref={transcript}
+            onScroll={() => {
+              const el = transcript.current!;
+              atBottom.current = el.scrollHeight - el.scrollTop - el.clientHeight < 90;
+              if (atBottom.current) setUnread(0);
+            }}
+          >
+            {!s.messages.length && <Loading text="主持人正在准备开场…" />}
+            {s.messages.map((m) => {
+              const p = participant(m.participantId);
+              if (!p) return null;
+              return (
+                <article
+                  id={m.id}
+                  key={m.id}
+                  className={`message ${m.kind === 'summary' ? 'summary-message' : ''}`}
+                >
+                  <Avatar p={p} small />
+                  <div className="message-body">
+                    <div className="message-meta">
+                      <strong style={{ color: colors[p.colorKey] }}>{p.name}</strong>
+                      <span>{p.role === 'moderator' ? '主持人' : p.title}</span>
+                      <time>
+                        {new Date(m.createdAt).toLocaleTimeString('zh-CN', {
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        })}
+                      </time>
+                    </div>
+                    {m.replyToMessageId && (
+                      <button
+                        className="reply-reference"
+                        onClick={() => locate(m.replyToMessageId!)}
+                      >
+                        <GitBranch size={13} />
+                        回应{' '}
+                        {participant(
+                          s.messages.find((x) => x.id === m.replyToMessageId)?.participantId || '',
+                        )?.name || '先前观点'}
+                        <ArrowUpRight size={12} />
+                      </button>
+                    )}
+                    {m.kind === 'summary' && (
+                      <h3 className="summary-title">
+                        <Sparkles size={17} />
+                        本场圆桌总结
+                      </h3>
+                    )}
+                    <div className="message-content">
+                      {m.content.split('\n').map((line, i) => (
+                        <p key={i}>{line || <br />}</p>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+            {['completed', 'summarizing', 'failed', 'interrupted'].includes(d.status) && (
+              <div className="transcript-end">
+                <span />
+                {d.status === 'completed' ? (
+                  <Check size={14} />
+                ) : d.status === 'summarizing' ? (
+                  <LoaderCircle className="spin" size={14} />
+                ) : (
+                  <AlertCircle size={14} />
+                )}
+                <span className="end-label">
+                  {d.status === 'completed' ? '本场讨论已结束' : STATUS_LABEL[d.status]}
+                </span>
+                <span />
+              </div>
+            )}
+          </div>
+          {unread > 0 && (
+            <button className="new-messages" onClick={scrollBottom}>
+              {unread} 条新发言
+              <ChevronDown size={16} />
+            </button>
+          )}
+          <footer className="transcript-footer">
+            <span>
+              <i />
+              {['running', 'summarizing'].includes(d.status)
+                ? network === 'connected'
+                  ? '实时已连接'
+                  : '正在重新连接'
+                : '讨论记录已保存'}
+            </span>
+            <span>
+              {d.isSample
+                ? '预置历史样例'
+                : `${d.callCount}/${d.maxCalls} 次调用 · ${((usage.data?.inputTokens || 0) + (usage.data?.outputTokens || 0)).toLocaleString()} tokens`}
+            </span>
+          </footer>
+        </section>
+        <aside className="studio-panel insights-panel">
+          <div className="panel-title">
+            <h2>
+              <Layers3 size={16} />
+              共识与分歧
+            </h2>
+            <span className="live-text">{d.status === 'running' ? '实时更新' : '讨论洞察'}</span>
+          </div>
+          <div className="panel-scroll insights-list">
+            {(['consensus', 'divergence', 'open_question'] as const).map((kind) => (
+              <section key={kind} className={`insight-section ${kind}`}>
+                <h3>
+                  {kind === 'consensus' ? (
+                    <Check size={15} />
+                  ) : kind === 'divergence' ? (
+                    <GitBranch size={15} />
+                  ) : (
+                    <CircleHelp size={15} />
+                  )}
+                  {
+                    { consensus: '达成共识', divergence: '仍有分歧', open_question: '开放问题' }[
+                      kind
+                    ]
+                  }
+                  <span>{s.insights.filter((i) => i.kind === kind).length}</span>
+                </h3>
+                {s.insights.filter((i) => i.kind === kind).length === 0 ? (
+                  <p className="insight-empty">等待更多观点，逐步形成洞察。</p>
+                ) : (
+                  s.insights
+                    .filter((i) => i.kind === kind)
+                    .map((i) => (
+                      <article key={i.id} className="insight-card">
+                        {kind === 'consensus' && (
+                          <span className="scope-label">
+                            {i.scope === 'all' ? '全体共识' : '局部共识'}
+                          </span>
+                        )}
+                        <p>{i.text}</p>
+                        <div className="evidence-links">
+                          {i.evidence.map((e, j) => (
+                            <button
+                              key={e.messageId + j}
+                              onClick={() => locate(e.messageId)}
+                              aria-label={`查看证据发言 ${s.messages.find((m) => m.id === e.messageId)?.messageSeq}`}
+                            >
+                              <MessageSquare size={11} />
+                              {participant(
+                                s.messages.find((m) => m.id === e.messageId)?.participantId || '',
+                              )?.name || '原始发言'}
+                              <ArrowUpRight size={10} />
+                            </button>
+                          ))}
+                        </div>
+                      </article>
+                    ))
+                )}
+              </section>
+            ))}
+            <p className="insight-footnote">洞察来自已公开的发言。点击来源，回到观点发生的现场。</p>
+          </div>
+        </aside>
+      </div>
+      <Dialog open={confirm} onClose={() => setConfirm(false)} title="结束本场讨论？">
+        <p className="dialog-description">
+          当前发言完成或取消后，主持人将整理最后的共识与分歧，并生成总结。
+        </p>
+        <ErrorNotice error={finish.error} />
+        <div className="dialog-actions">
+          <Button variant="ghost" onClick={() => setConfirm(false)}>
+            继续讨论
+          </Button>
+          <Button disabled={finish.isPending} onClick={() => finish.mutate()}>
+            结束并生成总结
+          </Button>
+        </div>
+      </Dialog>
+    </main>
+  );
 }
