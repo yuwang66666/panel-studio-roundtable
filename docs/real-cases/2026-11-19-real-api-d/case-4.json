@@ -1,0 +1,1649 @@
+{
+  "provenance": "real-api",
+  "applicationSourceCommit": "1ba30083a43124b6d65b00cbd3b2a91ddd5ec572",
+  "runId": "2026-11-19-real-api-d",
+  "startedAt": "2026-11-18T16:03:31.025Z",
+  "finishedAt": "2026-11-18T16:09:51.541Z",
+  "expertUtteranceLimit": 8,
+  "snapshot": {
+    "discussion": {
+      "id": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+      "topic": "企业如何选择开源模型与商业模型？",
+      "expertCount": 4,
+      "status": "completed",
+      "version": 6,
+      "castVersion": 1,
+      "generation": 2,
+      "finishRequested": false,
+      "failureStage": null,
+      "error": null,
+      "maxUtterances": 8,
+      "maxCalls": 120,
+      "callCount": 50,
+      "insightsThrough": 9,
+      "isSample": false,
+      "createdAt": "2026-11-18T16:03:31.025Z",
+      "updatedAt": "2026-11-18T16:09:51.540Z"
+    },
+    "participants": [
+      {
+        "id": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "role": "moderator",
+        "name": "林知序",
+        "occupation": "科技议题主持人",
+        "title": "圆桌主持人",
+        "stance": "围绕业务目标、风险与长期可控性组织讨论，不预设开源或商业模型更优。",
+        "specialty": ["议题梳理", "跨领域对话"],
+        "colorKey": 0,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "role": "expert",
+        "name": "顾远衡",
+        "occupation": "企业 AI 架构师",
+        "title": "模型部署与评测专家",
+        "stance": "先用真实任务评测效果与延迟，再决定自部署开源模型、调用商业模型或组合使用。",
+        "specialty": ["模型评测", "推理部署", "系统集成"],
+        "colorKey": 1,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "role": "expert",
+        "name": "沈砚秋",
+        "occupation": "企业财务规划顾问",
+        "title": "AI 投资回报分析专家",
+        "stance": "比较采购、算力、人力和维护的总成本，避免只看模型单价。",
+        "specialty": ["总拥有成本", "预算规划", "投资回报"],
+        "colorKey": 2,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "role": "expert",
+        "name": "许清岚",
+        "occupation": "数据合规律师",
+        "title": "数据治理与模型许可专家",
+        "stance": "以数据敏感度、许可条款和责任边界确定可选范围，而非将私有化部署等同于合规。",
+        "specialty": ["数据保护", "开源许可", "供应商合同"],
+        "colorKey": 3,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "role": "expert",
+        "name": "程若川",
+        "occupation": "企业产品负责人",
+        "title": "AI 产品落地专家",
+        "stance": "从用户体验和迭代速度出发选择模型，并为迁移和多模型切换保留余地。",
+        "specialty": ["用户需求", "产品迭代", "供应商依赖管理"],
+        "colorKey": 4,
+        "status": "idle",
+        "publicFocus": null
+      }
+    ],
+    "bindings": [
+      {
+        "participantId": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+        "connectionId": "env:GPT",
+        "connectionVersion": 1,
+        "model": "gpt-6-sol",
+        "provider": "gpt"
+      },
+      {
+        "participantId": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+        "connectionId": "env:QWEN",
+        "connectionVersion": 1,
+        "model": "qwen-max",
+        "provider": "qwen"
+      },
+      {
+        "participantId": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+        "connectionId": "env:DEEPSEEK",
+        "connectionVersion": 1,
+        "model": "deepseek-v4-pro",
+        "provider": "deepseek"
+      },
+      {
+        "participantId": "980391cd-2c9a-4469-8517-5c9389a5c107",
+        "connectionId": "env:KIMI",
+        "connectionVersion": 1,
+        "model": "kimi-k3.1-pro",
+        "provider": "kimi"
+      },
+      {
+        "participantId": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+        "connectionId": "env:GPT",
+        "connectionVersion": 1,
+        "model": "gpt-6-sol",
+        "provider": "gpt"
+      }
+    ],
+    "messages": [
+      {
+        "id": "6e8158f7-9816-434d-866b-81ee96de0aff",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 1,
+        "turnId": "c018d17d-0e94-4d7f-80a7-73761040a1be",
+        "participantId": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+        "kind": "opening",
+        "content": "欢迎来到圆桌。今天讨论企业如何选择开源模型与商业模型，不预设哪种更优。先请顾远衡谈谈：企业启动选型时，该用哪些真实业务任务和指标做第一轮评测？",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T16:03:50.112Z"
+      },
+      {
+        "id": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 2,
+        "turnId": "3522155b-c7ba-4cfe-b3c7-b13b4dd577ba",
+        "participantId": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+        "kind": "expert",
+        "content": "企业启动选型时，应该基于自身的核心业务流程来设计评测任务，比如客服响应、数据分析或产品推荐等。在这些任务中，重点关注模型的准确性、响应时间以及资源消耗，以此作为第一轮评测的主要指标。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T16:04:10.329Z"
+      },
+      {
+        "id": "4c5d8f69-3c22-40b7-baa3-cf0aa073c8d7",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 3,
+        "turnId": "67e78ef9-ec2c-4df3-8d6e-8fb2d1641b72",
+        "participantId": "980391cd-2c9a-4469-8517-5c9389a5c107",
+        "kind": "expert",
+        "content": "在准确性、响应时间和资源消耗之外，建议把合规设为第一轮评测的准入项：按数据敏感度分级，核查输入、输出与日志的去向、留存期限以及是否被用于训练，未通过核查的候选方案不必再进入效果和成本比较。开源模型要逐条确认许可中的商用、修改与分发义务，商业模型则应在合同中锁定数据使用、留存删除、第三方分包和事故责任边界；同时提醒，私有化部署只改变数据存放位置，并不自动等于合规，语料来源、许可义务和跨境传输仍需单独审查。",
+        "replyToMessageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+        "createdAt": "2026-11-18T16:04:42.811Z"
+      },
+      {
+        "id": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 4,
+        "turnId": "74dafe90-5cd7-4c91-9a49-fff72faa6dcb",
+        "participantId": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+        "kind": "expert",
+        "content": "我建议在顾远衡提到的资源消耗之外，把算力、人力、维护、许可及合同成本都纳入第一轮评测，形成候选方案的总拥有成本基线。只有在早期量化这些成本，后续比较才不会只盯着模型单价或单次调用费用而误判长期财务负担。",
+        "replyToMessageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+        "createdAt": "2026-11-18T16:05:15.453Z"
+      },
+      {
+        "id": "21c4f80e-b238-40de-b459-d7fc17f053c4",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 5,
+        "turnId": "f91f35f2-68d5-453b-9745-08ae3e40962a",
+        "participantId": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+        "kind": "expert",
+        "content": "在准确性和响应时间之外，我建议用同一批真实用户任务比较开源与商业模型的任务完成率、人工接管率，以及从收到反馈到修复问题的周期，这些指标更能反映上线后的体验和迭代速度。评测时还应做一次接口适配和模型切换演练，记录改造工作量，避免产品上线后因迁移成本过高而被单一方案锁定。",
+        "replyToMessageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+        "createdAt": "2026-11-18T16:05:55.224Z"
+      },
+      {
+        "id": "aec9093b-00af-4ea1-afe7-496c07c9ed8a",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 6,
+        "turnId": "9c5e37d0-f1ba-44e4-a48e-d19b9d1a553a",
+        "participantId": "980391cd-2c9a-4469-8517-5c9389a5c107",
+        "kind": "expert",
+        "content": "补充程若川的切换演练：建议将合规退出纳入验收，核验业务数据、提示词、日志及微调成果能否按可用格式完整导出，取得原供应商及分包商返还或删除数据的可核验证明，按实际使用方式复核开源组件许可义务，并写清过渡期的数据访问、留存、训练使用和安全事件责任，避免接口已切换而数据与合同仍被锁定。对依法或依约暂不能删除的备份，还应明确隔离、限制使用和到期清除安排，不能只凭一纸删除承诺通过验收。",
+        "replyToMessageId": "21c4f80e-b238-40de-b459-d7fc17f053c4",
+        "createdAt": "2026-11-18T16:07:36.644Z"
+      },
+      {
+        "id": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 7,
+        "turnId": "fb0cc511-f5a7-41f7-b581-fa7101a14881",
+        "participantId": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+        "kind": "expert",
+        "content": "同意把数据导出与删除核验纳入切换验收；产品选型也不必一次定死，可按任务复杂度和用户场景分层，用小流量验证开源、商业及混合路由方案。上线前预设任务完成率、响应时间等体验阈值和降级路径，并定期复评，让真实使用数据决定扩量还是切换。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T16:07:54.581Z"
+      },
+      {
+        "id": "f7b6c5a4-e66f-42c9-b766-f0b00cf914fe",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 8,
+        "turnId": "4d8e2170-5afc-4fff-b672-2e7ddae1b5de",
+        "participantId": "980391cd-2c9a-4469-8517-5c9389a5c107",
+        "kind": "expert",
+        "content": "赞成按场景分层和小流量验证，但混合路由与降级也须设合规门槛：按任务数据敏感度限定可路由模型和数据范围，降级不得绕过审查转入外部服务，试用数据、用户反馈及日志应明确授权、留存与删除规则。定期复评除任务完成率和响应时间外，还应同步核查许可条款、供应商合同及分包安排的变化，并确认扩量或切换时，数据导出、删除核验与责任约定仍然有效。",
+        "replyToMessageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+        "createdAt": "2026-11-18T16:08:25.785Z"
+      },
+      {
+        "id": "922637c7-d993-44ba-aeed-ea3895791e65",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 9,
+        "turnId": "4e26f8df-a3b2-4d59-b3a2-636a271d1aed",
+        "participantId": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+        "kind": "expert",
+        "content": "确实，企业在首轮评测时不仅要关注模型的即时性能指标，还应考虑其在实际业务场景中的长期适应性和维护成本。例如，可以通过设置模拟扩展任务来测试模型处理更大规模数据或更复杂请求的能力，并评估维护团队所需的技术支持与培训投入。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T16:08:38.963Z"
+      },
+      {
+        "id": "53c6ae5c-9ceb-497f-8985-0292c571c7b2",
+        "discussionId": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+        "messageSeq": 10,
+        "turnId": "52581b09-af61-4f89-bf3d-9592957a7959",
+        "participantId": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+        "kind": "summary",
+        "content": "本轮讨论没有预设开源或商业模型更优。企业选型应从自身业务任务出发，比较候选方案的实际表现，并把合规、成本、用户体验和长期可控性纳入判断。\n\n在已形成的局部共识中，技术与产品视角都支持用真实业务或用户任务评测，关注准确性、响应时间等指标；技术与财务视角都认为，不能只看即时性能或单次调用费用，还要考虑资源消耗和长期维护成本。产品与合规视角则支持按场景分层、小流量验证开源、商业及混合方案，但路由和降级不能绕过合规门槛；模型切换也不应只验收接口，还需核验数据导出与删除。\n\n各方主要是补充了不同的选型约束，尚未形成开源或商业模型孰优的结论。合规视角主张先按数据敏感度、数据去向与留存、许可和合同责任筛选候选方案，并提醒私有化部署不自动等于合规；财务视角主张尽早建立涵盖算力、人力、维护等项目的总拥有成本基线；产品视角强调任务完成率、人工接管率、迭代速度及迁移工作量。\n\n接下来仍需在具体业务中验证：各类任务的体验阈值和可用模型范围如何设定，混合路由及降级如何守住合规边界，总拥有成本如何量化；模型面对更大规模、更复杂请求时的表现，以及团队培训、技术支持和切换退出成本，也有待通过评测与演练确认。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T16:09:51.540Z",
+        "summaryMeta": {
+          "source": "model",
+          "throughMessageSeq": 9,
+          "insightsThroughMessageSeq": 9,
+          "model": "gpt-6-sol",
+          "provider": "gpt",
+          "connectionId": "env:GPT",
+          "connectionVersion": 1,
+          "fallbackUsed": false,
+          "reason": null
+        }
+      }
+    ],
+    "draft": null,
+    "insights": [
+      {
+        "id": "i1",
+        "kind": "consensus",
+        "status": "revised",
+        "scope": "local",
+        "text": "模型选型除效果外，还应评估资源消耗和长期维护成本，避免只看即时性能或单次调用费用。",
+        "revision": 4,
+        "throughMessageSeq": 9,
+        "participantIds": [
+          "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+          "90a1d579-f783-40d9-bced-7d6d12f7ebf5"
+        ],
+        "evidence": [
+          {
+            "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+            "relation": "supports"
+          },
+          {
+            "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+            "relation": "supports"
+          },
+          {
+            "messageId": "922637c7-d993-44ba-aeed-ea3895791e65",
+            "relation": "supports"
+          }
+        ]
+      },
+      {
+        "id": "i2",
+        "kind": "consensus",
+        "status": "stable",
+        "scope": "local",
+        "text": "应使用真实业务或用户任务比较候选模型，并关注准确性、响应时间等表现。",
+        "revision": 4,
+        "throughMessageSeq": 9,
+        "participantIds": [
+          "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+          "c86676a3-61f9-47ae-bff5-76e98316ff8a"
+        ],
+        "evidence": [
+          {
+            "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+            "relation": "supports"
+          },
+          {
+            "messageId": "21c4f80e-b238-40de-b459-d7fc17f053c4",
+            "relation": "supports"
+          }
+        ]
+      },
+      {
+        "id": "i3",
+        "kind": "open_question",
+        "status": "emerging",
+        "scope": null,
+        "text": "如何将数据敏感度、数据去向及留存、模型许可和合同责任纳入合规准入核查？私有化部署不能替代这些审查。",
+        "revision": 4,
+        "throughMessageSeq": 9,
+        "participantIds": ["980391cd-2c9a-4469-8517-5c9389a5c107"],
+        "evidence": [
+          {
+            "messageId": "4c5d8f69-3c22-40b7-baa3-cf0aa073c8d7",
+            "relation": "supports"
+          }
+        ]
+      },
+      {
+        "id": "i4",
+        "kind": "open_question",
+        "status": "emerging",
+        "scope": null,
+        "text": "如何在首轮建立涵盖算力、人力、维护、许可及合同成本的总拥有成本基线？",
+        "revision": 4,
+        "throughMessageSeq": 9,
+        "participantIds": ["90a1d579-f783-40d9-bced-7d6d12f7ebf5"],
+        "evidence": [
+          {
+            "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+            "relation": "supports"
+          }
+        ]
+      },
+      {
+        "id": "i5",
+        "kind": "consensus",
+        "status": "stable",
+        "scope": "local",
+        "text": "模型切换验收应核验数据导出与删除，避免接口已切换而数据仍被锁定。",
+        "revision": 3,
+        "throughMessageSeq": 9,
+        "participantIds": [
+          "980391cd-2c9a-4469-8517-5c9389a5c107",
+          "c86676a3-61f9-47ae-bff5-76e98316ff8a"
+        ],
+        "evidence": [
+          {
+            "messageId": "aec9093b-00af-4ea1-afe7-496c07c9ed8a",
+            "relation": "supports"
+          },
+          {
+            "messageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+            "relation": "supports"
+          }
+        ]
+      },
+      {
+        "id": "i6",
+        "kind": "consensus",
+        "status": "stable",
+        "scope": "local",
+        "text": "可按场景分层、小流量验证开源、商业及混合路由方案；混合路由和降级仍须满足合规门槛。",
+        "revision": 3,
+        "throughMessageSeq": 9,
+        "participantIds": [
+          "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+          "980391cd-2c9a-4469-8517-5c9389a5c107"
+        ],
+        "evidence": [
+          {
+            "messageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+            "relation": "supports"
+          },
+          {
+            "messageId": "f7b6c5a4-e66f-42c9-b766-f0b00cf914fe",
+            "relation": "supports"
+          }
+        ]
+      },
+      {
+        "id": "i7",
+        "kind": "open_question",
+        "status": "emerging",
+        "scope": null,
+        "text": "如何用模拟扩展任务评估模型应对更大规模、更复杂请求的能力，并估算团队培训与技术支持投入？",
+        "revision": 1,
+        "throughMessageSeq": 9,
+        "participantIds": ["3d32e71e-0500-4ca7-8355-ca358ab57c17"],
+        "evidence": [
+          {
+            "messageId": "922637c7-d993-44ba-aeed-ea3895791e65",
+            "relation": "supports"
+          }
+        ]
+      }
+    ],
+    "lastEventSeq": 245
+  },
+  "usage": {
+    "calls": 50,
+    "errorCalls": 7,
+    "inputTokens": 112752,
+    "outputTokens": 17737
+  },
+  "calls": [
+    {
+      "id": "af6e2d58-9ec8-4faf-aff8-8b1b6b911137",
+      "participant_id": null,
+      "purpose": "cast",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 15168,
+      "usage_json": "{\"inputTokens\":152,\"outputTokens\":533}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:03:46.196Z"
+    },
+    {
+      "id": "05a943a7-8f69-4ccb-a16e-cd0e7b83e397",
+      "participant_id": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+      "purpose": "opening",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 3906,
+      "usage_json": "{\"inputTokens\":977,\"outputTokens\":59}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:03:50.112Z"
+    },
+    {
+      "id": "696e028f-af7d-4b77-8418-7539c014fa2a",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 1980,
+      "usage_json": "{\"inputTokens\":1332,\"outputTokens\":43}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:03:52.095Z"
+    },
+    {
+      "id": "44417a2b-f241-4ca1-a8a4-a690e093201e",
+      "participant_id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 5343,
+      "usage_json": "{\"inputTokens\":1283,\"outputTokens\":87}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:03:55.458Z"
+    },
+    {
+      "id": "d436b14d-751c-4a49-a965-849df0561440",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 9580,
+      "usage_json": "{\"inputTokens\":1249,\"outputTokens\":105}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:03:59.697Z"
+    },
+    {
+      "id": "f2457060-7562-46e1-9347-cc381cbafcd6",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 18220,
+      "usage_json": "{\"inputTokens\":1231,\"outputTokens\":504}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:08.336Z"
+    },
+    {
+      "id": "3728e5e6-027e-4b3a-88a2-3a324083f815",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "utterance",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 1984,
+      "usage_json": "{\"inputTokens\":1338,\"outputTokens\":57}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:10.329Z"
+    },
+    {
+      "id": "cca9d65a-0e62-4a31-93c3-dd9e8ac72262",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2076,
+      "usage_json": "{\"inputTokens\":1570,\"outputTokens\":70}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:12.407Z"
+    },
+    {
+      "id": "51072931-899c-4215-9fe7-3f4eb356d3ab",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 8376,
+      "usage_json": "{\"inputTokens\":1450,\"outputTokens\":114}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:18.708Z"
+    },
+    {
+      "id": "ebc0f619-eec8-43e6-bdb2-02c9e606d143",
+      "participant_id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 9120,
+      "usage_json": "{\"inputTokens\":1480,\"outputTokens\":279}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:19.451Z"
+    },
+    {
+      "id": "7dd2dfb6-91cf-421e-8483-f568756c6e1e",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 13523,
+      "usage_json": "{\"inputTokens\":1420,\"outputTokens\":456}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:23.855Z"
+    },
+    {
+      "id": "04cf18fa-50b5-4222-8136-d5397ae5ffde",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "utterance",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 18952,
+      "usage_json": "{\"inputTokens\":1461,\"outputTokens\":733}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:42.811Z"
+    },
+    {
+      "id": "af657908-7f67-4a65-97a4-f4ae954c39c2",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2224,
+      "usage_json": "{\"inputTokens\":1923,\"outputTokens\":48}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:45.036Z"
+    },
+    {
+      "id": "2faf1498-50fd-498e-8835-695b1ceea4ef",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 5073,
+      "usage_json": "{\"inputTokens\":1712,\"outputTokens\":132}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:47.887Z"
+    },
+    {
+      "id": "dca121f8-68e2-4baa-a22a-71ecf0352c00",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 11727,
+      "usage_json": null,
+      "error_code": "UPSTREAM_TEMPORARY",
+      "created_at": "2026-11-18T16:04:54.541Z"
+    },
+    {
+      "id": "cfa362db-a756-47e9-a838-1b607d1ac2bc",
+      "participant_id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 12065,
+      "usage_json": "{\"inputTokens\":1781,\"outputTokens\":838}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:04:54.878Z"
+    },
+    {
+      "id": "3bbc77a3-147f-40bb-a55a-95473269aef3",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 7520,
+      "usage_json": "{\"inputTokens\":1782,\"outputTokens\":126}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:02.061Z"
+    },
+    {
+      "id": "b5f3588b-a54e-45d1-be2e-a5ee73c8c15e",
+      "participant_id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 13389,
+      "usage_json": "{\"inputTokens\":1813,\"outputTokens\":681}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:15.452Z"
+    },
+    {
+      "id": "19972acb-0931-4e97-ae09-cbe58f5f7d68",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2046,
+      "usage_json": "{\"inputTokens\":2211,\"outputTokens\":66}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:17.501Z"
+    },
+    {
+      "id": "86f5f607-8887-4b90-abc2-5d88133e7acc",
+      "participant_id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 5899,
+      "usage_json": "{\"inputTokens\":2020,\"outputTokens\":268}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:21.354Z"
+    },
+    {
+      "id": "d27a2622-e478-44e0-8fef-2d5452a8adef",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 9810,
+      "usage_json": "{\"inputTokens\":2032,\"outputTokens\":121}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:25.266Z"
+    },
+    {
+      "id": "d9f2665b-1ad6-44f6-ad32-31874747cf16",
+      "participant_id": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+      "purpose": "insights",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 18825,
+      "usage_json": "{\"inputTokens\":2046,\"outputTokens\":660}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:34.282Z"
+    },
+    {
+      "id": "e4fcf946-6a49-413c-a1e2-1d5f4a8b0b25",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 34098,
+      "usage_json": "{\"inputTokens\":1942,\"outputTokens\":939}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:49.553Z"
+    },
+    {
+      "id": "9ebb775c-a4f9-438a-813e-4a517433b48f",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "utterance",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5667,
+      "usage_json": "{\"inputTokens\":2081,\"outputTokens\":109}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:55.223Z"
+    },
+    {
+      "id": "e8ab810e-6071-43ec-95ff-4c6f9674b8dd",
+      "participant_id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 403,
+      "usage_json": null,
+      "error_code": "UPSTREAM_REQUEST",
+      "created_at": "2026-11-18T16:05:55.630Z"
+    },
+    {
+      "id": "c35ec898-57fe-4298-a9cd-e91df9b37ad1",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2169,
+      "usage_json": "{\"inputTokens\":3146,\"outputTokens\":46}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:57.394Z"
+    },
+    {
+      "id": "bad90210-07c0-4efc-8193-8cd0c2f3e189",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 3117,
+      "usage_json": "{\"inputTokens\":2864,\"outputTokens\":46}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:05:58.344Z"
+    },
+    {
+      "id": "0fb07390-e78d-42f6-bd27-15b9dd646218",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 36277,
+      "usage_json": "{\"inputTokens\":2710,\"outputTokens\":1200}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T16:06:31.504Z"
+    },
+    {
+      "id": "1843a6d6-76ea-4d7d-a01f-1cbf76aa64b6",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 30051,
+      "usage_json": "{\"inputTokens\":2739,\"outputTokens\":907}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:07:01.555Z"
+    },
+    {
+      "id": "ba6fe0cd-a604-4cdd-85a9-0b170f70b1e6",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "utterance",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 35086,
+      "usage_json": "{\"inputTokens\":2751,\"outputTokens\":1083}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:07:36.644Z"
+    },
+    {
+      "id": "9fdee2a4-7606-4ea6-ac94-5f0f1b1eb301",
+      "participant_id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 412,
+      "usage_json": null,
+      "error_code": "UPSTREAM_REQUEST",
+      "created_at": "2026-11-18T16:07:37.058Z"
+    },
+    {
+      "id": "f255d5ef-c8f3-42ba-9984-23a6912af289",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3232,
+      "usage_json": "{\"inputTokens\":3492,\"outputTokens\":71}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:07:39.878Z"
+    },
+    {
+      "id": "8a4e9757-78e3-494a-9e1f-96c77f15d23c",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 6396,
+      "usage_json": "{\"inputTokens\":3181,\"outputTokens\":196}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:07:43.044Z"
+    },
+    {
+      "id": "5769730a-55c1-44ca-8460-0a3576d29f62",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 12863,
+      "usage_json": "{\"inputTokens\":2995,\"outputTokens\":345}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:07:49.510Z"
+    },
+    {
+      "id": "c2fa995b-a856-4233-86bb-01aefee885be",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "utterance",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5067,
+      "usage_json": "{\"inputTokens\":3212,\"outputTokens\":123}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:07:54.580Z"
+    },
+    {
+      "id": "40b23830-d250-47d1-aa11-08798a5045d9",
+      "participant_id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 381,
+      "usage_json": null,
+      "error_code": "UPSTREAM_REQUEST",
+      "created_at": "2026-11-18T16:07:54.965Z"
+    },
+    {
+      "id": "bdfc30ad-b3e4-46c2-b260-5e67aa466680",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3020,
+      "usage_json": "{\"inputTokens\":3760,\"outputTokens\":73}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:07:57.603Z"
+    },
+    {
+      "id": "74cd9850-dfa4-4987-9931-18db0a6a7f20",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5095,
+      "usage_json": "{\"inputTokens\":3414,\"outputTokens\":101}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:07:59.680Z"
+    },
+    {
+      "id": "b696e84e-4efc-4fc3-80a7-59bd8282b8ab",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 14338,
+      "usage_json": "{\"inputTokens\":3209,\"outputTokens\":427}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:08:08.923Z"
+    },
+    {
+      "id": "fb58dd5c-8716-43d4-84d3-6a94b2fc8e3a",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "utterance",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 16859,
+      "usage_json": "{\"inputTokens\":3264,\"outputTokens\":605}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:08:25.785Z"
+    },
+    {
+      "id": "15ca83d8-1038-4af3-9900-4c8e6221e556",
+      "participant_id": "90a1d579-f783-40d9-bced-7d6d12f7ebf5",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 444,
+      "usage_json": null,
+      "error_code": "UPSTREAM_REQUEST",
+      "created_at": "2026-11-18T16:08:26.232Z"
+    },
+    {
+      "id": "4bd757d5-d0f8-43fe-afe6-fc49fe152f37",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2843,
+      "usage_json": "{\"inputTokens\":4090,\"outputTokens\":55}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:08:28.630Z"
+    },
+    {
+      "id": "c6c24b97-60ec-4d54-8347-81918eee492f",
+      "participant_id": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+      "purpose": "insights",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 36897,
+      "usage_json": "{\"inputTokens\":3428,\"outputTokens\":1111}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:08:31.483Z"
+    },
+    {
+      "id": "f67ce9bc-d489-4db2-a651-9774ef16ad3b",
+      "participant_id": "980391cd-2c9a-4469-8517-5c9389a5c107",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 5870,
+      "usage_json": "{\"inputTokens\":3478,\"outputTokens\":147}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:08:31.659Z"
+    },
+    {
+      "id": "6fe1364c-389a-4882-8e9e-6a693e90eb73",
+      "participant_id": "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 8671,
+      "usage_json": "{\"inputTokens\":3716,\"outputTokens\":299}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:08:34.460Z"
+    },
+    {
+      "id": "72c1f8ce-c91c-456d-9f6f-0cacaedfc11f",
+      "participant_id": "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+      "purpose": "utterance",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 4500,
+      "usage_json": "{\"inputTokens\":4108,\"outputTokens\":65}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:08:38.963Z"
+    },
+    {
+      "id": "b2e9a33c-bb85-4858-8b1a-e83e95351e59",
+      "participant_id": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+      "purpose": "insights",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 24401,
+      "usage_json": "{\"inputTokens\":4076,\"outputTokens\":1126}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T16:08:55.886Z"
+    },
+    {
+      "id": "658a9932-67d1-4f95-a315-d50f66d03a37",
+      "participant_id": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+      "purpose": "insights",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 22712,
+      "usage_json": "{\"inputTokens\":4109,\"outputTokens\":1098}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:09:18.598Z"
+    },
+    {
+      "id": "9f1fa789-f501-4cc9-bf6b-9eaf8d5c91fa",
+      "participant_id": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+      "purpose": "insights",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 23066,
+      "usage_json": "{\"inputTokens\":4304,\"outputTokens\":1162}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:09:41.674Z"
+    },
+    {
+      "id": "b56e05fc-668e-499a-bce1-1549b381ba2a",
+      "participant_id": "350aa884-7f86-4a38-ad4f-376946c7da3d",
+      "purpose": "summary",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 9864,
+      "usage_json": "{\"inputTokens\":4420,\"outputTokens\":423}",
+      "error_code": null,
+      "created_at": "2026-11-18T16:09:51.540Z"
+    }
+  ],
+  "eventEvidence": {
+    "totalEvents": 245,
+    "participantStatesObserved": ["idle", "preparing", "speaking"],
+    "nonemptyDraftUpdates": 119,
+    "timeline": [
+      {
+        "seq": 1,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T16:03:31.025Z",
+        "status": "casting"
+      },
+      {
+        "seq": 5,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T16:03:46.204Z",
+        "status": "running"
+      },
+      {
+        "seq": 17,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T16:03:50.113Z",
+        "messageId": "6e8158f7-9816-434d-866b-81ee96de0aff",
+        "messageSeq": 1
+      },
+      {
+        "seq": 39,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T16:04:10.329Z",
+        "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+        "messageSeq": 2
+      },
+      {
+        "seq": 63,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T16:04:42.811Z",
+        "messageId": "4c5d8f69-3c22-40b7-baa3-cf0aa073c8d7",
+        "messageSeq": 3
+      },
+      {
+        "seq": 82,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T16:05:15.453Z",
+        "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+        "messageSeq": 4
+      },
+      {
+        "seq": 90,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T16:05:34.283Z",
+        "status": "running",
+        "throughMessageSeq": 4,
+        "insights": [
+          {
+            "id": "i1",
+            "kind": "consensus",
+            "status": "emerging",
+            "scope": "local",
+            "text": "首轮选型评测应考虑资源消耗及相关成本，不能只比较模型效果。",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": [
+              "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+              "90a1d579-f783-40d9-bced-7d6d12f7ebf5"
+            ],
+            "evidence": [
+              {
+                "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+                "relation": "supports"
+              },
+              {
+                "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i2",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何基于核心业务流程设计任务，并用准确性、响应时间和资源消耗完成第一轮评测？",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": ["3d32e71e-0500-4ca7-8355-ca358ab57c17"],
+            "evidence": [
+              {
+                "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i3",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何将数据敏感度、数据去向及留存、模型许可和合同责任纳入合规准入核查？私有化部署不能替代这些审查。",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": ["980391cd-2c9a-4469-8517-5c9389a5c107"],
+            "evidence": [
+              {
+                "messageId": "4c5d8f69-3c22-40b7-baa3-cf0aa073c8d7",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i4",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何在首轮建立涵盖算力、人力、维护、许可及合同成本的总拥有成本基线，避免仅凭模型单价判断长期负担？",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": ["90a1d579-f783-40d9-bced-7d6d12f7ebf5"],
+            "evidence": [
+              {
+                "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 107,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T16:05:55.224Z",
+        "messageId": "21c4f80e-b238-40de-b459-d7fc17f053c4",
+        "messageSeq": 5
+      },
+      {
+        "seq": 131,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T16:07:36.644Z",
+        "messageId": "aec9093b-00af-4ea1-afe7-496c07c9ed8a",
+        "messageSeq": 6
+      },
+      {
+        "seq": 152,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T16:07:54.581Z",
+        "messageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+        "messageSeq": 7
+      },
+      {
+        "seq": 173,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T16:08:25.785Z",
+        "messageId": "f7b6c5a4-e66f-42c9-b766-f0b00cf914fe",
+        "messageSeq": 8
+      },
+      {
+        "seq": 180,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T16:08:31.484Z",
+        "status": "running",
+        "throughMessageSeq": 7,
+        "insights": [
+          {
+            "id": "i1",
+            "kind": "consensus",
+            "status": "emerging",
+            "scope": "local",
+            "text": "首轮选型评测应考虑资源消耗及相关成本，不能只比较模型效果。",
+            "revision": 2,
+            "throughMessageSeq": 7,
+            "participantIds": [
+              "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+              "90a1d579-f783-40d9-bced-7d6d12f7ebf5"
+            ],
+            "evidence": [
+              {
+                "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+                "relation": "supports"
+              },
+              {
+                "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i2",
+            "kind": "consensus",
+            "status": "revised",
+            "scope": "local",
+            "text": "应使用真实业务或用户任务比较候选模型，并关注准确性、响应时间等表现。",
+            "revision": 2,
+            "throughMessageSeq": 7,
+            "participantIds": [
+              "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+              "c86676a3-61f9-47ae-bff5-76e98316ff8a"
+            ],
+            "evidence": [
+              {
+                "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+                "relation": "supports"
+              },
+              {
+                "messageId": "21c4f80e-b238-40de-b459-d7fc17f053c4",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i3",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何将数据敏感度、数据去向及留存、模型许可和合同责任纳入合规准入核查？私有化部署不能替代这些审查。",
+            "revision": 2,
+            "throughMessageSeq": 7,
+            "participantIds": ["980391cd-2c9a-4469-8517-5c9389a5c107"],
+            "evidence": [
+              {
+                "messageId": "4c5d8f69-3c22-40b7-baa3-cf0aa073c8d7",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i4",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何在首轮建立涵盖算力、人力、维护、许可及合同成本的总拥有成本基线，避免仅凭模型单价判断长期负担？",
+            "revision": 2,
+            "throughMessageSeq": 7,
+            "participantIds": ["90a1d579-f783-40d9-bced-7d6d12f7ebf5"],
+            "evidence": [
+              {
+                "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i5",
+            "kind": "consensus",
+            "status": "emerging",
+            "scope": "local",
+            "text": "模型切换验收不应只看接口适配，还应核验数据导出与删除，避免迁移时被锁定。",
+            "revision": 1,
+            "throughMessageSeq": 7,
+            "participantIds": [
+              "980391cd-2c9a-4469-8517-5c9389a5c107",
+              "c86676a3-61f9-47ae-bff5-76e98316ff8a"
+            ],
+            "evidence": [
+              {
+                "messageId": "aec9093b-00af-4ea1-afe7-496c07c9ed8a",
+                "relation": "supports"
+              },
+              {
+                "messageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i6",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何按任务和用户场景小流量验证开源、商业及混合路由方案，并依据体验阈值和真实使用数据决定扩量或切换？",
+            "revision": 1,
+            "throughMessageSeq": 7,
+            "participantIds": ["c86676a3-61f9-47ae-bff5-76e98316ff8a"],
+            "evidence": [
+              {
+                "messageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 199,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T16:08:38.963Z",
+        "messageId": "922637c7-d993-44ba-aeed-ea3895791e65",
+        "messageSeq": 9
+      },
+      {
+        "seq": 200,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T16:08:38.965Z",
+        "status": "summarizing"
+      },
+      {
+        "seq": 201,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T16:09:18.599Z",
+        "status": "summarizing",
+        "throughMessageSeq": 8,
+        "insights": [
+          {
+            "id": "i1",
+            "kind": "consensus",
+            "status": "emerging",
+            "scope": "local",
+            "text": "首轮选型评测应考虑资源消耗及相关成本，不能只比较模型效果。",
+            "revision": 3,
+            "throughMessageSeq": 8,
+            "participantIds": [
+              "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+              "90a1d579-f783-40d9-bced-7d6d12f7ebf5"
+            ],
+            "evidence": [
+              {
+                "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+                "relation": "supports"
+              },
+              {
+                "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i2",
+            "kind": "consensus",
+            "status": "revised",
+            "scope": "local",
+            "text": "应使用真实业务或用户任务比较候选模型，并关注准确性、响应时间等表现。",
+            "revision": 3,
+            "throughMessageSeq": 8,
+            "participantIds": [
+              "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+              "c86676a3-61f9-47ae-bff5-76e98316ff8a"
+            ],
+            "evidence": [
+              {
+                "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+                "relation": "supports"
+              },
+              {
+                "messageId": "21c4f80e-b238-40de-b459-d7fc17f053c4",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i3",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何将数据敏感度、数据去向及留存、模型许可和合同责任纳入合规准入核查？私有化部署不能替代这些审查。",
+            "revision": 3,
+            "throughMessageSeq": 8,
+            "participantIds": ["980391cd-2c9a-4469-8517-5c9389a5c107"],
+            "evidence": [
+              {
+                "messageId": "4c5d8f69-3c22-40b7-baa3-cf0aa073c8d7",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i4",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何在首轮建立涵盖算力、人力、维护、许可及合同成本的总拥有成本基线，避免仅凭模型单价判断长期负担？",
+            "revision": 3,
+            "throughMessageSeq": 8,
+            "participantIds": ["90a1d579-f783-40d9-bced-7d6d12f7ebf5"],
+            "evidence": [
+              {
+                "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i5",
+            "kind": "consensus",
+            "status": "emerging",
+            "scope": "local",
+            "text": "模型切换验收应核验数据导出与删除，避免接口已切换而数据仍被锁定。",
+            "revision": 2,
+            "throughMessageSeq": 8,
+            "participantIds": [
+              "980391cd-2c9a-4469-8517-5c9389a5c107",
+              "c86676a3-61f9-47ae-bff5-76e98316ff8a"
+            ],
+            "evidence": [
+              {
+                "messageId": "aec9093b-00af-4ea1-afe7-496c07c9ed8a",
+                "relation": "supports"
+              },
+              {
+                "messageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i6",
+            "kind": "consensus",
+            "status": "revised",
+            "scope": "local",
+            "text": "可按场景分层、小流量验证开源、商业及混合路由方案；混合路由和降级仍须满足合规门槛。",
+            "revision": 2,
+            "throughMessageSeq": 8,
+            "participantIds": [
+              "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+              "980391cd-2c9a-4469-8517-5c9389a5c107"
+            ],
+            "evidence": [
+              {
+                "messageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+                "relation": "supports"
+              },
+              {
+                "messageId": "f7b6c5a4-e66f-42c9-b766-f0b00cf914fe",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 202,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T16:09:41.674Z",
+        "status": "summarizing",
+        "throughMessageSeq": 9,
+        "insights": [
+          {
+            "id": "i1",
+            "kind": "consensus",
+            "status": "revised",
+            "scope": "local",
+            "text": "模型选型除效果外，还应评估资源消耗和长期维护成本，避免只看即时性能或单次调用费用。",
+            "revision": 4,
+            "throughMessageSeq": 9,
+            "participantIds": [
+              "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+              "90a1d579-f783-40d9-bced-7d6d12f7ebf5"
+            ],
+            "evidence": [
+              {
+                "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+                "relation": "supports"
+              },
+              {
+                "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+                "relation": "supports"
+              },
+              {
+                "messageId": "922637c7-d993-44ba-aeed-ea3895791e65",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i2",
+            "kind": "consensus",
+            "status": "stable",
+            "scope": "local",
+            "text": "应使用真实业务或用户任务比较候选模型，并关注准确性、响应时间等表现。",
+            "revision": 4,
+            "throughMessageSeq": 9,
+            "participantIds": [
+              "3d32e71e-0500-4ca7-8355-ca358ab57c17",
+              "c86676a3-61f9-47ae-bff5-76e98316ff8a"
+            ],
+            "evidence": [
+              {
+                "messageId": "4664b806-bf17-4a56-aa4e-ad8180575d81",
+                "relation": "supports"
+              },
+              {
+                "messageId": "21c4f80e-b238-40de-b459-d7fc17f053c4",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i3",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何将数据敏感度、数据去向及留存、模型许可和合同责任纳入合规准入核查？私有化部署不能替代这些审查。",
+            "revision": 4,
+            "throughMessageSeq": 9,
+            "participantIds": ["980391cd-2c9a-4469-8517-5c9389a5c107"],
+            "evidence": [
+              {
+                "messageId": "4c5d8f69-3c22-40b7-baa3-cf0aa073c8d7",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i4",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何在首轮建立涵盖算力、人力、维护、许可及合同成本的总拥有成本基线？",
+            "revision": 4,
+            "throughMessageSeq": 9,
+            "participantIds": ["90a1d579-f783-40d9-bced-7d6d12f7ebf5"],
+            "evidence": [
+              {
+                "messageId": "348e279d-1a6f-46a1-8a23-9b6115fc5d20",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i5",
+            "kind": "consensus",
+            "status": "stable",
+            "scope": "local",
+            "text": "模型切换验收应核验数据导出与删除，避免接口已切换而数据仍被锁定。",
+            "revision": 3,
+            "throughMessageSeq": 9,
+            "participantIds": [
+              "980391cd-2c9a-4469-8517-5c9389a5c107",
+              "c86676a3-61f9-47ae-bff5-76e98316ff8a"
+            ],
+            "evidence": [
+              {
+                "messageId": "aec9093b-00af-4ea1-afe7-496c07c9ed8a",
+                "relation": "supports"
+              },
+              {
+                "messageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i6",
+            "kind": "consensus",
+            "status": "stable",
+            "scope": "local",
+            "text": "可按场景分层、小流量验证开源、商业及混合路由方案；混合路由和降级仍须满足合规门槛。",
+            "revision": 3,
+            "throughMessageSeq": 9,
+            "participantIds": [
+              "c86676a3-61f9-47ae-bff5-76e98316ff8a",
+              "980391cd-2c9a-4469-8517-5c9389a5c107"
+            ],
+            "evidence": [
+              {
+                "messageId": "a66e842d-6072-4517-8f6a-c7788ef89df4",
+                "relation": "supports"
+              },
+              {
+                "messageId": "f7b6c5a4-e66f-42c9-b766-f0b00cf914fe",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "i7",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何用模拟扩展任务评估模型应对更大规模、更复杂请求的能力，并估算团队培训与技术支持投入？",
+            "revision": 1,
+            "throughMessageSeq": 9,
+            "participantIds": ["3d32e71e-0500-4ca7-8355-ca358ab57c17"],
+            "evidence": [
+              {
+                "messageId": "922637c7-d993-44ba-aeed-ea3895791e65",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 245,
+        "type": "summary.ready",
+        "occurredAt": "2026-11-18T16:09:51.540Z",
+        "messageId": "53c6ae5c-9ceb-497f-8985-0292c571c7b2",
+        "messageSeq": 10
+      }
+    ]
+  }
+}

@@ -1,0 +1,1515 @@
+{
+  "provenance": "real-api",
+  "runId": "2026-11-18-real-api-c",
+  "startedAt": "2026-11-18T15:51:05.456Z",
+  "finishedAt": "2026-11-18T15:58:19.204Z",
+  "expertUtteranceLimit": 8,
+  "snapshot": {
+    "discussion": {
+      "id": "47d12c65-0625-4252-9715-c7db746a3156",
+      "topic": "城市是否应优先发展公共交通？",
+      "expertCount": 4,
+      "status": "completed",
+      "version": 6,
+      "castVersion": 1,
+      "generation": 2,
+      "finishRequested": false,
+      "failureStage": null,
+      "error": null,
+      "maxUtterances": 8,
+      "maxCalls": 120,
+      "callCount": 61,
+      "insightsThrough": 11,
+      "isSample": false,
+      "createdAt": "2026-11-18T15:51:05.457Z",
+      "updatedAt": "2026-11-18T15:58:19.203Z"
+    },
+    "participants": [
+      {
+        "id": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "role": "moderator",
+        "name": "李明",
+        "occupation": "媒体评论员",
+        "title": "讨论主持人",
+        "stance": "中立",
+        "specialty": ["公共政策分析", "交通规划"],
+        "colorKey": 0,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "role": "expert",
+        "name": "张伟",
+        "occupation": "城市规划师",
+        "title": "专家顾问",
+        "stance": "支持优先发展公共交通",
+        "specialty": ["城市交通系统设计", "可持续城市发展"],
+        "colorKey": 1,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "role": "expert",
+        "name": "王芳",
+        "occupation": "经济学家",
+        "title": "经济分析师",
+        "stance": "根据成本效益分析决定",
+        "specialty": ["公共财政管理", "基础设施投资回报评估"],
+        "colorKey": 2,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "role": "expert",
+        "name": "赵强",
+        "occupation": "环境科学家",
+        "title": "环保专家",
+        "stance": "支持优先发展公共交通以减少污染",
+        "specialty": ["空气质量管理", "绿色交通解决方案"],
+        "colorKey": 3,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "role": "expert",
+        "name": "孙丽",
+        "occupation": "社会学家",
+        "title": "社区发展研究员",
+        "stance": "关注公共交通对社会包容性的影响",
+        "specialty": ["城市社会学", "交通与社会平等"],
+        "colorKey": 4,
+        "status": "idle",
+        "publicFocus": null
+      }
+    ],
+    "bindings": [
+      {
+        "participantId": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+        "connectionId": "env:KIMI",
+        "connectionVersion": 1,
+        "model": "kimi-k3.1-pro",
+        "provider": "kimi"
+      },
+      {
+        "participantId": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+        "connectionId": "env:QWEN",
+        "connectionVersion": 1,
+        "model": "qwen-max",
+        "provider": "qwen"
+      },
+      {
+        "participantId": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+        "connectionId": "env:DEEPSEEK",
+        "connectionVersion": 1,
+        "model": "deepseek-v4-pro",
+        "provider": "deepseek"
+      },
+      {
+        "participantId": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+        "connectionId": "env:GPT",
+        "connectionVersion": 1,
+        "model": "gpt-6-sol",
+        "provider": "gpt"
+      },
+      {
+        "participantId": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+        "connectionId": "env:QWEN",
+        "connectionVersion": 1,
+        "model": "qwen-max",
+        "provider": "qwen"
+      }
+    ],
+    "messages": [
+      {
+        "id": "410aa20a-82fe-42af-97e1-47b814871391",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 1,
+        "turnId": "126250ce-c368-4151-9671-975157572b42",
+        "participantId": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+        "kind": "opening",
+        "content": "欢迎大家参加今天的讨论，我们的主题是'城市是否应优先发展公共交通？'。这是一个关系到我们日常生活质量以及未来城市发展的重要议题。首先，请各位专家分享一下你们对于当前城市交通状况的看法，特别是公共交通在其中扮演的角色。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:51:24.337Z"
+      },
+      {
+        "id": "94708dfe-3aec-4a22-83b9-64cb0e47bcd2",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 2,
+        "turnId": "0685025a-6830-4a7b-8cbe-1e993e7bb01b",
+        "participantId": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+        "kind": "expert",
+        "content": "从空气质量与公众健康看，机动车排放和拥堵会加重大气污染及道路沿线人群暴露，城市应优先发展公共交通，但减排前提是以可靠、便捷的服务真正替代部分私家车出行，而非只增加低满载率车辆。建议同步落实公交专用路权、班次与准点保障、清洁运力更新，并完善步行和自行车接驳，按每客公里污染物排放、公交分担率、私人小汽车车公里、重点区域污染物浓度与暴露人口变化持续评估，同时结合客流和空气质量数据核验减排及健康收益是否兑现。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:52:04.379Z"
+      },
+      {
+        "id": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 3,
+        "turnId": "84687a65-8545-4565-a58d-8bd9352d30df",
+        "participantId": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+        "kind": "expert",
+        "content": "公共交通是否应优先，不能只看减排或拥堵收益，还要把建设运维、运营补贴、票价收入和长期财政压力纳入全生命周期成本效益。应当与道路扩容、需求管理等替代方案比较边际收益和财政可承受性，确保公共资金配置效率，而不是无条件扩大供给。",
+        "replyToMessageId": "94708dfe-3aec-4a22-83b9-64cb0e47bcd2",
+        "createdAt": "2026-11-18T15:53:12.522Z"
+      },
+      {
+        "id": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 4,
+        "turnId": "a521da52-e73a-4abe-95d2-d2325c46ba96",
+        "participantId": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+        "kind": "expert",
+        "content": "同意将全生命周期成本和财政承受能力纳入评估，但平均成本效益可能掩盖不同群体的出行处境。比较方案时，还应看低收入社区、老年人和残障人士的票价负担、无障碍条件及就医就业可达性，避免削减客流较少却不可替代的服务。",
+        "replyToMessageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+        "createdAt": "2026-11-18T15:53:31.869Z"
+      },
+      {
+        "id": "70c28039-499f-487e-b701-beb3f4d89576",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 5,
+        "turnId": "aa6aaec8-e39b-4886-a911-9fb88eefd360",
+        "participantId": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+        "kind": "expert",
+        "content": "优先发展公共交通是提高城市运行效率、缓解交通拥堵的有效手段，通过精心规划的线路和服务提升，能够鼓励更多市民放弃私家车出行，转向使用公共交通工具，这样不仅有助于减少环境污染，还能促进社会资源更加公平合理地分配。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:53:53.482Z"
+      },
+      {
+        "id": "c502bf94-f6f7-4fa2-8d1f-8fb387a0844b",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 6,
+        "turnId": "1bee587e-0123-4b8a-826f-01003c0856b0",
+        "participantId": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+        "kind": "probe",
+        "content": "在考虑成本效益的同时，如何确保公共交通的发展能够满足不同社会群体的需求？",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:53:55.215Z"
+      },
+      {
+        "id": "c2ea32b8-22bb-4d1a-8af1-69ec6bd819cc",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 7,
+        "turnId": "7ff2ec4c-392b-450d-81d8-77697d3b0ee1",
+        "participantId": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+        "kind": "expert",
+        "content": "孙丽的提醒很关键，成本效益不能只核算建设运维和平均客流，还应计入健康收益及污染暴露的群体差异，尤其不能用低客流或高补贴简单否定服务高污染暴露、低机动车拥有率社区的线路。建议按社区联合评估就医就业可达性、票价负担、无障碍条件与污染物暴露变化，在财政约束下优先保留不可替代服务，并以清洁运力、可靠班次和平价接驳改善成效，再依据分群评估结果动态调整。",
+        "replyToMessageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+        "createdAt": "2026-11-18T15:54:30.019Z"
+      },
+      {
+        "id": "792c4104-8154-4373-8ee5-a516669d52f8",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 8,
+        "turnId": "423bbdc6-0927-4eea-aa85-1365cc55b72c",
+        "participantId": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+        "kind": "expert",
+        "content": "我同意把社会包容性作为成本效益框架中的分配权重和最低服务约束，而不是替代效率分析。但需要在财政约束下为低收入、老年等群体设定可达性与票价负担阈值，并比较保留或调整线路的边际成本与分配收益。",
+        "replyToMessageId": "c2ea32b8-22bb-4d1a-8af1-69ec6bd819cc",
+        "createdAt": "2026-11-18T15:54:56.616Z"
+      },
+      {
+        "id": "f52b2937-7a4b-43b7-a8f5-7f30c14f56c5",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 9,
+        "turnId": "0db286c0-583e-4413-b9c5-d3d6c47ae4bf",
+        "participantId": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+        "kind": "expert",
+        "content": "赞同在财政约束下设置可达性和票价负担阈值，但阈值不能只依据通勤高峰和平均出行时间，还应覆盖夜班、就医及照护接送等出行链。最低服务标准应由受影响社区参与制定，并据此评估线路调整对不同群体的实际影响，避免平均收益掩盖不可替代的出行需求。",
+        "replyToMessageId": "792c4104-8154-4373-8ee5-a516669d52f8",
+        "createdAt": "2026-11-18T15:55:27.391Z"
+      },
+      {
+        "id": "304516b1-236f-4c96-8d21-1d91902a4ee1",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 10,
+        "turnId": "b9c8033d-6c18-4fbd-8311-49a5f50e2a7f",
+        "participantId": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+        "kind": "probe",
+        "content": "在讨论成本效益和社会包容性时，我们是否考虑了技术进步可能带来的影响？例如，自动驾驶公交车或电动车辆的普及是否会改变当前的成本效益分析结果？",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:55:31.225Z"
+      },
+      {
+        "id": "362c9383-01c3-4005-b0fe-68cbe9c778a7",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 11,
+        "turnId": "f2aab6b9-4ed3-401d-a52c-f841e69ae5fb",
+        "participantId": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+        "kind": "expert",
+        "content": "技术进步确实能够影响成本效益分析，比如自动驾驶公交车和电动车辆的引入可以降低运营成本并提高效率，但我们也必须考虑新技术在实际应用中的可靠性和公众接受度。为了确保这些创新真正服务于社会，我们需要制定相应的政策来支持技术的研发与普及，并且关注它们如何更好地满足不同群体的需求。",
+        "replyToMessageId": "304516b1-236f-4c96-8d21-1d91902a4ee1",
+        "createdAt": "2026-11-18T15:56:33.920Z"
+      },
+      {
+        "id": "a4a6224e-d74b-4b31-a93d-0390f31ab7eb",
+        "discussionId": "47d12c65-0625-4252-9715-c7db746a3156",
+        "messageSeq": 12,
+        "turnId": "f586c58c-b154-4339-b4c0-0769c2ba78f2",
+        "participantId": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+        "kind": "summary",
+        "content": "主题\n\n本场讨论围绕“城市是否应优先发展公共交通？”展开，五位参与者分别从环境健康、公共财政、城市规划和社会包容角度提出观点。赵强与张伟倾向支持优先发展公共交通，王芳以成本效益为条件，孙丽侧重不同群体的社会包容性。\n\n共识及其范围\n\n经核验形成的共识为局部共识，而非全体一致：赵强与王芳认可发展公共交通需考虑空气质量改善等因素，并以可靠、便捷的服务替代部分私家车出行。该共识范围仅限赵强、王芳；张伟虽从减少污染、缓解拥堵和促进社会资源公平分配角度支持优先发展公共交通，但未被归入上述局部共识。\n\n剩余分歧\n\n主要分歧集中在成本效益分析如何纳入社会包容性。王芳坚持效率分析不可被社会包容替代，社会包容应作为分配权重和最低服务约束；孙丽强调平均成本效益会掩盖低收入社区、老年人和残障人士的出行处境，最低服务标准应由受影响社区参与制定，并覆盖夜班、就医及照护接送等出行链；赵强则要求把健康收益和污染暴露的群体差异纳入核算，反对以低客流或高补贴简单否定不可替代服务。\n\n待验证问题\n\n仍需验证自动驾驶公交车和电动车辆普及对全生命周期成本效益分析的实际影响，尤其是技术可靠性、公众接受度和政策支持路径。分群体可达性、票价负担、无障碍条件与污染物暴露变化如何转化为可操作的财政约束阈值和线路调整标准，也尚缺量化结论。此外，低客流但不可替代服务的保留标准、边际成本与分配收益比较，以及清洁运力、可靠班次和平价接驳带来的实际减排和健康收益兑现，仍需持续监测核验。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:58:19.203Z",
+        "summaryMeta": {
+          "source": "model",
+          "throughMessageSeq": 11,
+          "insightsThroughMessageSeq": 11,
+          "model": "deepseek-v4-pro",
+          "provider": "deepseek",
+          "connectionId": "env:DEEPSEEK",
+          "connectionVersion": 1,
+          "fallbackUsed": true,
+          "reason": null
+        }
+      }
+    ],
+    "draft": null,
+    "insights": [
+      {
+        "id": "insight-001",
+        "kind": "divergence",
+        "status": "revised",
+        "scope": null,
+        "text": "在讨论城市是否应优先发展公共交通时，专家们对于成本效益分析的重要性及其如何纳入社会包容性存在分歧。",
+        "revision": 3,
+        "throughMessageSeq": 11,
+        "participantIds": [
+          "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+          "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59"
+        ],
+        "evidence": [
+          {
+            "messageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+            "relation": "supports"
+          },
+          {
+            "messageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+            "relation": "qualifies"
+          },
+          {
+            "messageId": "c2ea32b8-22bb-4d1a-8af1-69ec6bd819cc",
+            "relation": "opposes"
+          },
+          {
+            "messageId": "792c4104-8154-4373-8ee5-a516669d52f8",
+            "relation": "supports"
+          },
+          {
+            "messageId": "f52b2937-7a4b-43b7-a8f5-7f30c14f56c5",
+            "relation": "qualifies"
+          }
+        ]
+      },
+      {
+        "id": "insight-002",
+        "kind": "open_question",
+        "status": "revised",
+        "scope": null,
+        "text": "如何平衡公共交通的成本效益与社会包容性之间的关系？尤其是在考虑不同群体需求时。",
+        "revision": 3,
+        "throughMessageSeq": 11,
+        "participantIds": ["7c4150ff-79d7-4f54-ac37-85dc7b2b1c59"],
+        "evidence": [
+          {
+            "messageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+            "relation": "supports"
+          },
+          {
+            "messageId": "c2ea32b8-22bb-4d1a-8af1-69ec6bd819cc",
+            "relation": "supports"
+          },
+          {
+            "messageId": "792c4104-8154-4373-8ee5-a516669d52f8",
+            "relation": "supports"
+          },
+          {
+            "messageId": "f52b2937-7a4b-43b7-a8f5-7f30c14f56c5",
+            "relation": "supports"
+          }
+        ]
+      },
+      {
+        "id": "insight-003",
+        "kind": "consensus",
+        "status": "stable",
+        "scope": "local",
+        "text": "城市发展公共交通需要考虑环境因素如空气质量改善，并确保服务可靠、便捷以替代私家车出行。",
+        "revision": 3,
+        "throughMessageSeq": 11,
+        "participantIds": [
+          "206f6afb-1349-466e-946e-5a4b06c7ab64",
+          "71b148f1-2aab-4b7a-89a8-85c0af9a80a6"
+        ],
+        "evidence": [
+          {
+            "messageId": "94708dfe-3aec-4a22-83b9-64cb0e47bcd2",
+            "relation": "supports"
+          },
+          {
+            "messageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+            "relation": "supports"
+          }
+        ]
+      }
+    ],
+    "lastEventSeq": 310
+  },
+  "usage": {
+    "calls": 61,
+    "errorCalls": 5,
+    "inputTokens": 149501,
+    "outputTokens": 25465
+  },
+  "calls": [
+    {
+      "id": "ab53946a-0e04-4822-b5e2-83d098519424",
+      "participant_id": null,
+      "purpose": "cast",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 9240,
+      "usage_json": "{\"inputTokens\":141,\"outputTokens\":301}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:51:14.699Z"
+    },
+    {
+      "id": "1ffb5b66-ad19-4cba-a8b3-896059a393fc",
+      "participant_id": null,
+      "purpose": "cast",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 7384,
+      "usage_json": "{\"inputTokens\":171,\"outputTokens\":286}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:22.083Z"
+    },
+    {
+      "id": "d835195d-992d-4765-a486-802c4365a74a",
+      "participant_id": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+      "purpose": "opening",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2244,
+      "usage_json": "{\"inputTokens\":879,\"outputTokens\":55}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:24.336Z"
+    },
+    {
+      "id": "d204b31f-360a-4025-ab60-5f0e2164aae1",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2015,
+      "usage_json": "{\"inputTokens\":1191,\"outputTokens\":40}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:26.354Z"
+    },
+    {
+      "id": "7f15390a-b783-4ae3-b525-b14b84064960",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4138,
+      "usage_json": "{\"inputTokens\":1078,\"outputTokens\":91}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:28.479Z"
+    },
+    {
+      "id": "2be405b5-7c35-4c2d-8d9e-1a319ccced08",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 4905,
+      "usage_json": "{\"inputTokens\":1121,\"outputTokens\":210}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:29.245Z"
+    },
+    {
+      "id": "dbc0547b-c3f1-42d7-b692-dcf337442a0b",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 9569,
+      "usage_json": "{\"inputTokens\":1072,\"outputTokens\":295}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:33.910Z"
+    },
+    {
+      "id": "acb343b1-82b4-4fae-bd80-c6e665dc67b6",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "utterance",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 30458,
+      "usage_json": "{\"inputTokens\":1080,\"outputTokens\":898}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:04.378Z"
+    },
+    {
+      "id": "44cade6f-bb78-450d-9f0f-a9acaf01cf1b",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 1569,
+      "usage_json": "{\"inputTokens\":1507,\"outputTokens\":36}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:05.949Z"
+    },
+    {
+      "id": "c36b570e-d4e1-417a-8646-9441ba01ed89",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 5040,
+      "usage_json": "{\"inputTokens\":1331,\"outputTokens\":151}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:09.422Z"
+    },
+    {
+      "id": "db4a4b75-df31-49e9-b205-9c5e58ac3eff",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 5912,
+      "usage_json": "{\"inputTokens\":1395,\"outputTokens\":268}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:10.293Z"
+    },
+    {
+      "id": "96fd715b-c3b8-4cc1-8a18-d4604f3780b1",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 27553,
+      "usage_json": "{\"inputTokens\":1375,\"outputTokens\":103}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:31.936Z"
+    },
+    {
+      "id": "e80a70ee-95ac-4a4f-9f7c-89aba0a4bafe",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 4410,
+      "usage_json": "{\"inputTokens\":1421,\"outputTokens\":178}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:52:36.348Z"
+    },
+    {
+      "id": "6008c2c6-9247-403c-be11-665f7b425924",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 20306,
+      "usage_json": "{\"inputTokens\":1450,\"outputTokens\":1200}",
+      "error_code": "UPSTREAM_STREAM",
+      "created_at": "2026-11-18T15:52:56.654Z"
+    },
+    {
+      "id": "72d1028a-0efd-4e68-9cd7-4d6dd47dce4d",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 1659,
+      "usage_json": "{\"inputTokens\":1507,\"outputTokens\":34}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:58.314Z"
+    },
+    {
+      "id": "caed0555-dd94-44ab-9f22-6b6dbb6b46e5",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4133,
+      "usage_json": "{\"inputTokens\":1375,\"outputTokens\":95}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:00.790Z"
+    },
+    {
+      "id": "816da324-6040-4168-afb1-d4f6e219572b",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 4411,
+      "usage_json": "{\"inputTokens\":1331,\"outputTokens\":119}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:01.068Z"
+    },
+    {
+      "id": "0c256fec-778b-4b79-8844-a027e211f56b",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 9348,
+      "usage_json": "{\"inputTokens\":1395,\"outputTokens\":555}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:06.004Z"
+    },
+    {
+      "id": "393e18c3-2ef4-4ad0-a93c-f16e7c687ade",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 6514,
+      "usage_json": "{\"inputTokens\":1434,\"outputTokens\":404}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:12.521Z"
+    },
+    {
+      "id": "10024b6c-5996-452b-95b4-f7195c4b3ea5",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2609,
+      "usage_json": "{\"inputTokens\":1790,\"outputTokens\":36}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:15.133Z"
+    },
+    {
+      "id": "ff43a2c4-f569-48f0-ae69-fda0a1f34fa1",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 3805,
+      "usage_json": "{\"inputTokens\":1629,\"outputTokens\":196}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:16.329Z"
+    },
+    {
+      "id": "7d3f9593-bb73-4e11-9ba6-184ffb7e8fcb",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 6692,
+      "usage_json": "{\"inputTokens\":1623,\"outputTokens\":138}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:19.217Z"
+    },
+    {
+      "id": "c06860ea-b99a-4b33-a423-d086591aefda",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 14968,
+      "usage_json": "{\"inputTokens\":1558,\"outputTokens\":434}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:27.493Z"
+    },
+    {
+      "id": "2258b98b-fe24-4db6-abf9-23c5a893a4fd",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "utterance",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4373,
+      "usage_json": "{\"inputTokens\":1672,\"outputTokens\":93}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:31.868Z"
+    },
+    {
+      "id": "b8e51db7-c2bd-4f01-b89b-cc457839cbac",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2960,
+      "usage_json": "{\"inputTokens\":2068,\"outputTokens\":64}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:34.830Z"
+    },
+    {
+      "id": "47f8b013-a947-4f04-9ef0-b133955b72f4",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 3947,
+      "usage_json": "{\"inputTokens\":1869,\"outputTokens\":42}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:35.819Z"
+    },
+    {
+      "id": "42f6795f-bbfb-44d6-8340-163bbf6f7b26",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 9873,
+      "usage_json": "{\"inputTokens\":1854,\"outputTokens\":617}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:41.744Z"
+    },
+    {
+      "id": "03869d0e-2c21-451e-84ac-b855139cbaa0",
+      "participant_id": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 17613,
+      "usage_json": "{\"inputTokens\":2084,\"outputTokens\":653}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:49.486Z"
+    },
+    {
+      "id": "2941a350-1cb4-42b6-a350-e82a7471fd1d",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 19349,
+      "usage_json": "{\"inputTokens\":1776,\"outputTokens\":546}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:51.220Z"
+    },
+    {
+      "id": "bf15e94d-e079-42df-8c0b-f23ce3fb29bd",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "utterance",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2259,
+      "usage_json": "{\"inputTokens\":2095,\"outputTokens\":59}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:53.482Z"
+    },
+    {
+      "id": "aa0a54c6-d2d8-4016-b549-23cc76fa0fd9",
+      "participant_id": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+      "purpose": "probe",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 1729,
+      "usage_json": "{\"inputTokens\":2799,\"outputTokens\":21}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:55.214Z"
+    },
+    {
+      "id": "8b9abe7f-a029-4706-9edf-16db6cdcda4e",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2184,
+      "usage_json": "{\"inputTokens\":3068,\"outputTokens\":37}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:57.401Z"
+    },
+    {
+      "id": "4a09470c-1d6b-43bf-a954-29290327dc45",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 6299,
+      "usage_json": "{\"inputTokens\":2704,\"outputTokens\":379}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:01.516Z"
+    },
+    {
+      "id": "fc50aeff-c576-42b8-aba6-9264e55d43ab",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 6459,
+      "usage_json": "{\"inputTokens\":2739,\"outputTokens\":133}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:01.677Z"
+    },
+    {
+      "id": "1e18d053-1a0b-4ea2-a482-be2de06c4cf7",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 16266,
+      "usage_json": "{\"inputTokens\":2579,\"outputTokens\":465}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:11.484Z"
+    },
+    {
+      "id": "e95248fe-424a-4157-ad47-663d9280e728",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "utterance",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 18532,
+      "usage_json": "{\"inputTokens\":2626,\"outputTokens\":544}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:30.019Z"
+    },
+    {
+      "id": "60b125c9-8689-4602-92f3-a3ab419ea607",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3363,
+      "usage_json": "{\"inputTokens\":3397,\"outputTokens\":86}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:33.384Z"
+    },
+    {
+      "id": "ee408c3d-4abc-4230-bb8a-17689a6715d8",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 6740,
+      "usage_json": "{\"inputTokens\":3040,\"outputTokens\":162}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:36.763Z"
+    },
+    {
+      "id": "648eecb5-9bc4-4601-87af-8c918e188e20",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 9217,
+      "usage_json": "{\"inputTokens\":2845,\"outputTokens\":160}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:39.239Z"
+    },
+    {
+      "id": "f17c1a9a-ff06-4a8b-9aa1-6f1f0f276681",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 11967,
+      "usage_json": "{\"inputTokens\":2980,\"outputTokens\":726}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:41.988Z"
+    },
+    {
+      "id": "ef5433ce-e69b-4085-ad3a-e5258e4adb92",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 14624,
+      "usage_json": "{\"inputTokens\":3023,\"outputTokens\":1029}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:56.615Z"
+    },
+    {
+      "id": "94511d1e-0da8-4bcf-b94c-867b4ed32a4b",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3565,
+      "usage_json": "{\"inputTokens\":3675,\"outputTokens\":79}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:00.183Z"
+    },
+    {
+      "id": "7aeef447-a301-4201-b788-e46da4f8ce9b",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 5741,
+      "usage_json": "{\"inputTokens\":3207,\"outputTokens\":348}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:02.360Z"
+    },
+    {
+      "id": "2f9449ea-10fd-4873-abb0-5146ab34884d",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 6229,
+      "usage_json": "{\"inputTokens\":3283,\"outputTokens\":151}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:02.849Z"
+    },
+    {
+      "id": "e64c89b7-72c4-4d20-a782-caec10ce1cec",
+      "participant_id": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 19314,
+      "usage_json": "{\"inputTokens\":3691,\"outputTokens\":627}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:15.934Z"
+    },
+    {
+      "id": "6fce4f7c-bd87-4b44-94c5-e20f4dee261d",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 26161,
+      "usage_json": "{\"inputTokens\":3066,\"outputTokens\":872}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:22.780Z"
+    },
+    {
+      "id": "00f61857-9f7e-4906-8450-ac11d4f1aa04",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "utterance",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4605,
+      "usage_json": "{\"inputTokens\":3325,\"outputTokens\":103}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:27.390Z"
+    },
+    {
+      "id": "bd3d4af7-dd1f-4fee-ae37-2a6bebd5deee",
+      "participant_id": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+      "purpose": "probe",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3833,
+      "usage_json": "{\"inputTokens\":3913,\"outputTokens\":40}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:31.225Z"
+    },
+    {
+      "id": "859046b0-0688-4247-b365-f39c0e222314",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2195,
+      "usage_json": "{\"inputTokens\":4207,\"outputTokens\":39}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:33.422Z"
+    },
+    {
+      "id": "d1412f53-7e7a-458d-bb35-789f611de655",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4908,
+      "usage_json": "{\"inputTokens\":3741,\"outputTokens\":106}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:36.137Z"
+    },
+    {
+      "id": "f3c29b7a-f3f8-4801-9685-0f2df072e568",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 15149,
+      "usage_json": "{\"inputTokens\":3635,\"outputTokens\":1023}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:46.377Z"
+    },
+    {
+      "id": "4112926a-9880-4be3-b6c9-d7471ac0c6c5",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 18309,
+      "usage_json": "{\"inputTokens\":3479,\"outputTokens\":550}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:55:49.537Z"
+    },
+    {
+      "id": "ca03a130-c0f8-4a97-8e83-1f4945d48505",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 18675,
+      "usage_json": "{\"inputTokens\":3682,\"outputTokens\":1200}",
+      "error_code": "UPSTREAM_STREAM",
+      "created_at": "2026-11-18T15:56:08.215Z"
+    },
+    {
+      "id": "90bd5f28-a887-413d-bc54-62b1d18eed26",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2580,
+      "usage_json": "{\"inputTokens\":4207,\"outputTokens\":83}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:56:10.797Z"
+    },
+    {
+      "id": "84b889da-4c26-47a5-84a1-69f24a98f00a",
+      "participant_id": "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5696,
+      "usage_json": "{\"inputTokens\":3741,\"outputTokens\":140}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:56:13.915Z"
+    },
+    {
+      "id": "3f49b917-dc60-4662-96fe-6846c4a73cd0",
+      "participant_id": "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 8666,
+      "usage_json": "{\"inputTokens\":3635,\"outputTokens\":607}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:56:16.885Z"
+    },
+    {
+      "id": "6730f6fe-31b3-4dd1-af93-3fd35a89a700",
+      "participant_id": "206f6afb-1349-466e-946e-5a4b06c7ab64",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 21318,
+      "usage_json": "{\"inputTokens\":3479,\"outputTokens\":676}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:56:29.536Z"
+    },
+    {
+      "id": "b41fadc4-2c58-4f3e-9675-9154fa373f4d",
+      "participant_id": "3c8b25e4-3a91-42ec-ba06-a640dddfc4e5",
+      "purpose": "utterance",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 4380,
+      "usage_json": "{\"inputTokens\":4252,\"outputTokens\":75}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:56:33.919Z"
+    },
+    {
+      "id": "1da13103-5ea8-494c-b91d-5fbb7ee8560d",
+      "participant_id": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 18237,
+      "usage_json": "{\"inputTokens\":4455,\"outputTokens\":917}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:56:52.160Z"
+    },
+    {
+      "id": "1f1c5064-ac9f-4187-84fd-89beaa3d873e",
+      "participant_id": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+      "purpose": "summary",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 10597,
+      "usage_json": "{\"inputTokens\":4698,\"outputTokens\":283}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:57:02.759Z"
+    },
+    {
+      "id": "0072826e-c422-4850-a71f-f7c5706f2742",
+      "participant_id": "c6152b0b-102d-4f81-afff-923385c4a4ed",
+      "purpose": "summary",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 76442,
+      "usage_json": "{\"inputTokens\":4058,\"outputTokens\":5607}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:58:19.203Z"
+    }
+  ],
+  "eventEvidence": {
+    "totalEvents": 310,
+    "participantStatesObserved": ["idle", "preparing", "speaking"],
+    "nonemptyDraftUpdates": 131,
+    "timeline": [
+      {
+        "seq": 1,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:51:05.457Z",
+        "status": "casting"
+      },
+      {
+        "seq": 5,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:51:22.090Z",
+        "status": "running"
+      },
+      {
+        "seq": 22,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:51:24.337Z",
+        "messageId": "410aa20a-82fe-42af-97e1-47b814871391",
+        "messageSeq": 1
+      },
+      {
+        "seq": 48,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:52:04.379Z",
+        "messageId": "94708dfe-3aec-4a22-83b9-64cb0e47bcd2",
+        "messageSeq": 2
+      },
+      {
+        "seq": 95,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:53:12.522Z",
+        "messageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+        "messageSeq": 3
+      },
+      {
+        "seq": 120,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:53:31.869Z",
+        "messageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+        "messageSeq": 4
+      },
+      {
+        "seq": 128,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:53:49.487Z",
+        "status": "running",
+        "throughMessageSeq": 4,
+        "insights": [
+          {
+            "id": "insight-001",
+            "kind": "divergence",
+            "status": "emerging",
+            "scope": null,
+            "text": "在讨论城市是否应优先发展公共交通时，专家们对于成本效益分析的重要性存在分歧。",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": [
+              "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+              "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59"
+            ],
+            "evidence": [
+              {
+                "messageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+                "relation": "supports"
+              },
+              {
+                "messageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+                "relation": "qualifies"
+              }
+            ]
+          },
+          {
+            "id": "insight-002",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何平衡公共交通的成本效益与社会包容性之间的关系？",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": ["7c4150ff-79d7-4f54-ac37-85dc7b2b1c59"],
+            "evidence": [
+              {
+                "messageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "insight-003",
+            "kind": "consensus",
+            "status": "emerging",
+            "scope": "local",
+            "text": "城市发展公共交通需要考虑环境因素如空气质量改善，并确保服务可靠、便捷以替代私家车出行。",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": [
+              "206f6afb-1349-466e-946e-5a4b06c7ab64",
+              "71b148f1-2aab-4b7a-89a8-85c0af9a80a6"
+            ],
+            "evidence": [
+              {
+                "messageId": "94708dfe-3aec-4a22-83b9-64cb0e47bcd2",
+                "relation": "supports"
+              },
+              {
+                "messageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 144,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:53:53.482Z",
+        "messageId": "70c28039-499f-487e-b701-beb3f4d89576",
+        "messageSeq": 5
+      },
+      {
+        "seq": 155,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:53:55.215Z",
+        "messageId": "c502bf94-f6f7-4fa2-8d1f-8fb387a0844b",
+        "messageSeq": 6
+      },
+      {
+        "seq": 179,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:54:30.019Z",
+        "messageId": "c2ea32b8-22bb-4d1a-8af1-69ec6bd819cc",
+        "messageSeq": 7
+      },
+      {
+        "seq": 195,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:54:56.616Z",
+        "messageId": "792c4104-8154-4373-8ee5-a516669d52f8",
+        "messageSeq": 8
+      },
+      {
+        "seq": 203,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:55:15.935Z",
+        "status": "running",
+        "throughMessageSeq": 8,
+        "insights": [
+          {
+            "id": "insight-001",
+            "kind": "divergence",
+            "status": "emerging",
+            "scope": null,
+            "text": "在讨论城市是否应优先发展公共交通时，专家们对于成本效益分析的重要性存在分歧。",
+            "revision": 2,
+            "throughMessageSeq": 8,
+            "participantIds": [
+              "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+              "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59"
+            ],
+            "evidence": [
+              {
+                "messageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+                "relation": "supports"
+              },
+              {
+                "messageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+                "relation": "qualifies"
+              }
+            ]
+          },
+          {
+            "id": "insight-002",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何平衡公共交通的成本效益与社会包容性之间的关系？",
+            "revision": 2,
+            "throughMessageSeq": 8,
+            "participantIds": ["7c4150ff-79d7-4f54-ac37-85dc7b2b1c59"],
+            "evidence": [
+              {
+                "messageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "insight-003",
+            "kind": "consensus",
+            "status": "stable",
+            "scope": "local",
+            "text": "城市发展公共交通需要考虑环境因素如空气质量改善，并确保服务可靠、便捷以替代私家车出行。",
+            "revision": 2,
+            "throughMessageSeq": 8,
+            "participantIds": [
+              "206f6afb-1349-466e-946e-5a4b06c7ab64",
+              "71b148f1-2aab-4b7a-89a8-85c0af9a80a6"
+            ],
+            "evidence": [
+              {
+                "messageId": "94708dfe-3aec-4a22-83b9-64cb0e47bcd2",
+                "relation": "supports"
+              },
+              {
+                "messageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 220,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:55:27.391Z",
+        "messageId": "f52b2937-7a4b-43b7-a8f5-7f30c14f56c5",
+        "messageSeq": 9
+      },
+      {
+        "seq": 233,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:55:31.225Z",
+        "messageId": "304516b1-236f-4c96-8d21-1d91902a4ee1",
+        "messageSeq": 10
+      },
+      {
+        "seq": 274,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:56:33.920Z",
+        "messageId": "362c9383-01c3-4005-b0fe-68cbe9c778a7",
+        "messageSeq": 11
+      },
+      {
+        "seq": 275,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:56:33.921Z",
+        "status": "summarizing"
+      },
+      {
+        "seq": 276,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:56:52.160Z",
+        "status": "summarizing",
+        "throughMessageSeq": 11,
+        "insights": [
+          {
+            "id": "insight-001",
+            "kind": "divergence",
+            "status": "revised",
+            "scope": null,
+            "text": "在讨论城市是否应优先发展公共交通时，专家们对于成本效益分析的重要性及其如何纳入社会包容性存在分歧。",
+            "revision": 3,
+            "throughMessageSeq": 11,
+            "participantIds": [
+              "71b148f1-2aab-4b7a-89a8-85c0af9a80a6",
+              "7c4150ff-79d7-4f54-ac37-85dc7b2b1c59"
+            ],
+            "evidence": [
+              {
+                "messageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+                "relation": "supports"
+              },
+              {
+                "messageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+                "relation": "qualifies"
+              },
+              {
+                "messageId": "c2ea32b8-22bb-4d1a-8af1-69ec6bd819cc",
+                "relation": "opposes"
+              },
+              {
+                "messageId": "792c4104-8154-4373-8ee5-a516669d52f8",
+                "relation": "supports"
+              },
+              {
+                "messageId": "f52b2937-7a4b-43b7-a8f5-7f30c14f56c5",
+                "relation": "qualifies"
+              }
+            ]
+          },
+          {
+            "id": "insight-002",
+            "kind": "open_question",
+            "status": "revised",
+            "scope": null,
+            "text": "如何平衡公共交通的成本效益与社会包容性之间的关系？尤其是在考虑不同群体需求时。",
+            "revision": 3,
+            "throughMessageSeq": 11,
+            "participantIds": ["7c4150ff-79d7-4f54-ac37-85dc7b2b1c59"],
+            "evidence": [
+              {
+                "messageId": "7493cc39-1e92-4a44-b23f-69f699bb2671",
+                "relation": "supports"
+              },
+              {
+                "messageId": "c2ea32b8-22bb-4d1a-8af1-69ec6bd819cc",
+                "relation": "supports"
+              },
+              {
+                "messageId": "792c4104-8154-4373-8ee5-a516669d52f8",
+                "relation": "supports"
+              },
+              {
+                "messageId": "f52b2937-7a4b-43b7-a8f5-7f30c14f56c5",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "insight-003",
+            "kind": "consensus",
+            "status": "stable",
+            "scope": "local",
+            "text": "城市发展公共交通需要考虑环境因素如空气质量改善，并确保服务可靠、便捷以替代私家车出行。",
+            "revision": 3,
+            "throughMessageSeq": 11,
+            "participantIds": [
+              "206f6afb-1349-466e-946e-5a4b06c7ab64",
+              "71b148f1-2aab-4b7a-89a8-85c0af9a80a6"
+            ],
+            "evidence": [
+              {
+                "messageId": "94708dfe-3aec-4a22-83b9-64cb0e47bcd2",
+                "relation": "supports"
+              },
+              {
+                "messageId": "7efcd4b0-e306-4f47-9680-0ed30f9edced",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 310,
+        "type": "summary.ready",
+        "occurredAt": "2026-11-18T15:58:19.203Z",
+        "messageId": "a4a6224e-d74b-4b31-a93d-0390f31ab7eb",
+        "messageSeq": 12
+      }
+    ]
+  },
+  "applicationSourceCommit": "1ba30083a43124b6d65b00cbd3b2a91ddd5ec572"
+}

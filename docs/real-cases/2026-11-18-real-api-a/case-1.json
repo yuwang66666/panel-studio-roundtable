@@ -1,0 +1,1193 @@
+{
+  "provenance": "real-api",
+  "runId": "2026-11-18-real-api-a",
+  "startedAt": "2026-11-18T15:47:40.800Z",
+  "finishedAt": "2026-11-18T15:53:15.303Z",
+  "expertUtteranceLimit": 8,
+  "snapshot": {
+    "discussion": {
+      "id": "e96fb469-6674-4eed-bc5d-446f554619d3",
+      "topic": "生成式 AI 会取代初级岗位，还是创造新的机会？",
+      "expertCount": 4,
+      "status": "completed",
+      "version": 6,
+      "castVersion": 1,
+      "generation": 2,
+      "finishRequested": false,
+      "failureStage": null,
+      "error": null,
+      "maxUtterances": 8,
+      "maxCalls": 120,
+      "callCount": 47,
+      "insightsThrough": 9,
+      "isSample": false,
+      "createdAt": "2026-11-18T15:47:40.801Z",
+      "updatedAt": "2026-11-18T15:53:15.303Z"
+    },
+    "participants": [
+      {
+        "id": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "role": "moderator",
+        "name": "林晓风",
+        "occupation": "科技评论员",
+        "title": "讨论引导者",
+        "stance": "中立",
+        "specialty": ["人工智能发展趋势", "就业市场分析"],
+        "colorKey": 0,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "role": "expert",
+        "name": "李思源",
+        "occupation": "软件工程师",
+        "title": "技术开发者",
+        "stance": "乐观",
+        "specialty": ["AI应用开发", "编程语言"],
+        "colorKey": 1,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "role": "expert",
+        "name": "赵文博",
+        "occupation": "经济学家",
+        "title": "经济分析师",
+        "stance": "谨慎乐观",
+        "specialty": ["劳动经济学", "宏观经济政策"],
+        "colorKey": 2,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "role": "expert",
+        "name": "孙悦心",
+        "occupation": "人力资源经理",
+        "title": "HR专家",
+        "stance": "关注转型",
+        "specialty": ["职业规划", "员工培训与发展"],
+        "colorKey": 3,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "role": "expert",
+        "name": "周志强",
+        "occupation": "教育家",
+        "title": "未来学家",
+        "stance": "前瞻性",
+        "specialty": ["教育改革", "未来工作技能"],
+        "colorKey": 4,
+        "status": "idle",
+        "publicFocus": null
+      }
+    ],
+    "bindings": [
+      {
+        "participantId": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+        "connectionId": "env:DEEPSEEK",
+        "connectionVersion": 1,
+        "model": "deepseek-v4-pro",
+        "provider": "deepseek"
+      },
+      {
+        "participantId": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+        "connectionId": "env:QWEN",
+        "connectionVersion": 1,
+        "model": "qwen-max",
+        "provider": "qwen"
+      },
+      {
+        "participantId": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+        "connectionId": "env:QWEN",
+        "connectionVersion": 1,
+        "model": "qwen-max",
+        "provider": "qwen"
+      },
+      {
+        "participantId": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+        "connectionId": "env:GPT",
+        "connectionVersion": 1,
+        "model": "gpt-6-sol",
+        "provider": "gpt"
+      },
+      {
+        "participantId": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+        "connectionId": "env:KIMI",
+        "connectionVersion": 1,
+        "model": "kimi-k3.1-pro",
+        "provider": "kimi"
+      }
+    ],
+    "messages": [
+      {
+        "id": "0b7c40c8-1561-49ab-b231-f884f6c5782e",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 1,
+        "turnId": "b78d9194-6449-4a5a-a57c-ed7a310cf8e2",
+        "participantId": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+        "kind": "opening",
+        "content": "大家好，欢迎来到今天的圆桌讨论。我们今天将探讨一个非常热门且具有前瞻性的话题：生成式AI是否会取代初级岗位，还是它实际上为劳动力市场创造了新的机会？这是一个充满争议的话题，我相信在座的各位专家都有自己独到的见解。那么，让我们首先从一个具体的问题开始吧：根据您的观察与研究，您认为生成式AI技术的发展对于当前就业结构产生了怎样的影响？",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:47:50.839Z"
+      },
+      {
+        "id": "beb31495-1bce-48b1-8a2d-e9b2aca98ecd",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 2,
+        "turnId": "a3e13c35-d3e4-4c95-939f-d4bfda0cdccc",
+        "participantId": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+        "kind": "expert",
+        "content": "当前就业结构的变化应区分替代效应与生产率效应：生成式AI会替代部分程序化初级任务，但未必等同长期净失业。历史上技术变革往往通过降低成本和创造新需求在中期拉动就业，关键在于培训与制度能否跟上转型速度。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:48:05.235Z"
+      },
+      {
+        "id": "eb66a382-12c9-460b-a317-77d0efc82f79",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 3,
+        "turnId": "5dc90def-30bc-4fcf-9f5f-b87e24dbabce",
+        "participantId": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+        "kind": "expert",
+        "content": "生成式AI确实能够提高生产力，并且通过自动化处理一些重复性高的任务，让软件工程师有更多时间专注于创新和解决更复杂的问题。这种技术的发展促进了新的应用程序和服务的诞生，为市场带来了前所未有的解决方案，同时也创造了对新技能的需求。",
+        "replyToMessageId": "beb31495-1bce-48b1-8a2d-e9b2aca98ecd",
+        "createdAt": "2026-11-18T15:48:20.171Z"
+      },
+      {
+        "id": "1f7b6c75-8ae9-4e44-99d1-198c36b012b3",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 4,
+        "turnId": "bcea4e2a-9c1e-47f9-8f35-a3efaaa05f18",
+        "participantId": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+        "kind": "expert",
+        "content": "我认同AI带来生产率提升和新技能需求，但从企业招聘与培养看，更隐蔽的风险是初级员工失去练手任务：基础工作被接管后，新人若只负责调用工具和转发结果，就缺少独立判断、纠错与负责到底的机会，几年后可能形成晋升断层。因此应重构「初级岗位+AI」培养路径，保留带评审的实践任务，要求新人说明AI产出的依据、核验结果并完成协作交付，同时以转岗周期和内部流动率检验转型成效，看员工是否真正进入更高价值的工作，而非只统计培训人次和工具使用率。",
+        "replyToMessageId": "beb31495-1bce-48b1-8a2d-e9b2aca98ecd",
+        "createdAt": "2026-11-18T15:48:59.165Z"
+      },
+      {
+        "id": "fc21f549-897c-4c85-aa06-6fbf3237f0a3",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 5,
+        "turnId": "a50dd0be-2ec1-4822-ace9-c8bd59f8ff25",
+        "participantId": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+        "kind": "expert",
+        "content": "孙悦心提出的晋升断层风险，也需要从教育端预防：学校与企业可共建真实项目，让学生先独立提出方案，再用AI验证和改进。考核应重视判断依据、纠错过程与协作成果，而不只是工具操作熟练度，这样新人进入岗位时才有能力承担更复杂的任务。",
+        "replyToMessageId": "1f7b6c75-8ae9-4e44-99d1-198c36b012b3",
+        "createdAt": "2026-11-18T15:49:13.687Z"
+      },
+      {
+        "id": "d13b745e-e172-404a-b4cf-a9e758cbb47f",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 6,
+        "turnId": "36e9c667-9f02-43fe-98cd-72f9bb7b809e",
+        "participantId": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+        "kind": "expert",
+        "content": "孙悦心指出的练手任务流失风险，从劳动经济学看会延缓初级劳动者的人力资本积累，并可能在中长期扩大技能溢价、拖累生产率增长。企业应把培训投入与晋升周期纳入自动化收益的成本收益分析，避免只看到短期节约，低估未来中高级人才断层带来的更高替代成本。",
+        "replyToMessageId": "1f7b6c75-8ae9-4e44-99d1-198c36b012b3",
+        "createdAt": "2026-11-18T15:49:52.711Z"
+      },
+      {
+        "id": "d4f5ea32-352a-43ae-88dc-438fbdabbb48",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 7,
+        "turnId": "e247c1c3-1470-431d-97e3-cfd7461a9726",
+        "participantId": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+        "kind": "expert",
+        "content": "企业设立导师制度确实是一个很好的方案，这不仅能够帮助初级员工更好地适应与AI协作的新工作模式，还促进了知识和经验的传承。通过这样的方式，我们既能保证技术进步带来的效率提升，又能确保新一代劳动力具备足够的实践经验和解决问题的能力。",
+        "replyToMessageId": "1f7b6c75-8ae9-4e44-99d1-198c36b012b3",
+        "createdAt": "2026-11-18T15:50:23.274Z"
+      },
+      {
+        "id": "2c1e7f95-9034-4511-81a2-fb5a7082e9f6",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 8,
+        "turnId": "1d310d59-319e-4de6-9032-86fca8d6d8d8",
+        "participantId": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+        "kind": "expert",
+        "content": "导师制值得推行，但并非充分条件，企业还应明确带教激励与权责边界：导师负责提问、评审和兜底，新人须独立提出方案、核验AI产出并完成交付，同时将新人的判断力、纠错表现和交付质量纳入导师考核。否则，导师可能为赶进度直接代做，企业也可能用培训时长掩盖实践任务仍被AI抽空的事实，看似完成了培养，实则没有消除晋升断层。",
+        "replyToMessageId": "d4f5ea32-352a-43ae-88dc-438fbdabbb48",
+        "createdAt": "2026-11-18T15:51:11.706Z"
+      },
+      {
+        "id": "85306187-9b87-4067-a56c-74c5c25ab5e7",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 9,
+        "turnId": "4879cfb0-4215-468c-90e6-697d21482c30",
+        "participantId": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+        "kind": "expert",
+        "content": "孙悦心说得对，明确带教责任还不够：如果初级岗位和实习名额缩减，再好的导师制也只能惠及少数已入职者。学校与企业可共建有报酬的学徒项目，向非名校毕业生和转行者开放，让学徒独立完成经导师评审的任务，并跟踪录用率与留任率，检验培养机会是否真正扩大。",
+        "replyToMessageId": "2c1e7f95-9034-4511-81a2-fb5a7082e9f6",
+        "createdAt": "2026-11-18T15:51:49.108Z"
+      },
+      {
+        "id": "c0fc6a13-b5fc-40ea-bc09-e020560c3456",
+        "discussionId": "e96fb469-6674-4eed-bc5d-446f554619d3",
+        "messageSeq": 10,
+        "turnId": "c23521c5-1187-4734-a230-f71ea6b0bb08",
+        "participantId": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+        "kind": "summary",
+        "content": "主题：讨论围绕“生成式 AI 会取代初级岗位，还是创造新的机会？”展开。五位参与者中，主持人林晓风负责开场，李思源、赵文博、孙悦心、周志强四位专家发表意见。\n\n共识及其范围：已核验的局部共识为，生成式 AI 通过自动化重复性较高任务提高生产率，支持者是李思源和赵文博（消息ID：eb66a382-12c9-460b-a317-77d0efc82f79、beb31495-1bce-48b1-8a2d-e9b2aca98ecd）。孙悦心虽在发言中认同 AI 带来生产率提升和新技能需求，但该表述未被归入上述局部共识，因此不将生产率共识扩大为全体。\n\n剩余分歧：李思源认为 AI 使工程师专注创新和复杂问题，并创造新应用、新服务和新技能需求；赵文博强调应区分替代效应与生产率效应，部分程序化初级任务会被替代，但未必形成长期净失业，关键在于培训和制度能否跟上。孙悦心与周志强更关注初级员工练手任务流失、晋升断层和实习机会缩减，主张重构“初级岗位+AI”培养路径、教育端真实项目、明确权责的导师制及有报酬学徒项目。\n\n待验证问题：基础任务被 AI 接管后，新人能否通过实践任务、导师制和学徒项目获得独立判断、纠错与交付能力；企业能否将培训投入、晋升周期、转岗周期和内部流动率纳入自动化收益评估，避免仅以培训人次和工具使用率衡量转型成效。相关风险来源为孙悦心、周志强和赵文博的发言（消息ID：1f7b6c75-8ae9-4e44-99d1-198c36b012b3、fc21f549-897c-4c85-aa06-6fbf3237f0a3、d13b745e-e172-404a-b4cf-a9e758cbb47f）。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:53:15.302Z",
+        "summaryMeta": {
+          "source": "model",
+          "throughMessageSeq": 9,
+          "insightsThroughMessageSeq": 9,
+          "model": "deepseek-v4-pro",
+          "provider": "deepseek",
+          "connectionId": "env:DEEPSEEK",
+          "connectionVersion": 1,
+          "fallbackUsed": true,
+          "reason": null
+        }
+      }
+    ],
+    "draft": null,
+    "insights": [
+      {
+        "id": "insight-001",
+        "kind": "consensus",
+        "status": "stable",
+        "scope": "local",
+        "text": "生成式AI技术通过自动化处理一些重复性高的任务，提高了生产力。",
+        "revision": 3,
+        "throughMessageSeq": 9,
+        "participantIds": [
+          "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+          "103164d7-b6ba-4759-b1bb-3628bdd93635"
+        ],
+        "evidence": [
+          {
+            "messageId": "beb31495-1bce-48b1-8a2d-e9b2aca98ecd",
+            "relation": "supports"
+          },
+          {
+            "messageId": "eb66a382-12c9-460b-a317-77d0efc82f79",
+            "relation": "supports"
+          }
+        ]
+      },
+      {
+        "id": "insight-002",
+        "kind": "open_question",
+        "status": "emerging",
+        "scope": null,
+        "text": "尽管生成式AI促进了生产率提升和新技能需求，但可能给初级员工带来缺乏实践机会的风险。",
+        "revision": 3,
+        "throughMessageSeq": 9,
+        "participantIds": [
+          "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+          "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+          "103164d7-b6ba-4759-b1bb-3628bdd93635"
+        ],
+        "evidence": [
+          {
+            "messageId": "1f7b6c75-8ae9-4e44-99d1-198c36b012b3",
+            "relation": "supports"
+          },
+          {
+            "messageId": "fc21f549-897c-4c85-aa06-6fbf3237f0a3",
+            "relation": "supports"
+          },
+          {
+            "messageId": "d13b745e-e172-404a-b4cf-a9e758cbb47f",
+            "relation": "supports"
+          }
+        ]
+      }
+    ],
+    "lastEventSeq": 254
+  },
+  "usage": {
+    "calls": 47,
+    "errorCalls": 1,
+    "inputTokens": 104653,
+    "outputTokens": 20409
+  },
+  "calls": [
+    {
+      "id": "c52a2d5b-5786-404e-944e-0399a39504d5",
+      "participant_id": null,
+      "purpose": "cast",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 6760,
+      "usage_json": "{\"inputTokens\":148,\"outputTokens\":266}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:47:47.563Z"
+    },
+    {
+      "id": "fe5dae1c-f34c-42b5-a2ce-45f5afb35e18",
+      "participant_id": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+      "purpose": "opening",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3267,
+      "usage_json": "{\"inputTokens\":849,\"outputTokens\":94}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:47:50.838Z"
+    },
+    {
+      "id": "7ce97834-0d98-43e6-aeed-0df853f348e2",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2310,
+      "usage_json": "{\"inputTokens\":1189,\"outputTokens\":38}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:47:53.151Z"
+    },
+    {
+      "id": "3368ca73-944f-43de-9883-0669c6764cb2",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 3444,
+      "usage_json": "{\"inputTokens\":1126,\"outputTokens\":121}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:47:54.286Z"
+    },
+    {
+      "id": "bf1cd20c-4ac3-4b85-b493-4282edcae927",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5161,
+      "usage_json": "{\"inputTokens\":1086,\"outputTokens\":84}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:47:56.004Z"
+    },
+    {
+      "id": "de763790-4370-4d44-9d85-dfb1bb27a4ac",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 7147,
+      "usage_json": "{\"inputTokens\":1075,\"outputTokens\":242}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:47:57.989Z"
+    },
+    {
+      "id": "72711391-eff2-4ad7-a3a0-ffbd1c9e3ef3",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 7236,
+      "usage_json": "{\"inputTokens\":1147,\"outputTokens\":417}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:05.235Z"
+    },
+    {
+      "id": "f1146eca-bcfb-402c-a275-ec664d3dcc15",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 2980,
+      "usage_json": "{\"inputTokens\":1326,\"outputTokens\":117}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:08.218Z"
+    },
+    {
+      "id": "0d1710db-bfd2-4119-9f57-f3229355aa62",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3890,
+      "usage_json": "{\"inputTokens\":1427,\"outputTokens\":83}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:09.127Z"
+    },
+    {
+      "id": "ebec7146-06e9-4b8e-adfd-7cb3ce9d6dd8",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5009,
+      "usage_json": "{\"inputTokens\":1301,\"outputTokens\":126}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:10.248Z"
+    },
+    {
+      "id": "971b7bb9-6000-4b00-b4d7-2230be894305",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 12557,
+      "usage_json": "{\"inputTokens\":1267,\"outputTokens\":354}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:17.795Z"
+    },
+    {
+      "id": "ac968ddf-9042-49ed-a03d-c09f1624b66a",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "utterance",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2373,
+      "usage_json": "{\"inputTokens\":1472,\"outputTokens\":62}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:20.171Z"
+    },
+    {
+      "id": "829b2f7c-7111-4d8c-9018-e4552a8da7f7",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2479,
+      "usage_json": "{\"inputTokens\":1693,\"outputTokens\":83}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:22.652Z"
+    },
+    {
+      "id": "13aa444c-a81f-45aa-9c91-2432f3ec20bb",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5423,
+      "usage_json": "{\"inputTokens\":1538,\"outputTokens\":108}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:25.599Z"
+    },
+    {
+      "id": "3cf1ddfa-c1a3-45c4-a247-31626f9ead80",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 7857,
+      "usage_json": "{\"inputTokens\":1549,\"outputTokens\":504}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:28.031Z"
+    },
+    {
+      "id": "999e3c50-8e77-4bf9-bebd-cef6be0996fa",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 15233,
+      "usage_json": "{\"inputTokens\":1479,\"outputTokens\":488}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:35.408Z"
+    },
+    {
+      "id": "7ffed65c-cab7-448c-9b06-e085ef23bbeb",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "utterance",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 23754,
+      "usage_json": "{\"inputTokens\":1535,\"outputTokens\":794}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:48:59.165Z"
+    },
+    {
+      "id": "5e739fe2-dc8c-497a-ab41-eda51cbea65b",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3323,
+      "usage_json": "{\"inputTokens\":2043,\"outputTokens\":82}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:02.490Z"
+    },
+    {
+      "id": "2cf69a82-96ef-46ac-ac60-cea7d5a66017",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 6698,
+      "usage_json": "{\"inputTokens\":1864,\"outputTokens\":162}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:05.867Z"
+    },
+    {
+      "id": "0fdc5c32-8583-450c-b1ee-13076be85ccf",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 6829,
+      "usage_json": "{\"inputTokens\":1773,\"outputTokens\":194}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:05.998Z"
+    },
+    {
+      "id": "34734faa-55f1-4ccb-98d4-8e17a9a6d534",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 10002,
+      "usage_json": "{\"inputTokens\":1856,\"outputTokens\":589}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:09.170Z"
+    },
+    {
+      "id": "82fef4e2-d3b2-41b2-b931-728a038f3077",
+      "participant_id": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 13224,
+      "usage_json": "{\"inputTokens\":2062,\"outputTokens\":411}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:12.394Z"
+    },
+    {
+      "id": "d0a54555-812d-4473-9d1c-f722a70a6d85",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "utterance",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4514,
+      "usage_json": "{\"inputTokens\":1916,\"outputTokens\":108}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:13.687Z"
+    },
+    {
+      "id": "4486a78d-1c65-4715-aa9b-974016302cda",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2802,
+      "usage_json": "{\"inputTokens\":2673,\"outputTokens\":78}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:16.491Z"
+    },
+    {
+      "id": "7ad1c434-4285-4987-8070-32abb94479fc",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4052,
+      "usage_json": "{\"inputTokens\":2414,\"outputTokens\":52}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:17.744Z"
+    },
+    {
+      "id": "dcc3f60e-7c9b-47f6-bddb-f53679736bb0",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 7768,
+      "usage_json": "{\"inputTokens\":2396,\"outputTokens\":452}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:21.458Z"
+    },
+    {
+      "id": "3ae49260-e52e-4355-a305-8b196242dcbe",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 24025,
+      "usage_json": "{\"inputTokens\":2291,\"outputTokens\":603}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:37.716Z"
+    },
+    {
+      "id": "535b40f2-2485-4fe3-90ba-d470e19da083",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 14991,
+      "usage_json": "{\"inputTokens\":2457,\"outputTokens\":930}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:52.710Z"
+    },
+    {
+      "id": "205e0b7d-a764-484b-a044-d1ca430b333a",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3080,
+      "usage_json": "{\"inputTokens\":2966,\"outputTokens\":73}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:55.792Z"
+    },
+    {
+      "id": "ff69f085-c257-4b10-bec7-1a35948bbc74",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 3456,
+      "usage_json": "{\"inputTokens\":2633,\"outputTokens\":209}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:56.169Z"
+    },
+    {
+      "id": "cb764ef9-d6ca-4474-9fbf-55f79b67c0e4",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 7354,
+      "usage_json": "{\"inputTokens\":2666,\"outputTokens\":241}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:00.069Z"
+    },
+    {
+      "id": "0fb29325-a877-4177-a3ce-8089a4fd2f5b",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 27070,
+      "usage_json": "{\"inputTokens\":2520,\"outputTokens\":727}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:19.784Z"
+    },
+    {
+      "id": "8924273f-85d1-4663-a215-4a800cf8f2f3",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "utterance",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3486,
+      "usage_json": "{\"inputTokens\":3001,\"outputTokens\":62}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:23.274Z"
+    },
+    {
+      "id": "0b5522bb-364c-460c-83d0-599e9f0818a6",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2703,
+      "usage_json": "{\"inputTokens\":3243,\"outputTokens\":74}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:25.979Z"
+    },
+    {
+      "id": "308f4e1f-efe6-4e95-8cf4-2b5b18f0a341",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 6059,
+      "usage_json": "{\"inputTokens\":2910,\"outputTokens\":208}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:29.337Z"
+    },
+    {
+      "id": "9681a035-de64-49d6-8e64-d2aaffe00e55",
+      "participant_id": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 14591,
+      "usage_json": "{\"inputTokens\":3263,\"outputTokens\":553}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:37.869Z"
+    },
+    {
+      "id": "e677fd8f-08a4-4ed5-b105-95c7625b229a",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 15893,
+      "usage_json": "{\"inputTokens\":2856,\"outputTokens\":961}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:39.170Z"
+    },
+    {
+      "id": "daa32e48-8c46-4d98-8f6a-b479ff1fec69",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 35222,
+      "usage_json": "{\"inputTokens\":2736,\"outputTokens\":1019}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:58.499Z"
+    },
+    {
+      "id": "a91fad5f-5d7a-4413-ace0-dcc8a3ba027d",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "utterance",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 13203,
+      "usage_json": "{\"inputTokens\":2780,\"outputTokens\":462}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:11.706Z"
+    },
+    {
+      "id": "ce733338-4b4c-459f-af06-b01340dad6a9",
+      "participant_id": "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3447,
+      "usage_json": "{\"inputTokens\":3711,\"outputTokens\":77}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:15.155Z"
+    },
+    {
+      "id": "332f8ec7-e9d6-47b3-aca6-5e6c90647f27",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 7220,
+      "usage_json": "{\"inputTokens\":3305,\"outputTokens\":221}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:18.930Z"
+    },
+    {
+      "id": "43cdcfad-a704-475c-900b-74dd75e7c9ee",
+      "participant_id": "103164d7-b6ba-4759-b1bb-3628bdd93635",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 11946,
+      "usage_json": "{\"inputTokens\":3238,\"outputTokens\":702}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:23.655Z"
+    },
+    {
+      "id": "e930a79a-a5fb-4b65-88a6-a4577630881c",
+      "participant_id": "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 32341,
+      "usage_json": "{\"inputTokens\":3097,\"outputTokens\":894}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:44.051Z"
+    },
+    {
+      "id": "d91f40d6-6379-426f-8925-66a545519539",
+      "participant_id": "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+      "purpose": "utterance",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5052,
+      "usage_json": "{\"inputTokens\":3371,\"outputTokens\":135}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:49.108Z"
+    },
+    {
+      "id": "5c3376ca-a69a-4bcd-a75f-7de3ba5c3e23",
+      "participant_id": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 11549,
+      "usage_json": "{\"inputTokens\":3982,\"outputTokens\":553}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:00.660Z"
+    },
+    {
+      "id": "4087e4ef-83ea-45a8-af55-ced38cfb6d8a",
+      "participant_id": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+      "purpose": "summary",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 5299,
+      "usage_json": "{\"inputTokens\":3960,\"outputTokens\":151}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:52:05.961Z"
+    },
+    {
+      "id": "861f742e-7da7-4dd9-a270-a2a8c7920bcc",
+      "participant_id": "62cf3dfb-41a6-408d-abfc-85938385cf55",
+      "purpose": "summary",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 69340,
+      "usage_json": "{\"inputTokens\":3463,\"outputTokens\":5445}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:15.302Z"
+    }
+  ],
+  "eventEvidence": {
+    "totalEvents": 254,
+    "participantStatesObserved": ["idle", "preparing", "speaking"],
+    "nonemptyDraftUpdates": 116,
+    "timeline": [
+      {
+        "seq": 1,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:47:40.801Z",
+        "status": "casting"
+      },
+      {
+        "seq": 5,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:47:47.569Z",
+        "status": "running"
+      },
+      {
+        "seq": 26,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:47:50.839Z",
+        "messageId": "0b7c40c8-1561-49ab-b231-f884f6c5782e",
+        "messageSeq": 1
+      },
+      {
+        "seq": 47,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:48:05.235Z",
+        "messageId": "beb31495-1bce-48b1-8a2d-e9b2aca98ecd",
+        "messageSeq": 2
+      },
+      {
+        "seq": 71,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:48:20.171Z",
+        "messageId": "eb66a382-12c9-460b-a317-77d0efc82f79",
+        "messageSeq": 3
+      },
+      {
+        "seq": 96,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:48:59.166Z",
+        "messageId": "1f7b6c75-8ae9-4e44-99d1-198c36b012b3",
+        "messageSeq": 4
+      },
+      {
+        "seq": 108,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:49:12.395Z",
+        "status": "running",
+        "throughMessageSeq": 4,
+        "insights": [
+          {
+            "id": "insight-001",
+            "kind": "consensus",
+            "status": "emerging",
+            "scope": "local",
+            "text": "生成式AI技术通过自动化处理一些重复性高的任务，提高了生产力。",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": [
+              "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+              "103164d7-b6ba-4759-b1bb-3628bdd93635"
+            ],
+            "evidence": [
+              {
+                "messageId": "beb31495-1bce-48b1-8a2d-e9b2aca98ecd",
+                "relation": "supports"
+              },
+              {
+                "messageId": "eb66a382-12c9-460b-a317-77d0efc82f79",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "insight-002",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "尽管生成式AI促进了生产率提升和新技能需求，但可能给初级员工带来缺乏实践机会的风险。",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": ["db02fe3a-0572-4956-a3f5-a9c9012058f5"],
+            "evidence": [
+              {
+                "messageId": "1f7b6c75-8ae9-4e44-99d1-198c36b012b3",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 118,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:49:13.688Z",
+        "messageId": "fc21f549-897c-4c85-aa06-6fbf3237f0a3",
+        "messageSeq": 5
+      },
+      {
+        "seq": 137,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:49:52.711Z",
+        "messageId": "d13b745e-e172-404a-b4cf-a9e758cbb47f",
+        "messageSeq": 6
+      },
+      {
+        "seq": 166,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:50:23.274Z",
+        "messageId": "d4f5ea32-352a-43ae-88dc-438fbdabbb48",
+        "messageSeq": 7
+      },
+      {
+        "seq": 173,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:50:37.870Z",
+        "status": "running",
+        "throughMessageSeq": 7,
+        "insights": [
+          {
+            "id": "insight-001",
+            "kind": "consensus",
+            "status": "stable",
+            "scope": "local",
+            "text": "生成式AI技术通过自动化处理一些重复性高的任务，提高了生产力。",
+            "revision": 2,
+            "throughMessageSeq": 7,
+            "participantIds": [
+              "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+              "103164d7-b6ba-4759-b1bb-3628bdd93635"
+            ],
+            "evidence": [
+              {
+                "messageId": "beb31495-1bce-48b1-8a2d-e9b2aca98ecd",
+                "relation": "supports"
+              },
+              {
+                "messageId": "eb66a382-12c9-460b-a317-77d0efc82f79",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "insight-002",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "尽管生成式AI促进了生产率提升和新技能需求，但可能给初级员工带来缺乏实践机会的风险。",
+            "revision": 2,
+            "throughMessageSeq": 7,
+            "participantIds": [
+              "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+              "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+              "103164d7-b6ba-4759-b1bb-3628bdd93635"
+            ],
+            "evidence": [
+              {
+                "messageId": "1f7b6c75-8ae9-4e44-99d1-198c36b012b3",
+                "relation": "supports"
+              },
+              {
+                "messageId": "fc21f549-897c-4c85-aa06-6fbf3237f0a3",
+                "relation": "supports"
+              },
+              {
+                "messageId": "d13b745e-e172-404a-b4cf-a9e758cbb47f",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 189,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:51:11.707Z",
+        "messageId": "2c1e7f95-9034-4511-81a2-fb5a7082e9f6",
+        "messageSeq": 8
+      },
+      {
+        "seq": 215,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:51:49.108Z",
+        "messageId": "85306187-9b87-4067-a56c-74c5c25ab5e7",
+        "messageSeq": 9
+      },
+      {
+        "seq": 216,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:51:49.109Z",
+        "status": "summarizing"
+      },
+      {
+        "seq": 217,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:52:00.660Z",
+        "status": "summarizing",
+        "throughMessageSeq": 9,
+        "insights": [
+          {
+            "id": "insight-001",
+            "kind": "consensus",
+            "status": "stable",
+            "scope": "local",
+            "text": "生成式AI技术通过自动化处理一些重复性高的任务，提高了生产力。",
+            "revision": 3,
+            "throughMessageSeq": 9,
+            "participantIds": [
+              "760bfed3-7587-4ca9-bbca-6d69c9bd589e",
+              "103164d7-b6ba-4759-b1bb-3628bdd93635"
+            ],
+            "evidence": [
+              {
+                "messageId": "beb31495-1bce-48b1-8a2d-e9b2aca98ecd",
+                "relation": "supports"
+              },
+              {
+                "messageId": "eb66a382-12c9-460b-a317-77d0efc82f79",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "insight-002",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "尽管生成式AI促进了生产率提升和新技能需求，但可能给初级员工带来缺乏实践机会的风险。",
+            "revision": 3,
+            "throughMessageSeq": 9,
+            "participantIds": [
+              "db02fe3a-0572-4956-a3f5-a9c9012058f5",
+              "b5699a7b-1b9f-4e73-932e-e39140c926aa",
+              "103164d7-b6ba-4759-b1bb-3628bdd93635"
+            ],
+            "evidence": [
+              {
+                "messageId": "1f7b6c75-8ae9-4e44-99d1-198c36b012b3",
+                "relation": "supports"
+              },
+              {
+                "messageId": "fc21f549-897c-4c85-aa06-6fbf3237f0a3",
+                "relation": "supports"
+              },
+              {
+                "messageId": "d13b745e-e172-404a-b4cf-a9e758cbb47f",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 254,
+        "type": "summary.ready",
+        "occurredAt": "2026-11-18T15:53:15.303Z",
+        "messageId": "c0fc6a13-b5fc-40ea-bc09-e020560c3456",
+        "messageSeq": 10
+      }
+    ]
+  },
+  "applicationSourceCommit": "1ba30083a43124b6d65b00cbd3b2a91ddd5ec572"
+}

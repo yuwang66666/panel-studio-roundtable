@@ -1,0 +1,17 @@
+[
+  {
+    "case": 1,
+    "topic": "生成式 AI 会取代初级岗位，还是创造新的机会？",
+    "id": "e96fb469-6674-4eed-bc5d-446f554619d3",
+    "status": "completed",
+    "expertMessages": 8,
+    "insights": 2,
+    "summarySource": "model",
+    "usage": {
+      "calls": 47,
+      "errorCalls": 1,
+      "inputTokens": 104653,
+      "outputTokens": 20409
+    }
+  }
+]

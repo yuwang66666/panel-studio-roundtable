@@ -6,25 +6,28 @@
 
 ## 内容对应
 
-| 交付要求          | 文件与目录                                                                         | 如何核验                                                          |
-| ----------------- | ---------------------------------------------------------------------------------- | ----------------------------------------------------------------- |
-| 完整前后端源码    | `apps/web`、`apps/api`、`packages/contracts`、`packages/domain`                    | `pnpm build`，前后端可分别启动                                    |
-| 数据库初始化脚本  | `db/migrations/001.sql`–`003.sql`、`apps/api/src/init-db.ts`                       | `pnpm db:init`，见[初始化文档](database.md)                       |
-| 至少5条高质量样例 | `packages/domain/src/samples.ts`、`apps/api/src/seed.ts`                           | `pnpm seed`；[样例全文](samples.md)列明对应阵容、发言与证据       |
-| PRD与开发文档     | [PRD](PRD.md)、[架构/状态机/时序](architecture.md)、[ER图/数据模型](data-model.md) | 均为Markdown，图使用Mermaid                                       |
-| API文档           | [REST/SSE文档](api.md)、`docs/openapi.json`                                        | Markdown请求示例与机器可读Schema，`pnpm docs:api`可重建           |
-| 测试代码          | `tests/*.test.ts`、`tests/e2e`、`tests/fixtures`                                   | [测试指南](testing.md)，无需真实模型完成自动回归                  |
-| README完整度      | [运行指南与选型](../README.md)                                                     | 运行、环境变量、技术选型、主要API、已完成能力及后续方向           |
-| Git演进层次       | [提交演进映射](git-history.md)                                                     | 真实docs/schema→ui→tests→feat logic及后续修复可用git show逐条核对 |
-| 核心Prompt记录    | [多范式工程Prompt](prompts.md)                                                     | 10段重构稿，标记SDD/DDD/TDD/E2E；每段1–2句说明及实际提交依据      |
-| 开发过程与工作流  | [开发者视角说明](workflow-reflection.md)                                           | 约1–1.5页篇幅，Codex与GPT6 Astra协作设定、3个真实问题及工程化理解 |
-| 过程与证据        | [任务](tasks.md)、[验收](verification.md)                                          | 每项产出和实际结果对应                                            |
+| 交付要求            | 文件与目录                                                                                              | 如何核验                                                             |
+| ------------------- | ------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| 完整前后端源码      | `apps/web`、`apps/api`、`packages/contracts`、`packages/domain`                                         | `pnpm build`，前后端可分别启动                                       |
+| 数据库初始化脚本    | `db/migrations/001.sql`–`003.sql`、`apps/api/src/init-db.ts`                                            | `pnpm db:init`，见[初始化文档](database.md)                          |
+| 至少5条高质量样例   | `packages/domain/src/samples.ts`、`apps/api/src/seed.ts`                                                | `pnpm seed`；[样例全文](samples.md)列明对应阵容、发言与证据          |
+| 真实 API 案例与证据 | [真实运行全文及 JSON](real-cases/README.md)、`scripts/verify-real-cases.ts`、`tests/real-cases.test.ts` | 新建讨论真实调用，失败与重跑独立保留；可离线核验引用、调用和总结来源 |
+| PRD与开发文档       | [PRD](PRD.md)、[架构/状态机/时序](architecture.md)、[ER图/数据模型](data-model.md)                      | 均为Markdown，图使用Mermaid                                          |
+| API文档             | [REST/SSE文档](api.md)、`docs/openapi.json`                                                             | Markdown请求示例与机器可读Schema，`pnpm docs:api`可重建              |
+| 测试代码            | `tests/*.test.ts`、`tests/e2e`、`tests/fixtures`                                                        | [测试指南](testing.md)，无需真实模型完成自动回归                     |
+| README完整度        | [运行指南与选型](../README.md)                                                                          | 运行、环境变量、技术选型、主要API、已完成能力及后续方向              |
+| Git演进层次         | [提交演进映射](git-history.md)                                                                          | 真实docs/schema→ui→tests→feat logic及后续修复可用git show逐条核对    |
+| 核心Prompt记录      | [多范式工程Prompt](prompts.md)                                                                          | 10段重构稿，标记SDD/DDD/TDD/E2E；每段1–2句说明及实际提交依据         |
+| 开发过程与工作流    | [开发者视角说明](workflow-reflection.md)                                                                | 约1–1.5页篇幅，Codex与GPT6 Astra协作设定、3个真实问题及工程化理解    |
+| 过程与证据          | [任务](tasks.md)、[验收](verification.md)                                                               | 每项产出和实际结果对应                                               |
 
 ## 样例质量说明
 
 五个主题覆盖就业、公共交通、远程办公、企业模型选型和自动驾驶。各场使用独立的虚构主持人及四位对应专业嘉宾；每位有职业、Title、立场、专业标签和颜色标识。专家发言控制在1–2句，包含明确反驳及补充，回应只指向更早的本场发言。每场提供3类洞察，局部共识列明支持者，分歧关联双方发言，未解问题可追溯；主持人以自然语言收束。
 
 样例是人工编写的确定性演示数据，不是实际模型生成成功的证据，也不用于替代真实自主调度验收。种子导入幂等，不写入真实连接或凭据。
+
+现另交付 [五主题真实 API 案例](real-cases/README.md)：五场完整链路均含动态阵容、8 次专家发言、实时洞察、最终覆盖和真实模型总结。另保留一场阵容失败与一场洞察缺失的降级记录，不以离线预置内容替代真实运行。正文、调用明细和质量问题分开呈现；新增证据检查 9/9、既有回归 265/265、类型检查通过，详细见 T28。
 
 ## 接收方复现路径
 
@@ -38,4 +41,4 @@
 
 最新交付复验记录位于[阶段验收的T25](verification.md)。公开提交包含代码、SQL、空白环境模板、Markdown与可执行测试，不包含实际 `.env`、主密钥、用户数据库、运行日志或依赖缓存。截图及本机诊断报告可通过测试重新生成。
 
-三种协议已有本地测试服务覆盖，配置过的真实模型最小连接测试与业务质量验收分别记录在[供应商验证表](provider-validation.md)。真实混合讨论质量、跨平台浏览器以及未来改进项按README列出，不把测试桩通过表述为这些项目已经验收。
+三种协议已有本地测试服务覆盖，最小连接测试与真实业务验收分别记录在[供应商验证表](provider-validation.md)。本次真实混合讨论已形成五主题完整记录；共识语义质量、Claude业务覆盖、默认16次发言及跨平台浏览器等后续工作按README与质量复核列明。

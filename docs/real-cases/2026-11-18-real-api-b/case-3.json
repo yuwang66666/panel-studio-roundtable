@@ -1,0 +1,1388 @@
+{
+  "provenance": "real-api",
+  "runId": "2026-11-18-real-api-b",
+  "startedAt": "2026-11-18T15:49:32.821Z",
+  "finishedAt": "2026-11-18T15:54:58.683Z",
+  "expertUtteranceLimit": 8,
+  "snapshot": {
+    "discussion": {
+      "id": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+      "topic": "远程办公应该成为企业的长期制度吗？",
+      "expertCount": 4,
+      "status": "completed",
+      "version": 6,
+      "castVersion": 1,
+      "generation": 2,
+      "finishRequested": false,
+      "failureStage": null,
+      "error": null,
+      "maxUtterances": 8,
+      "maxCalls": 120,
+      "callCount": 53,
+      "insightsThrough": 11,
+      "isSample": false,
+      "createdAt": "2026-11-18T15:49:32.822Z",
+      "updatedAt": "2026-11-18T15:54:58.682Z"
+    },
+    "participants": [
+      {
+        "id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "role": "moderator",
+        "name": "李思明",
+        "occupation": "媒体评论员",
+        "title": "讨论主持人",
+        "stance": "中立",
+        "specialty": ["公共议题讨论", "沟通协调"],
+        "colorKey": 0,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "role": "expert",
+        "name": "张婉婷",
+        "occupation": "人力资源经理",
+        "title": "企业HR专家",
+        "stance": "支持",
+        "specialty": ["员工福利设计", "远程工作政策"],
+        "colorKey": 1,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "09f96f3e-7431-4799-903a-0204851c58a8",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "role": "expert",
+        "name": "陈建宇",
+        "occupation": "信息技术顾问",
+        "title": "IT行业分析师",
+        "stance": "有条件支持",
+        "specialty": ["信息安全", "技术支持方案"],
+        "colorKey": 2,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "role": "expert",
+        "name": "林静怡",
+        "occupation": "心理学家",
+        "title": "职场心理健康专家",
+        "stance": "担忧但开放",
+        "specialty": ["员工心理健康", "工作与生活平衡"],
+        "colorKey": 3,
+        "status": "idle",
+        "publicFocus": null
+      },
+      {
+        "id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "role": "expert",
+        "name": "周志宏",
+        "occupation": "经济学家",
+        "title": "宏观经济研究者",
+        "stance": "审慎乐观",
+        "specialty": ["劳动市场分析", "经济影响评估"],
+        "colorKey": 4,
+        "status": "idle",
+        "publicFocus": null
+      }
+    ],
+    "bindings": [
+      {
+        "participantId": "09f96f3e-7431-4799-903a-0204851c58a8",
+        "connectionId": "env:DEEPSEEK",
+        "connectionVersion": 1,
+        "model": "deepseek-v4-pro",
+        "provider": "deepseek"
+      },
+      {
+        "participantId": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+        "connectionId": "env:QWEN",
+        "connectionVersion": 1,
+        "model": "qwen-max",
+        "provider": "qwen"
+      },
+      {
+        "participantId": "522e27ad-9b4d-4560-b622-a40c28d65404",
+        "connectionId": "env:KIMI",
+        "connectionVersion": 1,
+        "model": "kimi-k3.1-pro",
+        "provider": "kimi"
+      },
+      {
+        "participantId": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+        "connectionId": "env:QWEN",
+        "connectionVersion": 1,
+        "model": "qwen-max",
+        "provider": "qwen"
+      },
+      {
+        "participantId": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+        "connectionId": "env:GPT",
+        "connectionVersion": 1,
+        "model": "gpt-6-sol",
+        "provider": "gpt"
+      }
+    ],
+    "messages": [
+      {
+        "id": "0a1ed721-482d-473b-88f7-991a9c45a7e4",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 1,
+        "turnId": "48be8776-72b7-41dd-9b52-13560254213c",
+        "participantId": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+        "kind": "opening",
+        "content": "大家好，欢迎来到今天的讨论会。我们的主题是关于远程办公是否应该成为企业的一种长期制度。这是一个近年来越来越受到关注的话题，特别是在当前环境下，它对个人生活、企业发展乃至整个社会都有着深远的影响。首先，请各位专家简单分享一下自己对于这个话题的看法，特别是您认为远程工作有哪些主要的优点和可能遇到的挑战？",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:49:43.047Z"
+      },
+      {
+        "id": "afce1894-d86c-4012-845a-3724b6f0780f",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 2,
+        "turnId": "5ba371e7-e8ba-4338-96e8-86d4c8e7f4f3",
+        "participantId": "09f96f3e-7431-4799-903a-0204851c58a8",
+        "kind": "expert",
+        "content": "远程办公长期化并非不可行，但前提是企业必须先建立清晰的信息安全边界，并具备可落地的技术支持方案。如果终端准入、身份认证、数据加密和远程运维没有标准化，长期远程办公反而会放大安全事件与技术支持响应的风险。",
+        "replyToMessageId": "0a1ed721-482d-473b-88f7-991a9c45a7e4",
+        "createdAt": "2026-11-18T15:50:03.324Z"
+      },
+      {
+        "id": "88ba78cb-5f61-4ae1-a4bb-89dd2658aae4",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 3,
+        "turnId": "36af62b3-54f6-49d0-b40a-d0898eae0ed5",
+        "participantId": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+        "kind": "expert",
+        "content": "我非常赞同远程办公可以作为企业的一种长期制度，它不仅能够帮助员工更好地平衡工作与生活，还能提高工作效率和满意度。为了保持团队间的紧密联系，建议公司定期组织线上或线下的团建活动，并利用先进的通讯工具促进日常交流。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:50:15.140Z"
+      },
+      {
+        "id": "04eedecc-7da2-403d-a840-5e6c07ab2522",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 4,
+        "turnId": "9dedbe48-a053-4e50-9772-bc1eff65849b",
+        "participantId": "522e27ad-9b4d-4560-b622-a40c28d65404",
+        "kind": "expert",
+        "content": "远程办公确实可能增强员工的自主性，但它并不天然带来工作与生活平衡，边界模糊、过度在线和社交隔离反而可能加剧耗竭与孤独，单靠团建和通讯工具也难以化解。因此我支持有条件地将其长期化，企业应保留混合办公与返岗选择，明确非紧急消息可延后回复等离线边界，并通过定期匿名调查和一对一沟通识别独居者、照护者及新员工等不同群体的心理需求，再依据反馈调整制度。",
+        "replyToMessageId": "88ba78cb-5f61-4ae1-a4bb-89dd2658aae4",
+        "createdAt": "2026-11-18T15:50:59.512Z"
+      },
+      {
+        "id": "e02eadbe-76a7-4a11-b6ec-b2122c7e8797",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 5,
+        "turnId": "fc7e5641-b720-406d-80f8-7e1d66d294f2",
+        "participantId": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+        "kind": "expert",
+        "content": "从劳动市场看，远程办公有机会扩大招聘范围、减轻通勤负担，并降低企业场地成本，但这些收益因岗位性质而异，不能一概而论。我倾向于将其作为可选择的长期制度：先按岗位试点，持续比较生产率、留任率与协作和管理的隐性成本，再决定适用范围。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:51:14.042Z"
+      },
+      {
+        "id": "a487dbfa-9798-4f34-842f-2b28ca4f92e5",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 6,
+        "turnId": "6f3673f8-60f0-4faf-9a08-83522f74a90c",
+        "participantId": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+        "kind": "probe",
+        "content": "张婉婷提到了远程办公有助于提高工作效率和满意度，而林静怡则指出了工作与生活边界模糊的问题。那么，对于如何在远程工作中设置有效的工作与生活界限，大家有什么具体的建议吗？",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:51:16.376Z"
+      },
+      {
+        "id": "91083943-17d6-49d1-b967-1a67ec27d6a4",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 7,
+        "turnId": "b009837b-be45-4fc5-81b8-594276ed216d",
+        "participantId": "09f96f3e-7431-4799-903a-0204851c58a8",
+        "kind": "expert",
+        "content": "远程办公的界限不能只靠员工自觉，企业应在终端和身份认证层设置可访问时段，并让协作工具默认进入免打扰状态，从技术上减少“随时在线”压力。审计日志应只用于发现安全异常，不应被用来统计在线时长或考核响应速度，否则员工会为了表现而持续在线，边界反而更难维持。",
+        "replyToMessageId": "a487dbfa-9798-4f34-842f-2b28ca4f92e5",
+        "createdAt": "2026-11-18T15:51:51.661Z"
+      },
+      {
+        "id": "4d43cd83-3dcb-41e1-a2c5-259a2aed090d",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 8,
+        "turnId": "7de55cb7-7ec0-4d03-9f8a-38d38a0988c8",
+        "participantId": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+        "kind": "expert",
+        "content": "企业确实可以通过设定明确的工作时间、鼓励设立专用工作区域以及提供心理健康支持等措施来帮助员工维持健康的工作与生活平衡。此外，培养一种重视成果而非工作时长的文化也非常重要，这有助于减轻员工的压力，并促进他们更好地管理个人时间和精力。",
+        "replyToMessageId": "a487dbfa-9798-4f34-842f-2b28ca4f92e5",
+        "createdAt": "2026-11-18T15:52:14.144Z"
+      },
+      {
+        "id": "dc302bcd-066e-47da-ab25-a543ab25fa18",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 9,
+        "turnId": "7ef0c08c-c7be-405b-a05b-ce56108a81f8",
+        "participantId": "522e27ad-9b4d-4560-b622-a40c28d65404",
+        "kind": "expert",
+        "content": "我赞同“重成果”和心理支持，但前者应落实为管理者避免深夜派单、不以在线时长或响应速度隐性考核，后者则须通过独立渠道保密提供，求助情况与咨询记录不得进入绩效或晋升评估。专用工作区也不应成为制度门槛，对没有独立书房的员工，可用固定的开工收工仪式、下班后收纳工作设备以及协作工具中的状态标识来划清边界，并结合其家庭与照护情况保留混合办公选择。",
+        "replyToMessageId": "4d43cd83-3dcb-41e1-a2c5-259a2aed090d",
+        "createdAt": "2026-11-18T15:52:48.030Z"
+      },
+      {
+        "id": "c7fae8a6-c06c-47c5-b328-595f13a5909b",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 10,
+        "turnId": "0d93ef90-c41a-4e32-aebc-282b13974093",
+        "participantId": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+        "kind": "probe",
+        "content": "陈建宇和张婉婷都提到了技术支持方案的重要性，但具体实现方式有所不同。请问在信息安全与技术支持方面，还有哪些具体的措施可以帮助企业更好地支持远程办公？",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:52:50.488Z"
+      },
+      {
+        "id": "32fce30d-8cce-4149-b87b-721704c4d6c4",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 11,
+        "turnId": "e67b13e3-371f-4921-ae83-5aad7b267c95",
+        "participantId": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+        "kind": "expert",
+        "content": "从经济可行性看，安全投入应按岗位的数据敏感度分级，并把设备、技术支持和培训费用与预期风险损失一并纳入评估，而非所有岗位统一高配。中小企业可先小范围试点，比较安全事件、支持响应和远程办公节省的成本，再决定是否扩大实施。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:53:31.328Z"
+      },
+      {
+        "id": "11aa84f3-bd15-409e-b739-ec7267bf7e9a",
+        "discussionId": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+        "messageSeq": 12,
+        "turnId": "86a3bf11-e478-401a-876a-0da31b98e58f",
+        "participantId": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+        "kind": "summary",
+        "content": "主题：本次讨论围绕“远程办公是否应成为企业的长期制度”展开。\n\n总体共识及其范围：四位发表意见的专家均未主张无条件全面强制远程办公，而是倾向于将其作为有条件、可选择的长期制度。张婉婷明确支持长期化，并强调其对效率、满意度与工作生活平衡的积极作用；陈建宇要求先建立信息安全边界和可落地的技术支持；林静怡支持有条件长期化，但强调保留混合办公与返岗选择；周志宏则主张审慎试点、按岗位性质评估。主持人保持中立。因此，这一共识属于专家范围的方向性共识，不是全体一致。\n\n局部共识：张婉婷与林静怡在工作生活边界上形成较明确的局部共识，包括明确工作时间、重视成果而非在线时长或响应速度、提供心理健康支持，以及避免隐性在线考核；同时，林静怡补充专用工作区不应成为制度门槛，应提供替代性边界设置。\n\n剩余分歧：一是远程办公能否稳定提高效率与满意度，张婉婷较积极，林静怡认为其并不天然带来平衡，边界模糊、过度在线和社交隔离可能加剧耗竭与孤独。二是制度的适用范围和条件存在差异，张婉婷更支持作为长期安排，陈建宇、周志宏则更强调安全分级、岗位试点和经济可行性。三是技术支持的具体实现，陈建宇侧重终端准入、身份认证、可访问时段和免打扰默认，周志宏更强调按数据敏感度分级投入和成本收益比较。\n\n待验证问题：远程办公对生产率、留任率和协作管理隐性成本的影响尚需按岗位试点比较；信息安全分级投入在中小企业中的安全事件、支持响应与成本节省需实证；心理健康支持如何通过独立保密渠道落地且不进入绩效晋升评估；哪些岗位适合长期远程、哪些需要混合或返岗；企业如何标准化离线边界和审计日志使用，防止其演变为在线时长考核。",
+        "replyToMessageId": null,
+        "createdAt": "2026-11-18T15:54:58.682Z",
+        "summaryMeta": {
+          "source": "model",
+          "throughMessageSeq": 11,
+          "insightsThroughMessageSeq": 11,
+          "model": "deepseek-v4-pro",
+          "provider": "deepseek",
+          "connectionId": "env:DEEPSEEK",
+          "connectionVersion": 1,
+          "fallbackUsed": true,
+          "reason": null
+        }
+      }
+    ],
+    "draft": null,
+    "insights": [
+      {
+        "id": "ins001",
+        "kind": "divergence",
+        "status": "stable",
+        "scope": null,
+        "text": "远程办公可以提高员工的工作效率和满意度，但需注意工作与生活的边界模糊问题。",
+        "revision": 4,
+        "throughMessageSeq": 11,
+        "participantIds": [
+          "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+          "522e27ad-9b4d-4560-b622-a40c28d65404"
+        ],
+        "evidence": [
+          {
+            "messageId": "88ba78cb-5f61-4ae1-a4bb-89dd2658aae4",
+            "relation": "supports"
+          },
+          {
+            "messageId": "04eedecc-7da2-403d-a840-5e6c07ab2522",
+            "relation": "qualifies"
+          }
+        ]
+      },
+      {
+        "id": "ins002",
+        "kind": "open_question",
+        "status": "emerging",
+        "scope": null,
+        "text": "如何在保障信息安全的同时支持长期远程办公？",
+        "revision": 4,
+        "throughMessageSeq": 11,
+        "participantIds": ["09f96f3e-7431-4799-903a-0204851c58a8"],
+        "evidence": [
+          {
+            "messageId": "afce1894-d86c-4012-845a-3724b6f0780f",
+            "relation": "supports"
+          }
+        ]
+      },
+      {
+        "id": "ins003",
+        "kind": "consensus",
+        "status": "revised",
+        "scope": "local",
+        "text": "企业可以通过设定明确的工作时间、鼓励设立专用工作区域以及提供心理健康支持等措施来帮助员工维持健康的工作与生活平衡。同时，应避免以在线时长或响应速度作为隐性考核标准。",
+        "revision": 2,
+        "throughMessageSeq": 11,
+        "participantIds": [
+          "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+          "522e27ad-9b4d-4560-b622-a40c28d65404"
+        ],
+        "evidence": [
+          {
+            "messageId": "4d43cd83-3dcb-41e1-a2c5-259a2aed090d",
+            "relation": "supports"
+          },
+          {
+            "messageId": "dc302bcd-066e-47da-ab25-a543ab25fa18",
+            "relation": "supports"
+          }
+        ]
+      }
+    ],
+    "lastEventSeq": 284
+  },
+  "usage": {
+    "calls": 53,
+    "errorCalls": 5,
+    "inputTokens": 127951,
+    "outputTokens": 21800
+  },
+  "calls": [
+    {
+      "id": "3aa46b56-2396-43af-93e7-b826a2843541",
+      "participant_id": null,
+      "purpose": "cast",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 7371,
+      "usage_json": "{\"inputTokens\":143,\"outputTokens\":275}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:40.195Z"
+    },
+    {
+      "id": "ed3a706a-5bdd-492a-8741-3dac8a30cf56",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "opening",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2844,
+      "usage_json": "{\"inputTokens\":859,\"outputTokens\":78}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:43.047Z"
+    },
+    {
+      "id": "16cb9f92-adbf-4cd9-8ed7-4a49e9a55791",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 1713,
+      "usage_json": "{\"inputTokens\":1190,\"outputTokens\":43}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:44.762Z"
+    },
+    {
+      "id": "4fad3be2-9967-44ef-af0e-2c59ceaf77aa",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 3038,
+      "usage_json": "{\"inputTokens\":1128,\"outputTokens\":121}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:46.088Z"
+    },
+    {
+      "id": "94a3971f-97fa-41d8-9b60-7528407519a0",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4811,
+      "usage_json": "{\"inputTokens\":1089,\"outputTokens\":82}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:47.862Z"
+    },
+    {
+      "id": "ccee3899-a91d-4647-a360-dc3d97e1840f",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 8996,
+      "usage_json": "{\"inputTokens\":1078,\"outputTokens\":251}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:49:52.047Z"
+    },
+    {
+      "id": "05119a1e-d571-44ca-9846-4de0580ed04f",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 11267,
+      "usage_json": "{\"inputTokens\":1147,\"outputTokens\":663}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:03.324Z"
+    },
+    {
+      "id": "d5bb2364-dd1f-41d2-8bca-6e962280a796",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2412,
+      "usage_json": "{\"inputTokens\":1472,\"outputTokens\":42}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:05.738Z"
+    },
+    {
+      "id": "64abf775-6884-4dd5-9805-7b1bcea31e5e",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 4457,
+      "usage_json": "{\"inputTokens\":1357,\"outputTokens\":246}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:07.784Z"
+    },
+    {
+      "id": "ed5d5b0a-6dc5-40c1-b50d-c50440b2f105",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5240,
+      "usage_json": "{\"inputTokens\":1331,\"outputTokens\":91}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:08.568Z"
+    },
+    {
+      "id": "2632ec5e-11ca-4ba9-9cfe-088b5749284e",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 9189,
+      "usage_json": "{\"inputTokens\":1300,\"outputTokens\":265}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:12.516Z"
+    },
+    {
+      "id": "c1622569-7c48-4a6d-9200-5dbff2cb3f9f",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "utterance",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2621,
+      "usage_json": "{\"inputTokens\":1477,\"outputTokens\":62}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:15.140Z"
+    },
+    {
+      "id": "bd042034-bebe-4fe1-b8d7-b868d343552c",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2313,
+      "usage_json": "{\"inputTokens\":1711,\"outputTokens\":78}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:17.455Z"
+    },
+    {
+      "id": "1750357c-69b5-4248-ab41-d9dae577bff0",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 14313,
+      "usage_json": "{\"inputTokens\":1488,\"outputTokens\":401}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:29.456Z"
+    },
+    {
+      "id": "bcb0005c-ed24-450b-a2de-1e52f2064914",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 18835,
+      "usage_json": "{\"inputTokens\":1559,\"outputTokens\":1200}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:50:33.977Z"
+    },
+    {
+      "id": "dc880e5d-3853-4996-a0d6-08e84631f453",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 7339,
+      "usage_json": "{\"inputTokens\":1588,\"outputTokens\":423}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:41.316Z"
+    },
+    {
+      "id": "e394562e-9d1f-4eae-a9b9-7a76af2ef88e",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 31535,
+      "usage_json": "{\"inputTokens\":1542,\"outputTokens\":106}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:46.679Z"
+    },
+    {
+      "id": "243828ba-e307-4a9e-98c3-b0ce3fb28956",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "utterance",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 12830,
+      "usage_json": "{\"inputTokens\":1528,\"outputTokens\":454}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:50:59.511Z"
+    },
+    {
+      "id": "bcb3a5db-eead-4fc8-9920-119aa546ea18",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2642,
+      "usage_json": "{\"inputTokens\":2030,\"outputTokens\":75}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:02.155Z"
+    },
+    {
+      "id": "a51601e6-e171-4d4e-9343-a50426a4788f",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 4285,
+      "usage_json": "{\"inputTokens\":1739,\"outputTokens\":106}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:03.800Z"
+    },
+    {
+      "id": "dc5e4e90-6750-4eae-ba59-8f4850fd17d2",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5250,
+      "usage_json": "{\"inputTokens\":1836,\"outputTokens\":102}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:04.765Z"
+    },
+    {
+      "id": "2b3a9d97-1b41-46ea-acf7-d6bf755d01a5",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 10057,
+      "usage_json": "{\"inputTokens\":1827,\"outputTokens\":615}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:09.571Z"
+    },
+    {
+      "id": "63057109-4148-4f4b-92e4-9ed58e2b84e7",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 10227,
+      "usage_json": "{\"inputTokens\":2047,\"outputTokens\":318}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:09.743Z"
+    },
+    {
+      "id": "a7ce16f5-5fea-4fd6-9d1e-0d6edce2aa91",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "utterance",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4469,
+      "usage_json": "{\"inputTokens\":1864,\"outputTokens\":94}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:14.042Z"
+    },
+    {
+      "id": "d3a60695-c49f-4ea3-97a2-f3770c05c3f2",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "probe",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2332,
+      "usage_json": "{\"inputTokens\":2569,\"outputTokens\":51}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:16.376Z"
+    },
+    {
+      "id": "d40f2c0f-ac41-413f-9e6f-86564ac0c925",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2357,
+      "usage_json": "{\"inputTokens\":2863,\"outputTokens\":46}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:18.735Z"
+    },
+    {
+      "id": "6e55591d-7d35-4a8f-88dd-cb8707e47a6d",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5579,
+      "usage_json": "{\"inputTokens\":2551,\"outputTokens\":143}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:21.958Z"
+    },
+    {
+      "id": "21454a82-6321-4209-850b-4ee7224b01eb",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 16980,
+      "usage_json": "{\"inputTokens\":2521,\"outputTokens\":1153}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:33.358Z"
+    },
+    {
+      "id": "c627ab2f-7efe-4d03-9faf-6b7c206eb576",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 28899,
+      "usage_json": "{\"inputTokens\":2399,\"outputTokens\":870}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:45.278Z"
+    },
+    {
+      "id": "438d4333-4213-4659-b47f-51c9ea1d08c3",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "utterance",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 6379,
+      "usage_json": "{\"inputTokens\":2563,\"outputTokens\":427}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:51.661Z"
+    },
+    {
+      "id": "972681fd-23fc-463c-9623-f373e4104b96",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 3055,
+      "usage_json": "{\"inputTokens\":2764,\"outputTokens\":171}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:54.720Z"
+    },
+    {
+      "id": "68e0dbb5-283c-4783-ab44-6bb97b5ea7cc",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3322,
+      "usage_json": "{\"inputTokens\":3167,\"outputTokens\":83}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:54.986Z"
+    },
+    {
+      "id": "e29cf25e-52ce-4ef7-97e5-ddd79c1346bf",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5617,
+      "usage_json": "{\"inputTokens\":2804,\"outputTokens\":168}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:51:57.284Z"
+    },
+    {
+      "id": "701ef415-8611-4c18-ba78-ed871e0092b0",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 19309,
+      "usage_json": "{\"inputTokens\":2635,\"outputTokens\":487}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:10.975Z"
+    },
+    {
+      "id": "1d75e7e1-83cf-4f10-8c7e-e7cdb3e29c2d",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "utterance",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 3167,
+      "usage_json": "{\"inputTokens\":3212,\"outputTokens\":63}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:14.144Z"
+    },
+    {
+      "id": "6ea581c2-439e-4ee1-b417-7add214295e3",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 1557,
+      "usage_json": "{\"inputTokens\":3443,\"outputTokens\":17}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:15.703Z"
+    },
+    {
+      "id": "54604117-80fd-45c8-9c12-898d108c0d85",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 5102,
+      "usage_json": "{\"inputTokens\":3052,\"outputTokens\":150}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:19.250Z"
+    },
+    {
+      "id": "73c238ab-ab3e-4d81-bf9c-cadb385cfcbc",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 12768,
+      "usage_json": "{\"inputTokens\":2997,\"outputTokens\":854}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:26.915Z"
+    },
+    {
+      "id": "8174633f-e89e-415c-a5eb-27ed974c817b",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 17191,
+      "usage_json": "{\"inputTokens\":2857,\"outputTokens\":515}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:31.339Z"
+    },
+    {
+      "id": "afff5630-d766-4009-bda4-de7e8f568ff7",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 26582,
+      "usage_json": "{\"inputTokens\":3461,\"outputTokens\":623}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:52:40.731Z"
+    },
+    {
+      "id": "ecc1afa3-2ecd-4ce3-9143-81f358d3d552",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "utterance",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 16688,
+      "usage_json": "{\"inputTokens\":2908,\"outputTokens\":533}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:48.030Z"
+    },
+    {
+      "id": "706b6059-936d-4c32-b5ed-d7eca2d7a0b3",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 8159,
+      "usage_json": "{\"inputTokens\":3491,\"outputTokens\":386}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:48.891Z"
+    },
+    {
+      "id": "7f6d7478-95a8-4504-9ba2-c5d438d218bf",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "probe",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2455,
+      "usage_json": "{\"inputTokens\":3706,\"outputTokens\":42}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:50.488Z"
+    },
+    {
+      "id": "e94512b0-6ec1-4c0a-9883-4d1dd9e6d461",
+      "participant_id": "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+      "purpose": "intent",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 2548,
+      "usage_json": "{\"inputTokens\":3990,\"outputTokens\":43}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:53.039Z"
+    },
+    {
+      "id": "6b732144-cfc3-4ab6-b16f-b699e4b79891",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "intent",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 8121,
+      "usage_json": "{\"inputTokens\":3531,\"outputTokens\":150}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:52:58.613Z"
+    },
+    {
+      "id": "5b68a847-68c0-4ce0-be7f-9a3eb3907093",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 14948,
+      "usage_json": "{\"inputTokens\":3728,\"outputTokens\":621}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:03.841Z"
+    },
+    {
+      "id": "2d4661e5-7dcd-4fbc-870a-1258b95c971b",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 17596,
+      "usage_json": "{\"inputTokens\":3445,\"outputTokens\":1200}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:53:08.087Z"
+    },
+    {
+      "id": "6554f9bd-f1dc-4bf2-b83b-e5e428af4841",
+      "participant_id": "522e27ad-9b4d-4560-b622-a40c28d65404",
+      "purpose": "intent",
+      "connection_id": "env:KIMI",
+      "connection_version": 1,
+      "model": "kimi-k3.1-pro",
+      "prompt_version": "v1",
+      "latency_ms": 32649,
+      "usage_json": "{\"inputTokens\":3288,\"outputTokens\":898}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:23.141Z"
+    },
+    {
+      "id": "8e36713a-57ac-4364-a990-182a53278ddf",
+      "participant_id": "09f96f3e-7431-4799-903a-0204851c58a8",
+      "purpose": "intent",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 18259,
+      "usage_json": "{\"inputTokens\":3474,\"outputTokens\":1200}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:53:26.346Z"
+    },
+    {
+      "id": "09888bc1-47f5-4425-9a12-fb6ad7ccd8bb",
+      "participant_id": "92b517f4-fa41-4b85-bf4e-c4853dbee609",
+      "purpose": "utterance",
+      "connection_id": "env:GPT",
+      "connection_version": 1,
+      "model": "gpt-6-sol",
+      "prompt_version": "v1",
+      "latency_ms": 4978,
+      "usage_json": "{\"inputTokens\":3559,\"outputTokens\":88}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:31.328Z"
+    },
+    {
+      "id": "bd1600b1-4e67-4674-988e-c9af20ce1f00",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "insights",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 25950,
+      "usage_json": "{\"inputTokens\":4412,\"outputTokens\":638}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:53:57.281Z"
+    },
+    {
+      "id": "9a6049d0-a4d9-4be0-9f79-8a59b2a8c3eb",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "summary",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 9712,
+      "usage_json": "{\"inputTokens\":4411,\"outputTokens\":312}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:54:06.995Z"
+    },
+    {
+      "id": "a97c626f-fed6-4080-834a-532a3387cfc7",
+      "participant_id": "91b20c78-6c8d-4b0e-9ba6-32f320cf179c",
+      "purpose": "summary",
+      "connection_id": "env:DEEPSEEK",
+      "connection_version": 1,
+      "model": "deepseek-v4-pro",
+      "prompt_version": "v1",
+      "latency_ms": 51684,
+      "usage_json": "{\"inputTokens\":3820,\"outputTokens\":3677}",
+      "error_code": null,
+      "created_at": "2026-11-18T15:54:58.681Z"
+    }
+  ],
+  "eventEvidence": {
+    "totalEvents": 284,
+    "participantStatesObserved": ["idle", "preparing", "speaking"],
+    "nonemptyDraftUpdates": 135,
+    "timeline": [
+      {
+        "seq": 1,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:49:32.822Z",
+        "status": "casting"
+      },
+      {
+        "seq": 5,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:49:40.200Z",
+        "status": "running"
+      },
+      {
+        "seq": 23,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:49:43.047Z",
+        "messageId": "0a1ed721-482d-473b-88f7-991a9c45a7e4",
+        "messageSeq": 1
+      },
+      {
+        "seq": 42,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:50:03.324Z",
+        "messageId": "afce1894-d86c-4012-845a-3724b6f0780f",
+        "messageSeq": 2
+      },
+      {
+        "seq": 67,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:50:15.140Z",
+        "messageId": "88ba78cb-5f61-4ae1-a4bb-89dd2658aae4",
+        "messageSeq": 3
+      },
+      {
+        "seq": 91,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:50:59.512Z",
+        "messageId": "04eedecc-7da2-403d-a840-5e6c07ab2522",
+        "messageSeq": 4
+      },
+      {
+        "seq": 102,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:51:09.744Z",
+        "status": "running",
+        "throughMessageSeq": 4,
+        "insights": [
+          {
+            "id": "ins001",
+            "kind": "divergence",
+            "status": "emerging",
+            "scope": null,
+            "text": "远程办公可以提高员工的工作效率和满意度，但需注意工作与生活的边界模糊问题。",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": [
+              "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+              "522e27ad-9b4d-4560-b622-a40c28d65404"
+            ],
+            "evidence": [
+              {
+                "messageId": "88ba78cb-5f61-4ae1-a4bb-89dd2658aae4",
+                "relation": "supports"
+              },
+              {
+                "messageId": "04eedecc-7da2-403d-a840-5e6c07ab2522",
+                "relation": "qualifies"
+              }
+            ]
+          },
+          {
+            "id": "ins002",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何在保障信息安全的同时支持长期远程办公？",
+            "revision": 1,
+            "throughMessageSeq": 4,
+            "participantIds": ["09f96f3e-7431-4799-903a-0204851c58a8"],
+            "evidence": [
+              {
+                "messageId": "afce1894-d86c-4012-845a-3724b6f0780f",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 117,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:51:14.042Z",
+        "messageId": "e02eadbe-76a7-4a11-b6ec-b2122c7e8797",
+        "messageSeq": 5
+      },
+      {
+        "seq": 132,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:51:16.376Z",
+        "messageId": "a487dbfa-9798-4f34-842f-2b28ca4f92e5",
+        "messageSeq": 6
+      },
+      {
+        "seq": 153,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:51:51.661Z",
+        "messageId": "91083943-17d6-49d1-b967-1a67ec27d6a4",
+        "messageSeq": 7
+      },
+      {
+        "seq": 178,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:52:14.145Z",
+        "messageId": "4d43cd83-3dcb-41e1-a2c5-259a2aed090d",
+        "messageSeq": 8
+      },
+      {
+        "seq": 201,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:52:48.031Z",
+        "messageId": "dc302bcd-066e-47da-ab25-a543ab25fa18",
+        "messageSeq": 9
+      },
+      {
+        "seq": 205,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:52:48.892Z",
+        "status": "running",
+        "throughMessageSeq": 8,
+        "insights": [
+          {
+            "id": "ins001",
+            "kind": "divergence",
+            "status": "stable",
+            "scope": null,
+            "text": "远程办公可以提高员工的工作效率和满意度，但需注意工作与生活的边界模糊问题。",
+            "revision": 2,
+            "throughMessageSeq": 8,
+            "participantIds": [
+              "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+              "522e27ad-9b4d-4560-b622-a40c28d65404"
+            ],
+            "evidence": [
+              {
+                "messageId": "88ba78cb-5f61-4ae1-a4bb-89dd2658aae4",
+                "relation": "supports"
+              },
+              {
+                "messageId": "04eedecc-7da2-403d-a840-5e6c07ab2522",
+                "relation": "qualifies"
+              }
+            ]
+          },
+          {
+            "id": "ins002",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何在保障信息安全的同时支持长期远程办公？",
+            "revision": 2,
+            "throughMessageSeq": 8,
+            "participantIds": ["09f96f3e-7431-4799-903a-0204851c58a8"],
+            "evidence": [
+              {
+                "messageId": "afce1894-d86c-4012-845a-3724b6f0780f",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 217,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:52:50.489Z",
+        "messageId": "c7fae8a6-c06c-47c5-b328-595f13a5909b",
+        "messageSeq": 10
+      },
+      {
+        "seq": 224,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:53:03.841Z",
+        "status": "running",
+        "throughMessageSeq": 9,
+        "insights": [
+          {
+            "id": "ins001",
+            "kind": "divergence",
+            "status": "stable",
+            "scope": null,
+            "text": "远程办公可以提高员工的工作效率和满意度，但需注意工作与生活的边界模糊问题。",
+            "revision": 3,
+            "throughMessageSeq": 9,
+            "participantIds": [
+              "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+              "522e27ad-9b4d-4560-b622-a40c28d65404"
+            ],
+            "evidence": [
+              {
+                "messageId": "88ba78cb-5f61-4ae1-a4bb-89dd2658aae4",
+                "relation": "supports"
+              },
+              {
+                "messageId": "04eedecc-7da2-403d-a840-5e6c07ab2522",
+                "relation": "qualifies"
+              }
+            ]
+          },
+          {
+            "id": "ins002",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何在保障信息安全的同时支持长期远程办公？",
+            "revision": 3,
+            "throughMessageSeq": 9,
+            "participantIds": ["09f96f3e-7431-4799-903a-0204851c58a8"],
+            "evidence": [
+              {
+                "messageId": "afce1894-d86c-4012-845a-3724b6f0780f",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "ins003",
+            "kind": "consensus",
+            "status": "emerging",
+            "scope": "local",
+            "text": "企业可以通过设定明确的工作时间、鼓励设立专用工作区域以及提供心理健康支持等措施来帮助员工维持健康的工作与生活平衡。",
+            "revision": 1,
+            "throughMessageSeq": 9,
+            "participantIds": [
+              "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+              "522e27ad-9b4d-4560-b622-a40c28d65404"
+            ],
+            "evidence": [
+              {
+                "messageId": "4d43cd83-3dcb-41e1-a2c5-259a2aed090d",
+                "relation": "supports"
+              },
+              {
+                "messageId": "dc302bcd-066e-47da-ab25-a543ab25fa18",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 242,
+        "type": "message.committed",
+        "occurredAt": "2026-11-18T15:53:31.328Z",
+        "messageId": "32fce30d-8cce-4149-b87b-721704c4d6c4",
+        "messageSeq": 11
+      },
+      {
+        "seq": 243,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:53:31.329Z",
+        "status": "summarizing"
+      },
+      {
+        "seq": 244,
+        "type": "insights.updated",
+        "occurredAt": "2026-11-18T15:53:57.282Z",
+        "status": "summarizing",
+        "throughMessageSeq": 11,
+        "insights": [
+          {
+            "id": "ins001",
+            "kind": "divergence",
+            "status": "stable",
+            "scope": null,
+            "text": "远程办公可以提高员工的工作效率和满意度，但需注意工作与生活的边界模糊问题。",
+            "revision": 4,
+            "throughMessageSeq": 11,
+            "participantIds": [
+              "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+              "522e27ad-9b4d-4560-b622-a40c28d65404"
+            ],
+            "evidence": [
+              {
+                "messageId": "88ba78cb-5f61-4ae1-a4bb-89dd2658aae4",
+                "relation": "supports"
+              },
+              {
+                "messageId": "04eedecc-7da2-403d-a840-5e6c07ab2522",
+                "relation": "qualifies"
+              }
+            ]
+          },
+          {
+            "id": "ins002",
+            "kind": "open_question",
+            "status": "emerging",
+            "scope": null,
+            "text": "如何在保障信息安全的同时支持长期远程办公？",
+            "revision": 4,
+            "throughMessageSeq": 11,
+            "participantIds": ["09f96f3e-7431-4799-903a-0204851c58a8"],
+            "evidence": [
+              {
+                "messageId": "afce1894-d86c-4012-845a-3724b6f0780f",
+                "relation": "supports"
+              }
+            ]
+          },
+          {
+            "id": "ins003",
+            "kind": "consensus",
+            "status": "revised",
+            "scope": "local",
+            "text": "企业可以通过设定明确的工作时间、鼓励设立专用工作区域以及提供心理健康支持等措施来帮助员工维持健康的工作与生活平衡。同时，应避免以在线时长或响应速度作为隐性考核标准。",
+            "revision": 2,
+            "throughMessageSeq": 11,
+            "participantIds": [
+              "1a024b20-61a4-4d05-a56b-abd02ceb1886",
+              "522e27ad-9b4d-4560-b622-a40c28d65404"
+            ],
+            "evidence": [
+              {
+                "messageId": "4d43cd83-3dcb-41e1-a2c5-259a2aed090d",
+                "relation": "supports"
+              },
+              {
+                "messageId": "dc302bcd-066e-47da-ab25-a543ab25fa18",
+                "relation": "supports"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "seq": 284,
+        "type": "summary.ready",
+        "occurredAt": "2026-11-18T15:54:58.682Z",
+        "messageId": "11aa84f3-bd15-409e-b739-ec7267bf7e9a",
+        "messageSeq": 12
+      }
+    ]
+  },
+  "applicationSourceCommit": "1ba30083a43124b6d65b00cbd3b2a91ddd5ec572"
+}

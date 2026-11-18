@@ -1,0 +1,17 @@
+[
+  {
+    "case": 2,
+    "topic": "城市是否应优先发展公共交通？",
+    "id": "47d12c65-0625-4252-9715-c7db746a3156",
+    "status": "completed",
+    "expertMessages": 8,
+    "insights": 3,
+    "summarySource": "model",
+    "usage": {
+      "calls": 61,
+      "errorCalls": 5,
+      "inputTokens": 149501,
+      "outputTokens": 25465
+    }
+  }
+]

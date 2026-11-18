@@ -1,0 +1,17 @@
+[
+  {
+    "case": 4,
+    "topic": "企业如何选择开源模型与商业模型？",
+    "id": "3c7a5587-0f58-4ef0-8b18-b4d0dfc79276",
+    "status": "completed",
+    "expertMessages": 8,
+    "insights": 7,
+    "summarySource": "model",
+    "usage": {
+      "calls": 50,
+      "errorCalls": 7,
+      "inputTokens": 112752,
+      "outputTokens": 17737
+    }
+  }
+]

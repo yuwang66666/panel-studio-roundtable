@@ -1,0 +1,30 @@
+[
+  {
+    "path": "2026-11-18-real-api-a/case-1.json",
+    "sha256": "dc15a7b0bf9d4dfef1ae991ea37811665d06248e39c6b95bd9533d840f45d7cc"
+  },
+  {
+    "path": "2026-11-18-real-api-b/case-2.json",
+    "sha256": "d7aab5e078d4955f5abede229c251ed5cce898ff943784bc18ba6673bce1f624"
+  },
+  {
+    "path": "2026-11-18-real-api-b/case-3.json",
+    "sha256": "70e1004f0e3d3fbb43d90b5b33c36824587f92d00266a023881b197f9656ec56"
+  },
+  {
+    "path": "2026-11-18-real-api-b/case-4.json",
+    "sha256": "d1c7582e6b1a02e285f8ce3d42e4d99e0c0ed8ae7595801f1b3a081d7072c6f0"
+  },
+  {
+    "path": "2026-11-18-real-api-b/case-5.json",
+    "sha256": "e3bbc55781d0563e1cff43758d995b1b15f6bdeed0d00e33e53e3d92e7de08f0"
+  },
+  {
+    "path": "2026-11-18-real-api-c/case-2.json",
+    "sha256": "dac73346db7a443d099952997ab53c909eff435594f509aaaebc372010118a2b"
+  },
+  {
+    "path": "2026-11-19-real-api-d/case-4.json",
+    "sha256": "c7b375bda8bda1f22ec0131d81b00f3031c478cb2d590b913737d34f2dc5bee9"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "case": 2,
+    "topic": "城市是否应优先发展公共交通？",
+    "id": "f2ad05ea-561e-47a5-b20a-9ac3fdb88cab",
+    "status": "failed",
+    "expertMessages": 0,
+    "insights": 0,
+    "summarySource": null,
+    "usage": {
+      "calls": 2,
+      "errorCalls": 2,
+      "inputTokens": 312,
+      "outputTokens": 575
+    }
+  },
+  {
+    "case": 3,
+    "topic": "远程办公应该成为企业的长期制度吗？",
+    "id": "1ffb91e7-a304-44cc-b06e-32c81524168a",
+    "status": "completed",
+    "expertMessages": 8,
+    "insights": 3,
+    "summarySource": "model",
+    "usage": {
+      "calls": 53,
+      "errorCalls": 5,
+      "inputTokens": 127951,
+      "outputTokens": 21800
+    }
+  },
+  {
+    "case": 4,
+    "topic": "企业如何选择开源模型与商业模型？",
+    "id": "2ef96d66-5fe6-4cee-9cfa-465783396503",
+    "status": "completed",
+    "expertMessages": 8,
+    "insights": 0,
+    "summarySource": "model",
+    "usage": {
+      "calls": 55,
+      "errorCalls": 12,
+      "inputTokens": 114641,
+      "outputTokens": 25089
+    }
+  },
+  {
+    "case": 5,
+    "topic": "自动驾驶大规模落地，还缺少什么？",
+    "id": "0bfdafd3-b308-408a-ada8-6c5f3db929e6",
+    "status": "completed",
+    "expertMessages": 8,
+    "insights": 4,
+    "summarySource": "model",
+    "usage": {
+      "calls": 55,
+      "errorCalls": 11,
+      "inputTokens": 108975,
+      "outputTokens": 17600
+    }
+  }
+]

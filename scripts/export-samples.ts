@@ -4,6 +4,7 @@ import { SnapshotSchema } from '../packages/contracts/src/index';
 
 const sections = [
   '# 预置讨论样例',
+  '真实 API 新建讨论的阵容、发言、洞察、模型总结与失败记录见 [真实案例](real-cases/README.md)。本页仅为离线演示样例，不能用作模型业务验收证据。',
   '由 `pnpm docs:samples` 从 `packages/domain/src/samples.ts` 生成。5 场均为人工编写的演示内容，嘉宾为虚构角色，不是真实模型调用记录。无须 API Key 即可通过 `pnpm seed` 导入，并在首页查看。',
   '每场包含 1 位主持人、4 位与话题对应的专家、开场、4 条有回应关系的专家发言、局部共识、明确分歧、未解问题及自然语言总结。证据只引用本场已保存的发言；未将沉默算作支持。样例不绑定实际模型连接，调用次数为 0。',
   '初始化只补入缺失样例，不覆盖已存在的同 ID 样例或真实讨论。更新后的样例可在新数据库及 `/preview` 查看；正式历史不会被文案更新改写。',

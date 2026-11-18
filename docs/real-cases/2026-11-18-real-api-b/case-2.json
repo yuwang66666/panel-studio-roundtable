@@ -1,0 +1,88 @@
+{
+  "provenance": "real-api",
+  "runId": "2026-11-18-real-api-b",
+  "startedAt": "2026-11-18T15:49:17.103Z",
+  "finishedAt": "2026-11-18T15:49:32.820Z",
+  "expertUtteranceLimit": 8,
+  "snapshot": {
+    "discussion": {
+      "id": "f2ad05ea-561e-47a5-b20a-9ac3fdb88cab",
+      "topic": "城市是否应优先发展公共交通？",
+      "expertCount": 4,
+      "status": "failed",
+      "version": 2,
+      "castVersion": 0,
+      "generation": 1,
+      "finishRequested": false,
+      "failureStage": "cast",
+      "error": "模型输出未通过格式或业务校验",
+      "maxUtterances": 8,
+      "maxCalls": 120,
+      "callCount": 2,
+      "insightsThrough": 0,
+      "isSample": false,
+      "createdAt": "2026-11-18T15:49:17.103Z",
+      "updatedAt": "2026-11-18T15:49:32.820Z"
+    },
+    "participants": [],
+    "bindings": [],
+    "messages": [],
+    "draft": null,
+    "insights": [],
+    "lastEventSeq": 2
+  },
+  "usage": {
+    "calls": 2,
+    "errorCalls": 2,
+    "inputTokens": 312,
+    "outputTokens": 575
+  },
+  "calls": [
+    {
+      "id": "4d747a88-b8d1-4b97-9a18-95fa30c12ae8",
+      "participant_id": null,
+      "purpose": "cast",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 8751,
+      "usage_json": "{\"inputTokens\":141,\"outputTokens\":309}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:49:25.857Z"
+    },
+    {
+      "id": "71c63b43-8b59-4763-8f21-a1bb188d9866",
+      "participant_id": null,
+      "purpose": "cast",
+      "connection_id": "env:QWEN",
+      "connection_version": 1,
+      "model": "qwen-max",
+      "prompt_version": "v1",
+      "latency_ms": 6962,
+      "usage_json": "{\"inputTokens\":171,\"outputTokens\":266}",
+      "error_code": "INVALID_OUTPUT",
+      "created_at": "2026-11-18T15:49:32.819Z"
+    }
+  ],
+  "eventEvidence": {
+    "totalEvents": 2,
+    "participantStatesObserved": [],
+    "nonemptyDraftUpdates": 0,
+    "timeline": [
+      {
+        "seq": 1,
+        "type": "discussion.status_changed",
+        "occurredAt": "2026-11-18T15:49:17.104Z",
+        "status": "casting"
+      },
+      {
+        "seq": 2,
+        "type": "discussion.failed",
+        "occurredAt": "2026-11-18T15:49:32.820Z",
+        "status": "failed"
+      }
+    ]
+  },
+  "applicationSourceCommit": "1ba30083a43124b6d65b00cbd3b2a91ddd5ec572"
+}
