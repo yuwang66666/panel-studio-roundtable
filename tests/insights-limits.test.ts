@@ -43,11 +43,12 @@ async function setup(
 }
 
 describe('洞察独立超时与输出额度', () => {
-  it('defaults insights to 180 seconds and 8192 tokens without changing other deadlines', () => {
+  it('keeps insights independent from ordinary and summary defaults', () => {
     const options = readGatewayOptions({});
     expect(options).toMatchObject({
       timeout: 60000,
-      summaryTimeout: 90000,
+      summaryTimeout: 240000,
+      summaryMaxTokens: 8192,
       insightsTimeout: 180000,
       insightsMaxTokens: 8192,
     });
@@ -96,7 +97,7 @@ describe('洞察独立超时与输出额度', () => {
       for (const purpose of ['insights', 'summary', 'cast', 'opening'] as const)
         await custom.request(purpose);
       expect(custom.provider.calls.map((call) => call.body[field])).toEqual([
-        16384, 4096, 4096, 1200,
+        16384, 8192, 4096, 1200,
       ]);
       expect(custom.provider.calls.every((call) => call.body.stream === undefined)).toBe(true);
     } finally {

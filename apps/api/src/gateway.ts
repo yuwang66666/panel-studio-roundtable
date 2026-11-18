@@ -33,6 +33,16 @@ const instructions: Record<Purpose, string> = {
   summary:
     '主持人根据最终公开发言和已核验洞察，以中文自然语言总结主题、共识及其范围、剩余分歧、待验证问题。返回 {"content":"以空行分段的总结正文"}。忠于证据，不把局部共识写成全体共识，不添加新的事实。',
 };
+const purposeLabels: Record<Purpose, string> = {
+  test: '模型连接测试',
+  cast: '阵容生成',
+  intent: '专家参与判断',
+  opening: '主持人开场',
+  probe: '主持人追问',
+  utterance: '专家发言',
+  insights: '洞察提炼',
+  summary: '主持人总结',
+};
 class Semaphore {
   private active = 0;
   private queue: {
@@ -158,15 +168,15 @@ export class ModelGateway {
           ? '\nThe previous response was invalid. Return exactly one JSON object with no other text.'
           : '')
       : JSON.stringify({ purpose: r.purpose, input: r.input });
+    const timeoutMs =
+      r.purpose === 'insights'
+        ? this.options.insightsTimeout
+        : r.purpose === 'summary'
+          ? this.options.summaryTimeout
+          : this.options.timeout;
     for (let retry = 0; retry <= 2; retry++) {
       const started = Date.now(),
-        deadline = AbortSignal.timeout(
-          r.purpose === 'insights'
-            ? this.options.insightsTimeout
-            : r.purpose === 'summary'
-              ? this.options.summaryTimeout
-              : this.options.timeout,
-        ),
+        deadline = AbortSignal.timeout(timeoutMs),
         signal = r.signal ? AbortSignal.any([r.signal, deadline]) : deadline;
       let releaseConnection: (() => void) | undefined,
         releaseGlobal: (() => void) | undefined,
@@ -225,9 +235,11 @@ export class ModelGateway {
           tokens =
             r.purpose === 'insights'
               ? this.options.insightsMaxTokens
-              : r.purpose === 'summary' || r.purpose === 'cast'
-                ? 4096
-                : 1200;
+              : r.purpose === 'summary'
+                ? this.options.summaryMaxTokens
+                : r.purpose === 'cast'
+                  ? 4096
+                  : 1200;
         let path: string, body: unknown;
         if (c.protocol === 'anthropic') {
           path = '/messages';
@@ -365,8 +377,12 @@ export class ModelGateway {
                     : '模型网络连接失败',
                 502,
               );
-        if (deadline.aborted && !r.signal?.aborted)
-          e = new AppError('TIMEOUT', '模型调用超时', 504);
+        if ((deadline.aborted || e.code === 'TIMEOUT') && !r.signal?.aborted)
+          e = new AppError(
+            'TIMEOUT',
+            `${purposeLabels[r.purpose]}超过 ${timeoutMs / 1000} 秒未完成${r.purpose === 'summary' ? '，请重试收尾' : '，请重试'}`,
+            504,
+          );
         errorCode = e.code;
         if (
           retry < 2 &&
