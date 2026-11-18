@@ -1,11 +1,27 @@
 {
-  "name": "ai-panel-studio", "private": true, "version": "0.1.0", "packageManager": "pnpm@10.28.2",
-  "engines": { "node": ">=24 <27" },
+  "name": "ai-panel-studio",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": ">=24 <27"
+  },
   "scripts": {
     "dev": "concurrently -k -n api,web -c cyan,magenta \"pnpm --filter @panel/api dev\" \"pnpm --filter @panel/web dev\"",
     "build": "pnpm --filter @panel/web build && pnpm typecheck",
     "typecheck": "tsc --noEmit -p apps/api/tsconfig.json && tsc --noEmit -p apps/web/tsconfig.json",
-    "test": "vitest run", "test:watch": "vitest", "test:e2e": "playwright test", "seed": "pnpm --filter @panel/api seed"
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "seed": "pnpm --filter @panel/api seed"
   },
-  "devDependencies": { "@playwright/test": "^1.58.0", "@types/node": "^24.0.0", "concurrently": "^9.2.1", "typescript": "^5.9.3", "vitest": "^3.2.4", "tsx": "^4.21.0" }
+  "devDependencies": {
+    "@playwright/test": "^1.58.0",
+    "@types/node": "^24.0.0",
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4",
+    "tsx": "^4.21.0",
+    "zod": "^3.25.76"
+  }
 }
