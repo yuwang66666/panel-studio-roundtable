@@ -65,10 +65,77 @@ describe('模型网关和设置 API', () => {
         expect(protocol === 'anthropic' ? call.apiKey : call.authorization).toContain(
           'secret-test-key',
         );
+        expect(call.body.instructions).toBeUndefined();
+        expect(call.body.system).toBeUndefined();
+        expect(call.body.messages?.some((message: any) => message.role === 'system') || false).toBe(
+          false,
+        );
+        expect((call.body.input || call.body.messages)[0]).toEqual({
+          role: 'user',
+          content: 'Return only {"ok":true}',
+        });
         expect((await s.app.inject('/api/model-connections')).body).not.toContain(
           'HIDDEN_REASONING',
         );
         expect((s.repo.db.prepare('SELECT count(*) as n FROM model_runs').get() as any).n).toBe(1);
+        const opening = await s.gateway.generate({
+          connection: s.repo.connection(c.id),
+          purpose: 'opening',
+          input: { topic: '如何组织中文圆桌讨论？' },
+          schema: z.object({ content: z.string().min(1) }).strict(),
+        });
+        expect(opening.content).toContain('欢迎来到圆桌');
+        const business = s.provider.calls[1].body;
+        const instructions =
+          business.instructions ||
+          business.system ||
+          business.messages?.find((message: any) => message.role === 'system')?.content;
+        expect(instructions).toContain('中文 AI 圆桌');
+        expect(instructions).toContain('以主持人身份');
+        expect(JSON.parse((business.input || business.messages).at(-1).content)).toEqual({
+          purpose: 'opening',
+          input: { topic: '如何组织中文圆桌讨论？' },
+        });
+      } finally {
+        await s.close();
+      }
+    },
+  );
+  it.each([
+    { label: 'plain text', output: 'The connection is working.' },
+    { label: 'extra JSON fields', output: { ok: true, extra: 'unrequested' } },
+  ])(
+    'rejects HTTP 200 with $label and marks the connection failed after one repair',
+    async ({ output }) => {
+      const s = await setup(() => output);
+      try {
+        const c = s.repo.saveConnection({
+          name: 'test',
+          provider: 'custom',
+          protocol: 'anthropic',
+          baseUrl: s.provider.baseUrl,
+          model: 'test',
+          apiKey: 'secret',
+          active: true,
+          structuredOutput: false,
+        });
+        const response = await s.app.inject({
+          method: 'POST',
+          url: `/api/model-connections/${c.id}/test`,
+          headers,
+          payload: {},
+        });
+        expect(response.statusCode).toBe(502);
+        expect(response.json().error.code).toBe('INVALID_OUTPUT');
+        expect(s.provider.calls).toHaveLength(2);
+        expect(s.provider.calls[0].body.messages[0].content).toBe('Return only {"ok":true}');
+        expect(s.provider.calls[1].body.messages[0].content).toBe(
+          'Return only {"ok":true}\nThe previous response was invalid. Return exactly one JSON object with no other text.',
+        );
+        expect(s.repo.listConnections()[0].testStatus).toBe('failed');
+        const publicConnections = await s.app.inject('/api/model-connections');
+        expect(publicConnections.json()[0].testStatus).toBe('failed');
+        expect(publicConnections.body).not.toContain('secret');
       } finally {
         await s.close();
       }

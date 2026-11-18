@@ -93,7 +93,7 @@ export async function createApp(
         schema: z.object({ ok: z.literal(true) }).strict(),
       });
       repo.markTest(c.id, c.version, true);
-      return { ok: true, message: '连接验证通过，可用于圆桌讨论。' };
+      return { ok: true, message: '连接验证通过，JSON 响应正常。' };
     } catch (e) {
       repo.markTest(c.id, c.version, false);
       throw e;

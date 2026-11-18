@@ -101,7 +101,10 @@ export async function startProvider(responder: Responder = defaultResponse) {
     }
     try {
       const raw = body.input?.at(-1)?.content || body.messages?.at(-1)?.content || '{}';
-      const task = JSON.parse(typeof raw === 'string' ? raw : raw[0].text);
+      const userText = typeof raw === 'string' ? raw : raw[0].text;
+      const task = userText.startsWith('Return only {"ok":true}')
+        ? { purpose: 'test', input: {} }
+        : JSON.parse(userText);
       const value = await responder(task, call),
         text = typeof value === 'string' ? value : JSON.stringify(value);
       const result = req.url?.endsWith('/responses')
