@@ -8,7 +8,7 @@ export function defaultResponse({purpose,input}: {purpose:string;input:any}) {
   if(purpose==='cast') { const role=(i:number)=>({name:`嘉宾${i}`,occupation:['主持人','产业研究员','政策研究员','企业实践者','社会学者','工程师','教育学者'][i],title:`视角${i}`,stance:`从第${i}种专业视角讨论适用条件`,specialty:[`领域${i}`]});return {moderator:role(0),experts:Array.from({length:input.expertCount},(_,i)=>role(i+1))}; }
   const experts=context?.participants?.filter((p:any)=>p.role==='expert')||[];
   const messages=(context?.messages||[]).filter((m:any)=>m.kind==='expert');
-  if(purpose==='intent') { const actor=context.participant; const last=messages.at(-1);return {action:last&&last.participantId!==actor.id?'supplement':'raise',targetMessageId:last&&last.participantId!==actor.id?last.id:null,proposedFocus:'补充适用条件和评估依据'}; }
+  if(purpose==='intent') { const actor=context.participant; const last=messages.at(-1);return {action:last&&last.participantId!==actor.id?'supplement':'raise',targetMessageId:last&&last.participantId!==actor.id?last.id:null,proposedFocus:`补充第${context.throughMessageSeq}条发言的适用条件和评估依据`}; }
   if(purpose==='utterance') return {sentences:[`从${context.participant.occupation}的角度，需要先明确适用条件和评价指标。`,'我支持在限定范围试点，并根据实际结果调整。']};
   if(purpose==='opening') return {content:'欢迎来到圆桌，请各位结合专业背景，讨论这个问题成立的条件。'};
   if(purpose==='probe') return {content:'刚才的观点在什么条件下会失效？请补充可检验的判断依据。'};

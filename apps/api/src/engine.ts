@@ -11,11 +11,16 @@ export class DiscussionEngine{
  constructor(private repo:Repository,private gateway:ModelGateway,private insights:InsightsPort){this.speech=new SpeechService(repo,gateway);}
  async run(id:string,signal:AbortSignal){
    let s=this.repo.snapshot(id);const generation=s.discussion.generation,host=s.participants.find(p=>p.role==='moderator')!;
-   const waits:Record<string,number>={};let emptyRounds=0,failureRounds=0,previousFocus:string|null=null;
+   const waits:Record<string,number>={};let emptyRounds=0,failureRounds=0,previousFocus:string|null=null,repeatedFocus=0,lastProbeAt=0;
    if(!s.messages.length&&!s.discussion.finishRequested)await this.speech.speak(s,host.id,'opening',signal);
    while(!signal.aborted){
      s=this.repo.snapshot(id);const d=this.repo.guard(id,generation,['running']),expertMessages=s.messages.filter(m=>m.kind==='expert');
      if(d.finishRequested||expertMessages.length>=d.maxUtterances||d.maxCalls-d.callCount<d.expertCount+1+12)break;
+     const moderatorCount=s.messages.filter(m=>m.kind==='opening'||m.kind==='probe').length;
+     if(moderatorCount<4&&(repeatedFocus>=3||(s.insights.some(i=>i.kind==='divergence'&&i.status!=='resolved')&&expertMessages.length-lastProbeAt>=3))){
+       try{const probe=await this.speech.speak(s,host.id,'probe',signal);this.insights.onMessage(id,generation,probe,false,signal);}catch(e){if(e instanceof AppError&&['BUDGET','CANCELLED'].includes(e.code))break;throw e;}
+       repeatedFocus=0;lastProbeAt=expertMessages.length;continue;
+     }
      const through=s.messages.at(-1)?.messageSeq||0;
      const results=await Promise.allSettled(s.participants.filter(p=>p.role==='expert').map(async p=>{
        const context=buildContext(s,p.id,through),connection=this.repo.actorConnection(id,p.id);
@@ -34,7 +39,7 @@ export class DiscussionEngine{
      emptyRounds=0;
      try{
        const message=await this.speech.speak(s,chosen.participantId,'expert',signal,{targetMessageId:chosen.targetMessageId,focus:chosen.proposedFocus});
-       failureRounds=0;previousFocus=chosen.proposedFocus;this.insights.onMessage(id,generation,message,chosen.action==='rebut',signal);
+       failureRounds=0;repeatedFocus=chosen.proposedFocus&&chosen.proposedFocus===previousFocus?repeatedFocus+1:1;previousFocus=chosen.proposedFocus;this.insights.onMessage(id,generation,message,chosen.action==='rebut',signal);
      }catch(e){if(e instanceof AppError&&['BUDGET','CANCELLED'].includes(e.code))break;if(++failureRounds>=3)throw new AppError('MODEL_FAILURE','专家发言连续未能通过验证，已有内容已保存',502);}
    }
    if(signal.aborted)throw new AppError('CANCELLED','讨论已中断',409);

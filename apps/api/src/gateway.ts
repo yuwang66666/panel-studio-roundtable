@@ -22,7 +22,7 @@ class Semaphore{
 const delay=(ms:number,signal?:AbortSignal)=>new Promise<void>((resolve,reject)=>{if(signal?.aborted){reject(new AppError('CANCELLED','调用已取消',409));return;}const abort=()=>{clearTimeout(timer);reject(new AppError('CANCELLED','调用已取消',409));};const timer=setTimeout(()=>{signal?.removeEventListener('abort',abort);resolve();},ms);signal?.addEventListener('abort',abort,{once:true});});
 async function readJson(response:Response){const reader=response.body?.getReader();if(!reader)throw new AppError('INVALID_OUTPUT','模型响应为空',502);const chunks:Uint8Array[]=[];let size=0;try{while(true){const {value,done}=await reader.read();if(done)break;size+=value.length;if(size>2_000_000){await reader.cancel();throw new AppError('INVALID_OUTPUT','模型响应超过大小限制',502);}chunks.push(value);}return JSON.parse(Buffer.concat(chunks).toString('utf8'));}catch(e){if(e instanceof AppError)throw e;throw new AppError('INVALID_OUTPUT','模型响应不是合法 JSON',502);}finally{reader.releaseLock();}}
 export class ModelGateway{
- private global:Semaphore;private connections=new Map<string,Semaphore>();
+ private global:Semaphore;private connections=new Map<string,Semaphore>();private discussionSlots=new Map<string,Semaphore>();
  constructor(private repo:Repository,private options={globalConcurrency:4,connectionConcurrency:2,timeout:60000,summaryTimeout:90000,retryDelay:400}){this.global=new Semaphore(options.globalConcurrency);}
  async generate<T>(request:ModelRequest<T>):Promise<T>{
    for(let repair=0;repair<=1;repair++){
@@ -35,9 +35,9 @@ export class ModelGateway{
    const user=JSON.stringify({purpose:r.purpose,input:r.input});
    for(let retry=0;retry<=2;retry++){
      const started=Date.now(),deadline=AbortSignal.timeout(r.purpose==='summary'?this.options.summaryTimeout:this.options.timeout),signal=r.signal?AbortSignal.any([r.signal,deadline]):deadline;
-     let releaseConnection:(()=>void)|undefined,releaseGlobal:(()=>void)|undefined,attempted=false,usage:unknown=null,errorCode:string|null=null;
+     let releaseConnection:(()=>void)|undefined,releaseGlobal:(()=>void)|undefined,releaseDiscussion:(()=>void)|undefined,attempted=false,usage:unknown=null,errorCode:string|null=null;
      try{
-       let sem=this.connections.get(c.id);if(!sem){sem=new Semaphore(this.options.connectionConcurrency);this.connections.set(c.id,sem);}releaseConnection=await sem.acquire(signal);releaseGlobal=await this.global.acquire(signal);
+       let sem=this.connections.get(c.id);if(!sem){sem=new Semaphore(this.options.connectionConcurrency);this.connections.set(c.id,sem);}releaseConnection=await sem.acquire(signal);if(r.discussionId){let slots=this.discussionSlots.get(r.discussionId);if(!slots){slots=new Semaphore(4);this.discussionSlots.set(r.discussionId,slots);}releaseDiscussion=await slots.acquire(signal);}releaseGlobal=await this.global.acquire(signal);
        if(signal.aborted)throw new AppError(r.signal?.aborted?'CANCELLED':'TIMEOUT','模型调用已取消或超时',504);
        if(r.discussionId)this.repo.reserveCall(r.discussionId,r.generation!,r.purpose==='summary'||(r.purpose==='insights'&&this.repo.discussion(r.discussionId).status==='summarizing'));
        attempted=true;
@@ -53,8 +53,8 @@ export class ModelGateway{
        if(typeof text!=='string'||!text.trim())throw new AppError('INVALID_OUTPUT','模型没有返回可用的公开文本',502);
        try { const data=JSON.parse(text.trim().replace(/^```(?:json)?\s*/i,'').replace(/\s*```$/,'')); const parsed=r.schema.parse(data); r.validate?.(parsed); return parsed; } catch { throw new AppError('INVALID_OUTPUT','模型输出未通过格式或业务校验',502); }
      }catch(error){let e=error instanceof AppError?error:new AppError(r.signal?.aborted?'CANCELLED':deadline.aborted?'TIMEOUT':'UPSTREAM_NETWORK',r.signal?.aborted?'模型调用已取消':deadline.aborted?'模型调用超时':'模型网络连接失败',502);if(deadline.aborted&&!r.signal?.aborted)e=new AppError('TIMEOUT','模型调用超时',504);errorCode=e.code;
-       if(retry<2&&['UPSTREAM_RATE_LIMIT','UPSTREAM_TEMPORARY','UPSTREAM_NETWORK'].includes(e.code)&&!r.signal?.aborted){releaseGlobal?.();releaseGlobal=undefined;releaseConnection?.();releaseConnection=undefined;await delay(this.options.retryDelay*2**retry,r.signal);continue;}throw e;
-     }finally{releaseGlobal?.();releaseConnection?.();if(attempted)this.repo.recordRun({discussionId:r.discussionId,participantId:r.participantId,purpose:r.purpose,connection:c,latencyMs:Date.now()-started,usage,errorCode});}
+       if(retry<2&&['UPSTREAM_RATE_LIMIT','UPSTREAM_TEMPORARY','UPSTREAM_NETWORK'].includes(e.code)&&!r.signal?.aborted){releaseGlobal?.();releaseGlobal=undefined;releaseDiscussion?.();releaseDiscussion=undefined;releaseConnection?.();releaseConnection=undefined;await delay(this.options.retryDelay*2**retry,r.signal);continue;}throw e;
+     }finally{releaseGlobal?.();releaseDiscussion?.();releaseConnection?.();if(attempted)this.repo.recordRun({discussionId:r.discussionId,participantId:r.participantId,purpose:r.purpose,connection:c,latencyMs:Date.now()-started,usage,errorCode});}
    }throw new AppError('UPSTREAM_NETWORK','模型服务暂时不可用',502);
  }
 }

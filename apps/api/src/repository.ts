@@ -110,6 +110,7 @@ export class Repository {
     return this.transition(id,'running',{expectedVersion,bumpGeneration:true});
   });}
   requestFinish(id:string,expectedVersion:number){return this.transaction(()=>{const d=this.checkVersion(id,expectedVersion);if(d.status!=='running')throw conflict();d.finishRequested=true;d.version++;this.persist(d);this.emit(id,'discussion.status_changed',{discussion:d});return this.snapshot(id);});}
+  allowClosingRetry(id:string){const d=this.discussion(id);d.maxCalls=Math.max(d.maxCalls,d.callCount+12);this.persist(d);}
   setParticipantState(id:string,generation:number,participantId:string,status:Participant['status'],publicFocus:string|null){this.transaction(()=>{
     this.guard(id,generation,['running','summarizing']);const p=this.snapshot(id).participants.find(p=>p.id===participantId);if(!p)throw conflict('参与者不属于当前讨论');p.status=status;p.publicFocus=publicFocus;this.db.prepare('UPDATE participants SET data_json=? WHERE discussion_id=? AND id=?').run(JSON.stringify(p),id,p.id);this.emit(id,'participant.state_changed',{participantId,status,publicFocus});
   });}

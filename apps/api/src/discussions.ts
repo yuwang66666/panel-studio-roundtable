@@ -7,6 +7,7 @@ import { DiscussionEngine } from './engine';
 import { InsightsService } from './insights';
 export class DiscussionService{
   private active=new Map<string,{controller:AbortController;promise:Promise<void>}>();
+  private stopping=false;
   readonly insights:InsightsService;readonly engine:DiscussionEngine;
   constructor(readonly repo:Repository,readonly gateway:ModelGateway){this.insights=new InsightsService(repo,gateway);this.engine=new DiscussionEngine(repo,gateway,this.insights);}
   run(id:string){this.launch(id,'discussion',signal=>this.engine.run(id,signal));}
@@ -23,12 +24,12 @@ export class DiscussionService{
     if(this.active.has(id))return;
     const controller=new AbortController();const generation=this.repo.discussion(id).generation;
     const promise=Promise.resolve().then(()=>work(controller.signal)).catch(error=>{
-      const d=this.repo.discussion(id);if(d.generation!==generation||!['casting','running','summarizing'].includes(d.status))return;
-      const e=safeError(error);this.repo.transition(id,'failed',{generation,failureStage:e.code==='INSIGHTS_FAILED'?'insights':d.status==='summarizing'?'summary':stage,error:e.message});this.repo.clearStates(id);
+      controller.abort();const d=this.repo.discussion(id);if(d.generation!==generation||!['casting','running','summarizing'].includes(d.status))return;
+      const e=safeError(error);this.repo.transition(id,this.stopping&&d.status!=='casting'?'interrupted':'failed',{generation,bumpGeneration:this.stopping,failureStage:e.code==='INSIGHTS_FAILED'?'insights':d.status==='summarizing'?'summary':stage,error:this.stopping?'服务已停止，已有讨论内容已保存':e.message});this.repo.clearStates(id);
     }).finally(()=>{if(this.active.get(id)?.controller===controller)this.active.delete(id);});
     this.active.set(id,{controller,promise});
   }
   hasActive(id:string){return this.active.has(id);}
   async idle(id:string){await this.active.get(id)?.promise;}
-  async close(){for(const job of this.active.values())job.controller.abort();await Promise.allSettled([...this.active.values()].map(j=>j.promise));await this.insights.close();}
+  async close(){this.stopping=true;for(const job of this.active.values())job.controller.abort();await Promise.allSettled([...this.active.values()].map(j=>j.promise));await this.insights.close();}
 }
